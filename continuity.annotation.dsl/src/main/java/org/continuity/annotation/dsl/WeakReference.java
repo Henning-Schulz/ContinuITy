@@ -109,6 +109,15 @@ public class WeakReference<T extends ContinuityModelElement> {
 	}
 
 	/**
+	 * Gets the type of the reference, if present.
+	 * 
+	 * @return The type or {@code null}, if not present.
+	 */
+	public Class<T> getType() {
+		return this.type;
+	}
+
+	/**
 	 * Resolves the referred element from the passed model, if possible and returns the reference.
 	 *
 	 * @param model
