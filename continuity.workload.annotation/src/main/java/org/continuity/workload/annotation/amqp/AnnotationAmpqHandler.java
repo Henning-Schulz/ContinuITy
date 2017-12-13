@@ -5,10 +5,13 @@ import java.io.IOException;
 import org.continuity.annotation.dsl.ann.SystemAnnotation;
 import org.continuity.annotation.dsl.system.SystemModel;
 import org.continuity.workload.annotation.config.RabbitMqConfig;
+import org.continuity.workload.annotation.entities.AnnotationValidityReport;
 import org.continuity.workload.annotation.entities.WorkloadModelLink;
 import org.continuity.workload.annotation.storage.AnnotationStorage;
+import org.continuity.workload.annotation.validation.AnnotationValidityChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +34,9 @@ public class AnnotationAmpqHandler {
 	@Autowired
 	private RestTemplate restTemplate;
 
+	@Autowired
+	private AmqpTemplate amqpTemplate;
+
 	@RabbitListener(queues = RabbitMqConfig.MODEL_CREATED_QUEUE_NAME)
 	public void onModelCreated(WorkloadModelLink link) {
 		LOGGER.info("Received workload model link: {}", link);
@@ -47,7 +53,28 @@ public class AnnotationAmpqHandler {
 			return;
 		}
 
-		// TODO: check if system has changed and adopt annotation
+		SystemModel oldSystemModel;
+		try {
+			oldSystemModel = storage.readSystemModel(link.getTag());
+		} catch (IOException e) {
+			LOGGER.error("Could not read system model with tag {}!", link.getTag());
+			e.printStackTrace();
+			return;
+		}
+
+		AnnotationValidityChecker checker = new AnnotationValidityChecker(systemResponse.getBody());
+		checker.checkOldSystemModel(oldSystemModel);
+		checker.checkAnnotation(annResponse.getBody());
+		AnnotationValidityReport report = checker.getReport();
+
+		if (!report.isOk()) {
+			amqpTemplate.convertAndSend(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME, "report", report);
+		}
+
+		if (report.isBreaking()) {
+			LOGGER.warn("The passed annotation with tag {} is breaking! Did not store it.", link.getTag());
+			return;
+		}
 
 		boolean overwritten;
 

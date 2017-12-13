@@ -1,4 +1,4 @@
-package org.continuity.workload.annotation.validation;
+package org.continuity.frontend.entities;
 
 import org.apache.commons.lang.StringUtils;
 import org.continuity.annotation.dsl.ContinuityModelElement;

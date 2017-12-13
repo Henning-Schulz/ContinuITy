@@ -9,6 +9,9 @@ import org.continuity.annotation.dsl.WeakReference;
 import org.continuity.annotation.dsl.ann.InterfaceAnnotation;
 import org.continuity.annotation.dsl.ann.ParameterAnnotation;
 import org.continuity.annotation.dsl.system.Parameter;
+import org.continuity.workload.annotation.entities.AnnotationValidityReport;
+import org.continuity.workload.annotation.entities.AnnotationViolation;
+import org.continuity.workload.annotation.entities.ModelElementReference;
 
 /**
  * @author Henning Schulz
@@ -19,23 +22,23 @@ public class AnnotationValidationReportBuilder {
 	/**
 	 * Affected annotation --> Set of violations
 	 */
-	private final Map<ModelElementReference, Set<AnnotationValidityViolation>> violations = new HashMap<>();
+	private final Map<ModelElementReference, Set<AnnotationViolation>> violations = new HashMap<>();
 
 	/**
 	 * Referenced --> Violation
 	 */
-	private final Map<ModelElementReference, AnnotationValidityViolation> violationsPerReferenced = new HashMap<>();
+	private final Map<ModelElementReference, AnnotationViolation> violationsPerReferenced = new HashMap<>();
 
-	public void addViolation(AnnotationValidityViolation violation) {
+	public void addViolation(AnnotationViolation violation) {
 		violationsPerReferenced.put(violation.getReferenced(), violation);
 	}
 
-	public void addViolation(ModelElementReference affected, AnnotationValidityViolation violation) {
+	public void addViolation(ModelElementReference affected, AnnotationViolation violation) {
 		getViolationSet(affected).add(violation);
 	}
 
 	public void resolveParameterAnnotation(ParameterAnnotation annotation) {
-		AnnotationValidityViolation violation = violationsPerReferenced.get(new ModelElementReference(annotation.getAnnotatedParameter()));
+		AnnotationViolation violation = violationsPerReferenced.get(new ModelElementReference(annotation.getAnnotatedParameter()));
 
 		if (violation != null) {
 			ModelElementReference ref = new ModelElementReference(annotation);
@@ -52,7 +55,7 @@ public class AnnotationValidationReportBuilder {
 	 *            The interface annotation.
 	 */
 	public void resolveInterfaceAnnotation(InterfaceAnnotation annotation) {
-		AnnotationValidityViolation violation = violationsPerReferenced.get(new ModelElementReference(annotation.getAnnotatedInterface()));
+		AnnotationViolation violation = violationsPerReferenced.get(new ModelElementReference(annotation.getAnnotatedInterface()));
 		ModelElementReference ref = new ModelElementReference(annotation);
 
 		if (violation != null) {
@@ -68,8 +71,8 @@ public class AnnotationValidationReportBuilder {
 		}
 	}
 
-	private Set<AnnotationValidityViolation> getViolationSet(ModelElementReference reference) {
-		Set<AnnotationValidityViolation> violationSet = violations.get(reference);
+	private Set<AnnotationViolation> getViolationSet(ModelElementReference reference) {
+		Set<AnnotationViolation> violationSet = violations.get(reference);
 
 		if (violationSet == null) {
 			violationSet = new HashSet<>();
@@ -79,16 +82,17 @@ public class AnnotationValidationReportBuilder {
 		return violationSet;
 	}
 
-	public Map<ModelElementReference, Set<AnnotationValidityViolation>> buildReport() {
-		Map<ModelElementReference, Set<AnnotationValidityViolation>> report = new HashMap<>();
+	public AnnotationValidityReport buildReport() {
+		Map<ModelElementReference, Set<AnnotationViolation>> report = new HashMap<>();
 		report.putAll(violations);
 
 		if (!violationsPerReferenced.isEmpty()) {
-			Set<AnnotationValidityViolation> violationSet = getViolationSet(new ModelElementReference("", "System changes"));
+			Set<AnnotationViolation> violationSet = new HashSet<>();
 			violationSet.addAll(violationsPerReferenced.values());
+			report.put(new ModelElementReference("", "System changes"), violationSet);
 		}
 
-		return report;
+		return new AnnotationValidityReport(report);
 	}
 
 }

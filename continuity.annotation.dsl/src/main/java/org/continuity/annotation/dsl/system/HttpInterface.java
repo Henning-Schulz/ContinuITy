@@ -5,6 +5,7 @@ package org.continuity.annotation.dsl.system;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.continuity.annotation.dsl.AbstractContinuityModelElement;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -222,6 +223,37 @@ public class HttpInterface extends AbstractContinuityModelElement implements Ser
 		result.append(headers);
 		result.append(')');
 		return result.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+
+		if (obj == this) {
+			return true;
+		}
+
+		if (!this.getClass().getName().equals(obj.getClass().getName())) {
+			return false;
+		}
+
+		HttpInterface other = (HttpInterface) obj;
+
+		boolean equal = this.domain.equals(other.domain);
+		equal = equal && this.port.equals(other.port);
+		equal = equal && this.path.equals(other.path);
+		equal = equal && this.method.equals(other.method);
+		equal = equal && this.encoding.equals(other.encoding);
+		equal = equal && this.protocol.equals(other.protocol);
+		equal = equal && CollectionUtils.isEqualCollection(this.parameters, other.parameters);
+		equal = equal && CollectionUtils.isEqualCollection(this.headers, other.headers);
+
+		return equal;
 	}
 
 	private static class EncodingValueFilter {

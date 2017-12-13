@@ -66,12 +66,44 @@ public class HttpParameter extends AbstractContinuityModelElement implements Par
 	@Override
 	public String toString() {
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (parameterType: ");
+		result.append(" (name: ");
+		result.append(name);
+		result.append(", parameterType: ");
 		result.append(parameterType);
 		result.append(", id: ");
 		result.append(getId());
 		result.append(')');
 		return result.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+
+		if (obj == this) {
+			return true;
+		}
+
+		if (!this.getClass().getName().equals(obj.getClass().getName())) {
+			return false;
+		}
+
+		HttpParameter other = (HttpParameter) obj;
+
+		return (this.parameterType == other.parameterType) && this.name.equals(other.name);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int compareTo(Parameter o) {
+		return this.toString().compareTo(o.toString());
 	}
 
 }
