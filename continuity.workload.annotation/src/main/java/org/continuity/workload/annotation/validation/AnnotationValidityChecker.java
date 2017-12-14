@@ -64,7 +64,7 @@ public class AnnotationValidityChecker {
 
 		ModelElementReference ref = new ModelElementReference(newInterf);
 
-		if (interfHolder.element.getId() == null) {
+		if (interfHolder.element == null) {
 			reportBuilder.addViolation(new AnnotationViolation(AnnotationViolationType.INTERFACE_ADDED, ref));
 		} else {
 			ServiceInterface<?> oldInterf = interfHolder.element;

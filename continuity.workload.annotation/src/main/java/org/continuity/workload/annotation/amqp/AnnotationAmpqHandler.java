@@ -28,14 +28,18 @@ public class AnnotationAmpqHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AnnotationAmpqHandler.class);
 
-	@Autowired
-	private AnnotationStorage storage;
+	private final AnnotationStorage storage;
+
+	private final RestTemplate restTemplate;
+
+	private final AmqpTemplate amqpTemplate;
 
 	@Autowired
-	private RestTemplate restTemplate;
-
-	@Autowired
-	private AmqpTemplate amqpTemplate;
+	public AnnotationAmpqHandler(AnnotationStorage storage, RestTemplate restTemplate, AmqpTemplate amqpTemplate) {
+		this.storage = storage;
+		this.restTemplate = restTemplate;
+		this.amqpTemplate = amqpTemplate;
+	}
 
 	@RabbitListener(queues = RabbitMqConfig.MODEL_CREATED_QUEUE_NAME)
 	public void onModelCreated(WorkloadModelLink link) {
@@ -62,18 +66,20 @@ public class AnnotationAmpqHandler {
 			return;
 		}
 
-		AnnotationValidityChecker checker = new AnnotationValidityChecker(systemResponse.getBody());
-		checker.checkOldSystemModel(oldSystemModel);
-		checker.checkAnnotation(annResponse.getBody());
-		AnnotationValidityReport report = checker.getReport();
+		if (oldSystemModel != null) {
+			AnnotationValidityChecker checker = new AnnotationValidityChecker(systemResponse.getBody());
+			checker.checkOldSystemModel(oldSystemModel);
+			checker.checkAnnotation(annResponse.getBody());
+			AnnotationValidityReport report = checker.getReport();
 
-		if (!report.isOk()) {
-			amqpTemplate.convertAndSend(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME, "report", report);
-		}
+			if (!report.isOk()) {
+				amqpTemplate.convertAndSend(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME, "report", report);
+			}
 
-		if (report.isBreaking()) {
-			LOGGER.warn("The passed annotation with tag {} is breaking! Did not store it.", link.getTag());
-			return;
+			if (report.isBreaking()) {
+				LOGGER.warn("The passed annotation with tag {} is breaking! Did not store it.", link.getTag());
+				return;
+			}
 		}
 
 		boolean overwritten;

@@ -2,6 +2,8 @@
  */
 package org.continuity.annotation.dsl.system;
 
+import java.util.Objects;
+
 import org.continuity.annotation.dsl.AbstractContinuityModelElement;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -95,7 +97,7 @@ public class HttpParameter extends AbstractContinuityModelElement implements Par
 
 		HttpParameter other = (HttpParameter) obj;
 
-		return (this.parameterType == other.parameterType) && this.name.equals(other.name);
+		return Objects.equals(this.parameterType, other.parameterType) && Objects.equals(this.name, other.name);
 	}
 
 	/**

@@ -3,9 +3,10 @@
 package org.continuity.annotation.dsl.system;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.continuity.annotation.dsl.AbstractContinuityModelElement;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -244,14 +245,20 @@ public class HttpInterface extends AbstractContinuityModelElement implements Ser
 
 		HttpInterface other = (HttpInterface) obj;
 
-		boolean equal = this.domain.equals(other.domain);
-		equal = equal && this.port.equals(other.port);
-		equal = equal && this.path.equals(other.path);
-		equal = equal && this.method.equals(other.method);
-		equal = equal && this.encoding.equals(other.encoding);
-		equal = equal && this.protocol.equals(other.protocol);
-		equal = equal && CollectionUtils.isEqualCollection(this.parameters, other.parameters);
-		equal = equal && CollectionUtils.isEqualCollection(this.headers, other.headers);
+		boolean equal = Objects.equals(this.domain, other.domain);
+		equal = equal && Objects.equals(this.port, other.port);
+		equal = equal && Objects.equals(this.path, other.path);
+		equal = equal && Objects.equals(this.method, other.method);
+		equal = equal && Objects.equals(this.encoding, other.encoding);
+		equal = equal && Objects.equals(this.protocol, other.protocol);
+
+		Collections.sort(this.getParameters());
+		Collections.sort(other.getParameters());
+		equal = equal && this.getParameters().equals(other.getParameters());
+
+		Collections.sort(this.getHeaders());
+		Collections.sort(other.getHeaders());
+		equal = equal && this.getHeaders().equals(other.getHeaders());
 
 		return equal;
 	}
