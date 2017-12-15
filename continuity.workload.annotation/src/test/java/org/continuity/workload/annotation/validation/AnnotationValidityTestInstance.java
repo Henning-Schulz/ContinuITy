@@ -1,9 +1,14 @@
 package org.continuity.workload.annotation.validation;
 
+import org.continuity.annotation.dsl.WeakReference;
+import org.continuity.annotation.dsl.ann.InterfaceAnnotation;
+import org.continuity.annotation.dsl.ann.PropertyOverride;
+import org.continuity.annotation.dsl.ann.PropertyOverrideKey;
 import org.continuity.annotation.dsl.ann.SystemAnnotation;
 import org.continuity.annotation.dsl.system.HttpInterface;
 import org.continuity.annotation.dsl.system.HttpParameter;
 import org.continuity.annotation.dsl.system.HttpParameterType;
+import org.continuity.annotation.dsl.system.ServiceInterface;
 import org.continuity.annotation.dsl.system.SystemModel;
 import org.continuity.annotation.dsl.test.ContinuityModelTestInstance;
 import org.springframework.http.HttpStatus;
@@ -26,7 +31,7 @@ public enum AnnotationValidityTestInstance {
 			return ContinuityModelTestInstance.SIMPLE.getAnnotation();
 		}
 	},
-	SECOND("http://second/") {
+	SECOND_SYSTEM("http://second/") {
 		@Override
 		public SystemModel getSystemModel() {
 			SystemModel system = new SystemModel();
@@ -55,7 +60,7 @@ public enum AnnotationValidityTestInstance {
 			return ContinuityModelTestInstance.SIMPLE.getAnnotation();
 		}
 	},
-	THIRD("http://third/") {
+	THIRD_SYSTEM("http://third/") {
 		@Override
 		public SystemModel getSystemModel() {
 			SystemModel system = new SystemModel();
@@ -71,6 +76,62 @@ public enum AnnotationValidityTestInstance {
 		public SystemAnnotation getAnnotation() {
 			return ContinuityModelTestInstance.SIMPLE.getAnnotation();
 		}
+	},
+	SECOND_ANNOTATION("http://second-ann") {
+
+		@Override
+		protected SystemModel getSystemModel() {
+			return ContinuityModelTestInstance.SIMPLE.getSystemModel();
+		}
+
+		@Override
+		protected SystemAnnotation getAnnotation() {
+			SystemAnnotation annotation = new SystemAnnotation();
+
+			WeakReference<ServiceInterface<?>> interfRef = WeakReference.create(ServiceInterface.GENERIC_TYPE, "login");
+
+			annotation = new SystemAnnotation();
+			annotation.setId("ANN");
+
+			InterfaceAnnotation interfaceAnn = new InterfaceAnnotation();
+			interfaceAnn.setAnnotatedInterface(interfRef);
+			PropertyOverride<PropertyOverrideKey.InterfaceLevel> ov = new PropertyOverride<>();
+			ov.setKey(PropertyOverrideKey.HttpInterface.DOMAIN);
+			ov.setValue("localhost");
+			interfaceAnn.addOverride(ov);
+			annotation.getInterfaceAnnotations().add(interfaceAnn);
+
+			return annotation;
+		}
+
+	},
+	THIRD_ANNOTATION("http://third-ann") {
+
+		@Override
+		protected SystemModel getSystemModel() {
+			return ContinuityModelTestInstance.SIMPLE.getSystemModel();
+		}
+
+		@Override
+		protected SystemAnnotation getAnnotation() {
+			SystemAnnotation annotation = new SystemAnnotation();
+
+			WeakReference<ServiceInterface<?>> interfRef = WeakReference.create(ServiceInterface.GENERIC_TYPE, "logout");
+
+			annotation = new SystemAnnotation();
+			annotation.setId("ANN");
+
+			InterfaceAnnotation interfaceAnn = new InterfaceAnnotation();
+			interfaceAnn.setAnnotatedInterface(interfRef);
+			PropertyOverride<PropertyOverrideKey.InterfaceLevel> ov = new PropertyOverride<>();
+			ov.setKey(PropertyOverrideKey.HttpInterface.DOMAIN);
+			ov.setValue("localhost");
+			interfaceAnn.addOverride(ov);
+			annotation.getInterfaceAnnotations().add(interfaceAnn);
+
+			return annotation;
+		}
+
 	};
 
 	private final String link;

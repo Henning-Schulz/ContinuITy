@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.continuity.annotation.dsl.ann.InterfaceAnnotation;
+import org.continuity.annotation.dsl.ann.ParameterAnnotation;
 import org.continuity.annotation.dsl.ann.SystemAnnotation;
 import org.continuity.annotation.dsl.system.Parameter;
 import org.continuity.annotation.dsl.system.ServiceInterface;
@@ -115,7 +117,33 @@ public class AnnotationValidityChecker {
 	 *            An annotation.
 	 */
 	public void checkAnnotation(SystemAnnotation annotation) {
-		// TODO: check if annotation matches the system
+		ContinuityByClassSearcher<InterfaceAnnotation> interfaceSearcher = new ContinuityByClassSearcher<>(InterfaceAnnotation.class, ann -> {
+			ServiceInterface<?> interf = ann.getAnnotatedInterface().resolve(newSystemModel);
+
+			if (interf == null) {
+				ModelElementReference interfRef = new ModelElementReference(ann.getAnnotatedInterface());
+				ModelElementReference annRef = new ModelElementReference(ann);
+				reportBuilder.addViolation(annRef, new AnnotationViolation(AnnotationViolationType.ILLEAL_INTERFACE_REFERENCE, interfRef));
+			}
+
+			reportBuilder.resolveInterfaceAnnotation(ann);
+		});
+
+		interfaceSearcher.visit(annotation);
+
+		ContinuityByClassSearcher<ParameterAnnotation> paramSearcher = new ContinuityByClassSearcher<>(ParameterAnnotation.class, ann -> {
+			Parameter param = ann.getAnnotatedParameter().resolve(newSystemModel);
+
+			if (param == null) {
+				ModelElementReference paramRef = new ModelElementReference(ann.getAnnotatedParameter());
+				ModelElementReference annRef = new ModelElementReference(ann);
+				reportBuilder.addViolation(annRef, new AnnotationViolation(AnnotationViolationType.ILLEGAL_PARAMETER_REFERENCE, paramRef));
+			}
+
+			reportBuilder.resolveParameterAnnotation(ann);
+		});
+
+		paramSearcher.visit(annotation);
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package org.continuity.workload.annotation.entities;
 
+import java.util.Objects;
+
 import org.apache.commons.lang.StringUtils;
 import org.continuity.annotation.dsl.ContinuityModelElement;
 import org.continuity.annotation.dsl.WeakReference;
@@ -83,7 +85,7 @@ public class ModelElementReference {
 	 */
 	@Override
 	public int hashCode() {
-		return id.hashCode();
+		return Objects.hashCode(id);
 	}
 
 	/**
@@ -97,6 +99,14 @@ public class ModelElementReference {
 
 		ModelElementReference other = (ModelElementReference) obj;
 		return StringUtils.equals(this.id, other.id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		return id + " [" + type + "]";
 	}
 
 }

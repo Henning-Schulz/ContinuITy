@@ -3,7 +3,6 @@ package org.continuity.workload.annotation.validation;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.EnumSet;
 
 import org.continuity.annotation.dsl.ann.SystemAnnotation;
 import org.continuity.annotation.dsl.system.SystemModel;
@@ -39,7 +38,7 @@ public class AnnotationAmqpValidityCheckTest {
 
 		restMock = Mockito.mock(RestTemplate.class);
 
-		for (AnnotationValidityTestInstance testInstance : EnumSet.of(AnnotationValidityTestInstance.FIRST, AnnotationValidityTestInstance.SECOND, AnnotationValidityTestInstance.THIRD)) {
+		for (AnnotationValidityTestInstance testInstance : AnnotationValidityTestInstance.values()) {
 			Mockito.when(restMock.getForEntity(testInstance.getSystemLink(), SystemModel.class)).thenReturn(testInstance.getSystemEntity());
 			Mockito.when(restMock.getForEntity(testInstance.getAnnotationLink(), SystemAnnotation.class)).thenReturn(testInstance.getAnnotationEntity());
 		}
@@ -56,7 +55,7 @@ public class AnnotationAmqpValidityCheckTest {
 
 		Mockito.reset(amqpMock);
 
-		callModelCreated(AnnotationValidityTestInstance.SECOND);
+		callModelCreated(AnnotationValidityTestInstance.SECOND_SYSTEM);
 		ArgumentCaptor<AnnotationValidityReport> reportCaptor = ArgumentCaptor.forClass(AnnotationValidityReport.class);
 		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME), ArgumentMatchers.eq("report"), reportCaptor.capture());
 		AnnotationValidityReport report = reportCaptor.getValue();
@@ -65,12 +64,11 @@ public class AnnotationAmqpValidityCheckTest {
 
 		Mockito.reset(amqpMock);
 
-		callModelCreated(AnnotationValidityTestInstance.THIRD);
+		callModelCreated(AnnotationValidityTestInstance.THIRD_SYSTEM);
 		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME), ArgumentMatchers.eq("report"), reportCaptor.capture());
 		report = reportCaptor.getValue();
 		Assert.assertFalse(report.isOk());
-		// Assert.assertTrue(report.isBreaking());
-		// TODO: will fail since annotation checking is not yet implemented
+		Assert.assertTrue(report.isBreaking());
 
 		Mockito.reset(amqpMock);
 
@@ -84,11 +82,26 @@ public class AnnotationAmqpValidityCheckTest {
 
 		callModelCreated(AnnotationValidityTestInstance.FIRST);
 		Mockito.verifyZeroInteractions(amqpMock);
-		// Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME),
-		// ArgumentMatchers.eq("report"), reportCaptor.capture());
-		// report = reportCaptor.getValue();
-		// Assert.assertTrue(report.isOk());
-		// TODO: will fail since annotation checking is not yet implemented
+	}
+
+	@Test
+	public void testChangingAnnotations() {
+		callModelCreated(AnnotationValidityTestInstance.FIRST);
+		Mockito.verifyZeroInteractions(amqpMock);
+
+		Mockito.reset(amqpMock);
+
+		callModelCreated(AnnotationValidityTestInstance.SECOND_ANNOTATION);
+		Mockito.verifyZeroInteractions(amqpMock);
+
+		Mockito.reset(amqpMock);
+
+		callModelCreated(AnnotationValidityTestInstance.THIRD_ANNOTATION);
+		ArgumentCaptor<AnnotationValidityReport> reportCaptor = ArgumentCaptor.forClass(AnnotationValidityReport.class);
+		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME), ArgumentMatchers.eq("report"), reportCaptor.capture());
+		AnnotationValidityReport report = reportCaptor.getValue();
+		Assert.assertFalse(report.isOk());
+		Assert.assertTrue(report.isBreaking());
 	}
 
 	private void callModelCreated(AnnotationValidityTestInstance testInstance) {

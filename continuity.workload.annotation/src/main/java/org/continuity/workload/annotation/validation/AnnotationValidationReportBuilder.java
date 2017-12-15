@@ -41,7 +41,7 @@ public class AnnotationValidationReportBuilder {
 		AnnotationViolation violation = violationsPerReferenced.get(new ModelElementReference(annotation.getAnnotatedParameter()));
 
 		if (violation != null) {
-			ModelElementReference ref = new ModelElementReference(annotation);
+			ModelElementReference ref = new ModelElementReference(annotation.getAnnotatedParameter());
 			getViolationSet(ref).add(violation);
 		}
 	}
@@ -62,11 +62,13 @@ public class AnnotationValidationReportBuilder {
 			getViolationSet(ref).add(violation);
 		}
 
-		for (Parameter parameter : annotation.getAnnotatedInterface().getReferred().getParameters()) {
-			violation = violationsPerReferenced.get(new ModelElementReference(parameter));
+		if (annotation.getAnnotatedInterface().isResolved()) {
+			for (Parameter parameter : annotation.getAnnotatedInterface().getReferred().getParameters()) {
+				violation = violationsPerReferenced.get(new ModelElementReference(parameter));
 
-			if (violation != null) {
-				getViolationSet(ref).add(violation);
+				if (violation != null) {
+					getViolationSet(ref).add(violation);
+				}
 			}
 		}
 	}

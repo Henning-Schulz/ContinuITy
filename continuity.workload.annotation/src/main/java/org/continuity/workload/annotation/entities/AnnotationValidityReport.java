@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Henning Schulz
@@ -11,10 +14,20 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class AnnotationValidityReport {
 
+	@JsonValue
 	private final Map<ModelElementReference, Set<AnnotationViolation>> violations;
 
 	public AnnotationValidityReport(Map<ModelElementReference, Set<AnnotationViolation>> violations) {
 		this.violations = violations;
+	}
+
+	/**
+	 * Gets {@link #violations}.
+	 *
+	 * @return {@link #violations}
+	 */
+	public Map<ModelElementReference, Set<AnnotationViolation>> getViolations() {
+		return this.violations;
 	}
 
 	@JsonIgnore
@@ -25,6 +38,20 @@ public class AnnotationValidityReport {
 	@JsonIgnore
 	public boolean isBreaking() {
 		return violations.values().stream().flatMap(Set::stream).reduce(false, (b, v) -> b || v.isBreaking(), Boolean::logicalOr);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return super.toString() + " [ERROR during serialization!]";
+		}
 	}
 
 }

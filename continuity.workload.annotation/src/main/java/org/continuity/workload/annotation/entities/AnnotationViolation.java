@@ -29,6 +29,9 @@ public class AnnotationViolation {
 		this(type, null);
 	}
 
+	public AnnotationViolation() {
+	}
+
 	/**
 	 * Gets {@link #type}.
 	 *
