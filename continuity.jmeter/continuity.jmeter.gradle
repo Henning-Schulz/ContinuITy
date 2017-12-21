@@ -24,6 +24,10 @@ dependencies {
 	compile("io.springfox:springfox-swagger-ui:2.7.0")
 	
 	compile("org.lpe.common:org.lpe.common.jmeter:1.0.4")
+	
+	// Due to strange JMeter behavior
+	
+	compile fileTree(dir: 'configuration/jmeter/lib/ext', include: ['*.jar'])
 }
 
 group = 'continuity'

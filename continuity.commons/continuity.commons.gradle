@@ -10,7 +10,7 @@ dependencies {
 	compile group: 'org.eclipse.emf', name: 'org.eclipse.emf.ecore.xmi', version: '2.12.0'
 	
 	compile group: 'net.sf.markov4jmeter', name: 'testplangenerator', version: '1.0.0'
-	// compile group: 'net.voorn', name: 'markov4jmeter', version: '1.0.20170921'
+	compile group: 'net.voorn', name: 'markov4jmeter', version: '1.0.20170921'
 	
 	// JMeter 
 	
@@ -25,6 +25,4 @@ dependencies {
 	}
 	
 	compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
-	
-	compile fileTree(dir: 'lib', include: ['*.jar'])
 }
