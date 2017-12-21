@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.collections.ListedHashTree;
 
 import net.sf.markov4jmeter.testplangenerator.JMeterEngineGateway;
@@ -25,6 +26,7 @@ public class TestPlanWriter {
 	 */
 	public TestPlanWriter(String jmeterHome) {
 		JMeterEngineGateway.getInstance().initJMeter(jmeterHome, "jmeter.properties", Locale.ENGLISH);
+		JMeterUtils.initLogging();
 	}
 
 	private final GeneratorAdapter generatorAdapter = new GeneratorAdapter();
