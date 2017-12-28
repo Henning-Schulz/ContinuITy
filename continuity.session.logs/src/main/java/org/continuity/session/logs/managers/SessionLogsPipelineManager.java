@@ -26,7 +26,7 @@ import rocks.inspectit.shared.all.communication.data.cmr.ApplicationData;
 import rocks.inspectit.shared.all.communication.data.cmr.BusinessTransactionData;
 
 /**
- * 
+ *
  * @author Alper Hi, Tobias Angerstein
  *
  */
@@ -46,11 +46,14 @@ public class SessionLogsPipelineManager {
 
 	/**
 	 * Runs the pipeline
-	 * 
+	 *
 	 * @return
 	 */
 	public String runPipeline() {
-		return getSessionLogs(this.link);
+		// for testing
+		return "DAC0E7CAC657D59A1328DEAC1F1F9472;\"ShopGET\":1511777946984000000:1511777947595000000:/dvdstore/browse:8080:localhost:HTTP/1.1:GET:conversationId=1:<no-encoding>;\"HomeGET\":1511777963338000000:1511777963415000000:/dvdstore/home:8080:localhost:HTTP/1.1:GET:<no-query-string>:<no-encoding>;\"ShopGET\":1511779159657000000:1511779159856000000:/dvdstore/browse:8080:localhost:HTTP/1.1:GET:<no-query-string>:<no-encoding>";
+
+		//return getSessionLogs(this.link);
 	}
 
 	/**
@@ -64,7 +67,7 @@ public class SessionLogsPipelineManager {
 			List<InvocationSequenceData> extractedInvocationSequences = new ArrayList<InvocationSequenceData>();
 			for (IITTraceImpl traceImpl : traceList) {
 				Callable callable = traceImpl.getRoot().getRoot();
-				if (callable instanceof IITRemoteInvocation || callable instanceof IITHTTPRequestProcessing) {
+				if ((callable instanceof IITRemoteInvocation) || (callable instanceof IITHTTPRequestProcessing)) {
 					extractedInvocationSequences.add(((IITAbstractCallable) callable).getInvocationSequenceData());
 				} else if (callable instanceof IITSpanCallable) {
 					// TODO: invoke a recursive method, which build the session logs based on the
