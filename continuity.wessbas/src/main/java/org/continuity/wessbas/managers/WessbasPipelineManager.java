@@ -6,12 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Properties;
 import java.util.function.Consumer;
 
-import org.continuity.commons.wessbas.WessbasModelParser;
 import org.continuity.wessbas.entities.MonitoringData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,23 +72,12 @@ public class WessbasPipelineManager {
 	public void runPipeline(MonitoringData data) {
 
 		String sessionLog = getSessionLog(data);
-
-		try {
-			convertSessionLogIntoWessbasDSLInstance(sessionLog);
-		} catch (SecurityException | IOException | GeneratorException e) {
-			LOGGER.error("Could not create a WESSBAS workload model!");
-			e.printStackTrace();
-			return;
-		}
-
-		WessbasModelParser parser = new WessbasModelParser();
-		Path workloadModelPath = workingDir.resolve("modelgenerator").resolve("workloadmodel.xmi");
 		WorkloadModel workloadModel;
 
 		try {
-			workloadModel = parser.readWorkloadModel(workloadModelPath.toString());
-		} catch (IOException e) {
-			LOGGER.error("Could not read the created WESSBAS workload model from path {}!", workloadModelPath);
+			workloadModel = convertSessionLogIntoWessbasDSLInstance(sessionLog);
+		} catch (SecurityException | IOException | GeneratorException e) {
+			LOGGER.error("Could not create a WESSBAS workload model!");
 			e.printStackTrace();
 			return;
 		}
@@ -106,11 +93,11 @@ public class WessbasPipelineManager {
 	 * @throws GeneratorException
 	 * @throws SecurityException
 	 */
-	private void convertSessionLogIntoWessbasDSLInstance(String sessionLog) throws IOException, SecurityException, GeneratorException {
+	private WorkloadModel convertSessionLogIntoWessbasDSLInstance(String sessionLog) throws IOException, SecurityException, GeneratorException {
 		Path sessionLogsPath = writeSessionLogIntoFile(sessionLog);
-		createWorkloadIntensity(100); // TODO: read from somewhere
-		createBehaviorModel(sessionLogsPath);
-		generateWessbasModel();
+		Properties intensityProps = createWorkloadIntensity(100); // TODO: read from somewhere
+		Properties behaviorProps = createBehaviorModel(sessionLogsPath);
+		return generateWessbasModel(intensityProps, behaviorProps);
 	}
 
 	private Path writeSessionLogIntoFile(String sessionLog) throws IOException {
@@ -119,22 +106,33 @@ public class WessbasPipelineManager {
 		return sessionLogsPath;
 	}
 
-	private void createWorkloadIntensity(int numberOfUsers) throws IOException {
-		List<String> properties = Arrays.asList("workloadIntensity.type=constant", "wl.type.value=" + numberOfUsers);
-		Files.write(workingDir.resolve("workloadIntensity.properties"), properties, StandardOpenOption.CREATE);
+	private Properties createWorkloadIntensity(int numberOfUsers) throws IOException {
+		Properties properties = new Properties();
+		properties.put("workloadIntensity.type", "constant");
+		properties.put("wl.type.value", Integer.toString(numberOfUsers));
+
+		properties.store(Files.newOutputStream(workingDir.resolve("workloadIntensity.properties"), StandardOpenOption.CREATE), null);
+
+		return properties;
 	}
 
-	private void createBehaviorModel(Path sessionLogsPath) {
+	private Properties createBehaviorModel(Path sessionLogsPath) throws IOException {
 		Path outputDir = workingDir.resolve("behaviormodelextractor");
 		outputDir.toFile().mkdir();
 
 		BehaviorModelExtractor behav = new BehaviorModelExtractor();
 		behav.createBehaviorModel(sessionLogsPath.toString(), outputDir.toString());
+
+		Properties behaviorProperties = new Properties();
+		behaviorProperties.load(Files.newInputStream(workingDir.resolve("behaviormodelextractor").resolve("behaviormix.txt")));
+		return behaviorProperties;
 	}
 
-	private void generateWessbasModel() throws FileNotFoundException, SecurityException, GeneratorException {
+	private WorkloadModel generateWessbasModel(Properties workloadIntensityProperties, Properties behaviorModelsProperties) throws FileNotFoundException, SecurityException, GeneratorException {
 		M4jdslModelGenerator generator = new M4jdslModelGenerator();
-		generator.generate(workingDir.toString());
+		final String sessionDatFilePath = workingDir.resolve("sessions.dat").toString();
+
+		return generator.generateWorkloadModel(workloadIntensityProperties, behaviorModelsProperties, null, sessionDatFilePath, false);
 	}
 
 	/**

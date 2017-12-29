@@ -30,7 +30,7 @@ public class WessbasAmqpHandler {
 
 	@Autowired
 	private AmqpTemplate amqpTemplate;
-	
+
 	@Autowired
 	private RestTemplate restTemplate;
 
@@ -48,10 +48,13 @@ public class WessbasAmqpHandler {
 	 */
 	@RabbitListener(queues = RabbitMqConfig.MONITORING_DATA_AVAILABLE_QUEUE_NAME)
 	public String onMonitoringDataAvailable(MonitoringData data) {
+		LOGGER.info("Received new monitoring data with tag '{}' to be processed: '{}'", data.getLink(), data.getTag());
 
 		String storageId = SimpleModelStorage.instance().reserve(data.getTag());
 		WessbasPipelineManager pipelineManager = new WessbasPipelineManager(model -> handleModelCreated(storageId, data.getTag(), model), restTemplate);
 		pipelineManager.runPipeline(data);
+
+		LOGGER.info("Created a new workload model with id '{}'.", storageId);
 
 		return applicationName + "/model/" + storageId;
 	}
