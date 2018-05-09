@@ -2,8 +2,8 @@ package org.continuity.system.model.amqp;
 
 import java.util.EnumSet;
 
-import org.continuity.annotation.dsl.system.SystemModel;
 import org.continuity.commons.utils.WebUtils;
+import org.continuity.idpa.application.Application;
 import org.continuity.system.model.config.RabbitMqConfig;
 import org.continuity.system.model.entities.SystemChangeReport;
 import org.continuity.system.model.entities.SystemChangeType;
@@ -65,16 +65,16 @@ public class UpdateSystemModelAmqpHandler {
 			return;
 		}
 
-		ResponseEntity<SystemModel> systemResponse;
+		ResponseEntity<Application> systemResponse;
 		try {
-			systemResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getSystemModelLink()), SystemModel.class);
+			systemResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getSystemModelLink()), Application.class);
 		} catch (HttpStatusCodeException e) {
 			LOGGER.error("Could not retrieve the system model from {}. Got response code {}!", link.getSystemModelLink(), e.getStatusCode());
 			LOGGER.error("Exception:", e);
 			return;
 		}
 
-		SystemModel systemModel = systemResponse.getBody();
+		Application systemModel = systemResponse.getBody();
 
 		// A workload model may only contain parts of all available interfaces, possible parameters
 		// and possible properties (e.g., headers).

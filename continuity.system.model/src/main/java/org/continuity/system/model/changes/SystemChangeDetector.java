@@ -7,10 +7,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.continuity.annotation.dsl.system.Parameter;
-import org.continuity.annotation.dsl.system.ServiceInterface;
-import org.continuity.annotation.dsl.system.SystemModel;
-import org.continuity.annotation.dsl.visitor.ContinuityByClassSearcher;
+import org.continuity.idpa.application.Parameter;
+import org.continuity.idpa.application.Endpoint;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.visitor.IdpaByClassSearcher;
 import org.continuity.system.model.entities.ModelElementReference;
 import org.continuity.system.model.entities.SystemChange;
 import org.continuity.system.model.entities.SystemChangeReport;
@@ -27,7 +27,7 @@ import com.google.common.base.Objects;
  */
 public class SystemChangeDetector {
 
-	private final SystemModel newSystemModel;
+	private final Application newSystemModel;
 
 	private final SystemChangeReportBuilder reportBuilder;
 
@@ -37,11 +37,11 @@ public class SystemChangeDetector {
 	 * @param newSystemModel
 	 *            The current system model.
 	 */
-	public SystemChangeDetector(SystemModel newSystemModel) {
+	public SystemChangeDetector(Application newSystemModel) {
 		this(newSystemModel, EnumSet.noneOf(SystemChangeType.class));
 	}
 
-	public SystemChangeDetector(SystemModel newSystemModel, EnumSet<SystemChangeType> ignoredChangeTypes) {
+	public SystemChangeDetector(Application newSystemModel, EnumSet<SystemChangeType> ignoredChangeTypes) {
 		this.newSystemModel = newSystemModel;
 		this.reportBuilder = new SystemChangeReportBuilder(ignoredChangeTypes, newSystemModel.getTimestamp());
 	}
@@ -52,20 +52,20 @@ public class SystemChangeDetector {
 	 * @param oldSystemModel
 	 *            An old system model.
 	 */
-	public void compareTo(SystemModel oldSystemModel) {
+	public void compareTo(Application oldSystemModel) {
 		reportBuilder.setBeforeChange(oldSystemModel.getTimestamp());
 
 		final Set<ModelElementReference> visited = new HashSet<>();
-		ContinuityByClassSearcher<ServiceInterface<?>> searcher = new ContinuityByClassSearcher<>(ServiceInterface.GENERIC_TYPE, inter -> checkInterface(inter, oldSystemModel, visited));
+		IdpaByClassSearcher<Endpoint<?>> searcher = new IdpaByClassSearcher<>(Endpoint.GENERIC_TYPE, inter -> checkInterface(inter, oldSystemModel, visited));
 		searcher.visit(newSystemModel);
 
-		searcher = new ContinuityByClassSearcher<>(ServiceInterface.GENERIC_TYPE, inter -> reportRemovedInterface(inter, visited));
+		searcher = new IdpaByClassSearcher<>(Endpoint.GENERIC_TYPE, inter -> reportRemovedInterface(inter, visited));
 		searcher.visit(oldSystemModel);
 	}
 
-	private boolean checkInterface(ServiceInterface<?> newInterf, SystemModel oldSystemModel, Set<ModelElementReference> visited) {
-		final Holder<ServiceInterface<?>> interfHolder = new Holder<>();
-		ContinuityByClassSearcher<ServiceInterface<?>> searcher = new ContinuityByClassSearcher<>(ServiceInterface.GENERIC_TYPE, oldInterf -> {
+	private boolean checkInterface(Endpoint<?> newInterf, Application oldSystemModel, Set<ModelElementReference> visited) {
+		final Holder<Endpoint<?>> interfHolder = new Holder<>();
+		IdpaByClassSearcher<Endpoint<?>> searcher = new IdpaByClassSearcher<>(Endpoint.GENERIC_TYPE, oldInterf -> {
 			if (oldInterf.getId().equals(newInterf.getId())) {
 				interfHolder.element = oldInterf;
 			}
@@ -77,7 +77,7 @@ public class SystemChangeDetector {
 		if (interfHolder.element == null) {
 			reportBuilder.addChange(new SystemChange(SystemChangeType.INTERFACE_ADDED, ref));
 		} else {
-			ServiceInterface<?> oldInterf = interfHolder.element;
+			Endpoint<?> oldInterf = interfHolder.element;
 
 			for (String changedProperty : oldInterf.getDifferingProperties(newInterf)) {
 				if (!"parameters".equals(changedProperty)) {
@@ -93,7 +93,7 @@ public class SystemChangeDetector {
 		return true;
 	}
 
-	private boolean reportRemovedInterface(ServiceInterface<?> oldInterf, Set<ModelElementReference> visited) {
+	private boolean reportRemovedInterface(Endpoint<?> oldInterf, Set<ModelElementReference> visited) {
 		ModelElementReference ref = new ModelElementReference(oldInterf);
 		if (!visited.contains(ref)) {
 			reportBuilder.addChange(new SystemChange(SystemChangeType.INTERFACE_REMOVED, ref));
@@ -102,7 +102,7 @@ public class SystemChangeDetector {
 		return true;
 	}
 
-	private void checkParameters(ServiceInterface<?> oldInterf, ServiceInterface<?> newInterf) {
+	private void checkParameters(Endpoint<?> oldInterf, Endpoint<?> newInterf) {
 		if (CollectionUtils.isEqualCollection(oldInterf.getParameters(), newInterf.getParameters())) {
 			return;
 		}

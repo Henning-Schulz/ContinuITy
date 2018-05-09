@@ -3,7 +3,7 @@ package org.continuity.system.model.controllers;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.continuity.annotation.dsl.system.SystemModel;
+import org.continuity.idpa.application.Application;
 import org.continuity.system.model.openapi.OpenApiToContinuityTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ public class OpenApiController {
 	}
 
 	/**
-	 * Parses the specified Open API JSON, transforms it to a {@link SystemModel} and updates the
+	 * Parses the specified Open API JSON, transforms it to a {@link Application} and updates the
 	 * already stored system model.
 	 *
 	 * @param tag
@@ -64,14 +64,14 @@ public class OpenApiController {
 			return ResponseEntity.badRequest().body("Currently, only version 2.0 is supported!");
 		}
 
-		SystemModel system = transformer.transform(swagger);
+		Application system = transformer.transform(swagger);
 
 		return systemModelController.updateSystemModel(tag, system);
 	}
 
 	/**
 	 * Reads the Open API specification from the specified URL, transforms it to a
-	 * {@link SystemModel} and updates the already stored system model.
+	 * {@link Application} and updates the already stored system model.
 	 *
 	 * @param tag
 	 *            Tag of the system model.
@@ -99,7 +99,7 @@ public class OpenApiController {
 			return ResponseEntity.badRequest().body("Currently, only version 2.0 is supported!");
 		}
 
-		SystemModel system = transformer.transform(swagger);
+		Application system = transformer.transform(swagger);
 
 		return systemModelController.updateSystemModel(tag, system);
 	}

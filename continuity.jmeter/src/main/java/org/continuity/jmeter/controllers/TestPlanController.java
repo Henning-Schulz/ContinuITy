@@ -1,9 +1,9 @@
 package org.continuity.jmeter.controllers;
 
 import org.apache.jorphan.collections.ListedHashTree;
-import org.continuity.annotation.dsl.ann.SystemAnnotation;
-import org.continuity.annotation.dsl.system.SystemModel;
 import org.continuity.commons.utils.WebUtils;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
+import org.continuity.idpa.application.Application;
 import org.continuity.jmeter.amqp.TestPlanAmqpHandler;
 import org.continuity.jmeter.entities.TestPlanBundle;
 import org.continuity.jmeter.entities.WorkloadLinks;
@@ -85,9 +85,9 @@ public class TestPlanController {
 	}
 
 	private ListedHashTree createAnnotatedTestPlan(TestPlanBundle testPlanPack, String tag) {
-		SystemAnnotation annotation;
+		ApplicationAnnotation annotation;
 		try {
-			annotation = restTemplate.getForObject("http://system-annotation/ann/" + tag + "/annotation", SystemAnnotation.class);
+			annotation = restTemplate.getForObject("http://system-annotation/ann/" + tag + "/annotation", ApplicationAnnotation.class);
 		} catch (HttpStatusCodeException e) {
 			LOGGER.error("Received a non-200 response: {} ({}) - {}", e.getStatusCode(), e.getStatusCode().getReasonPhrase(), e.getResponseBodyAsString());
 			return null;
@@ -98,7 +98,7 @@ public class TestPlanController {
 			return null;
 		}
 
-		SystemModel systemModel = restTemplate.getForObject("http://system-model/system/" + tag, SystemModel.class);
+		Application systemModel = restTemplate.getForObject("http://system-model/system/" + tag, Application.class);
 
 		if (systemModel == null) {
 			LOGGER.error("System with tag {} is null! Aborting.", tag);

@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.continuity.annotation.dsl.system.ServiceInterface;
-import org.continuity.annotation.dsl.system.SystemModel;
 import org.continuity.commons.format.CommonFormats;
+import org.continuity.idpa.application.Endpoint;
+import org.continuity.idpa.application.Application;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -83,10 +83,10 @@ public class SystemChangeReport {
 	 *            The system whose interfaces should be added.
 	 * @return A report holding all interfaces to be added.
 	 */
-	public static SystemChangeReport allOf(SystemModel system) {
+	public static SystemChangeReport allOf(Application system) {
 		Set<SystemChange> changes = new HashSet<>();
 
-		for (ServiceInterface<?> interf : system.getInterfaces()) {
+		for (Endpoint<?> interf : system.getEndpoints()) {
 			changes.add(new SystemChange(SystemChangeType.INTERFACE_ADDED, new ModelElementReference(interf)));
 		}
 

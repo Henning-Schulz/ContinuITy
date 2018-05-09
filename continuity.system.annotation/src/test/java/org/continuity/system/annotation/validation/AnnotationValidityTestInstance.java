@@ -1,23 +1,23 @@
 package org.continuity.system.annotation.validation;
 
-import org.continuity.annotation.dsl.WeakReference;
-import org.continuity.annotation.dsl.ann.CsvInput;
-import org.continuity.annotation.dsl.ann.CustomDataInput;
-import org.continuity.annotation.dsl.ann.DirectDataInput;
-import org.continuity.annotation.dsl.ann.ExtractedInput;
-import org.continuity.annotation.dsl.ann.InterfaceAnnotation;
-import org.continuity.annotation.dsl.ann.ParameterAnnotation;
-import org.continuity.annotation.dsl.ann.PropertyOverride;
-import org.continuity.annotation.dsl.ann.PropertyOverrideKey;
-import org.continuity.annotation.dsl.ann.RegExExtraction;
-import org.continuity.annotation.dsl.ann.SystemAnnotation;
-import org.continuity.annotation.dsl.system.HttpInterface;
-import org.continuity.annotation.dsl.system.HttpParameter;
-import org.continuity.annotation.dsl.system.HttpParameterType;
-import org.continuity.annotation.dsl.system.Parameter;
-import org.continuity.annotation.dsl.system.ServiceInterface;
-import org.continuity.annotation.dsl.system.SystemModel;
-import org.continuity.annotation.dsl.test.ContinuityModelTestInstance;
+import org.continuity.idpa.WeakReference;
+import org.continuity.idpa.annotation.CsvInput;
+import org.continuity.idpa.annotation.CustomDataInput;
+import org.continuity.idpa.annotation.DirectListInput;
+import org.continuity.idpa.annotation.ExtractedInput;
+import org.continuity.idpa.annotation.EndpointAnnotation;
+import org.continuity.idpa.annotation.ParameterAnnotation;
+import org.continuity.idpa.annotation.PropertyOverride;
+import org.continuity.idpa.annotation.PropertyOverrideKey;
+import org.continuity.idpa.annotation.RegExExtraction;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
+import org.continuity.idpa.application.HttpEndpoint;
+import org.continuity.idpa.application.HttpParameter;
+import org.continuity.idpa.application.HttpParameterType;
+import org.continuity.idpa.application.Parameter;
+import org.continuity.idpa.application.Endpoint;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.test.ContinuityModelTestInstance;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -29,66 +29,66 @@ public enum AnnotationValidityTestInstance {
 
 	FIRST("http://first/") {
 		@Override
-		public SystemModel getSystemModel() {
+		public Application getSystemModel() {
 			return ContinuityModelTestInstance.SIMPLE.getSystemModel();
 		}
 
 		@Override
-		public SystemAnnotation getAnnotation() {
+		public ApplicationAnnotation getAnnotation() {
 			return ContinuityModelTestInstance.SIMPLE.getAnnotation();
 		}
 	},
 	SECOND_SYSTEM("http://second/") {
 		@Override
-		public SystemModel getSystemModel() {
+		public Application getSystemModel() {
 			return ULTIMATE_ANNOTATION.getSystemModel();
 		}
 
 		@Override
-		public SystemAnnotation getAnnotation() {
+		public ApplicationAnnotation getAnnotation() {
 			return ContinuityModelTestInstance.SIMPLE.getAnnotation();
 		}
 	},
 	THIRD_SYSTEM("http://third/") {
 		@Override
-		public SystemModel getSystemModel() {
-			SystemModel system = new SystemModel();
-			HttpInterface interf = new HttpInterface();
+		public Application getSystemModel() {
+			Application system = new Application();
+			HttpEndpoint interf = new HttpEndpoint();
 			interf.setDomain("mydomain");
 			interf.setId("logout");
-			system.addInterface(interf);
+			system.addEndpoint(interf);
 
 			return system;
 		}
 
 		@Override
-		public SystemAnnotation getAnnotation() {
+		public ApplicationAnnotation getAnnotation() {
 			return ContinuityModelTestInstance.SIMPLE.getAnnotation();
 		}
 	},
 	SECOND_ANNOTATION("http://second-ann") {
 
 		@Override
-		protected SystemModel getSystemModel() {
+		protected Application getSystemModel() {
 			return ContinuityModelTestInstance.SIMPLE.getSystemModel();
 		}
 
 		@Override
-		protected SystemAnnotation getAnnotation() {
-			SystemAnnotation annotation = new SystemAnnotation();
+		protected ApplicationAnnotation getAnnotation() {
+			ApplicationAnnotation annotation = new ApplicationAnnotation();
 
-			WeakReference<ServiceInterface<?>> interfRef = WeakReference.create(ServiceInterface.GENERIC_TYPE, "login");
+			WeakReference<Endpoint<?>> interfRef = WeakReference.create(Endpoint.GENERIC_TYPE, "login");
 
-			annotation = new SystemAnnotation();
+			annotation = new ApplicationAnnotation();
 			annotation.setId("ANN");
 
-			InterfaceAnnotation interfaceAnn = new InterfaceAnnotation();
-			interfaceAnn.setAnnotatedInterface(interfRef);
-			PropertyOverride<PropertyOverrideKey.InterfaceLevel> ov = new PropertyOverride<>();
-			ov.setKey(PropertyOverrideKey.HttpInterface.DOMAIN);
+			EndpointAnnotation interfaceAnn = new EndpointAnnotation();
+			interfaceAnn.setAnnotatedEndpoint(interfRef);
+			PropertyOverride<PropertyOverrideKey.EndpointLevel> ov = new PropertyOverride<>();
+			ov.setKey(PropertyOverrideKey.HttpEndpoint.DOMAIN);
 			ov.setValue("localhost");
 			interfaceAnn.addOverride(ov);
-			annotation.getInterfaceAnnotations().add(interfaceAnn);
+			annotation.getEndpointAnnotations().add(interfaceAnn);
 
 			return annotation;
 		}
@@ -97,26 +97,26 @@ public enum AnnotationValidityTestInstance {
 	THIRD_ANNOTATION("http://third-ann") {
 
 		@Override
-		protected SystemModel getSystemModel() {
+		protected Application getSystemModel() {
 			return ContinuityModelTestInstance.SIMPLE.getSystemModel();
 		}
 
 		@Override
-		protected SystemAnnotation getAnnotation() {
-			SystemAnnotation annotation = new SystemAnnotation();
+		protected ApplicationAnnotation getAnnotation() {
+			ApplicationAnnotation annotation = new ApplicationAnnotation();
 
-			WeakReference<ServiceInterface<?>> interfRef = WeakReference.create(ServiceInterface.GENERIC_TYPE, "logout");
+			WeakReference<Endpoint<?>> interfRef = WeakReference.create(Endpoint.GENERIC_TYPE, "logout");
 
-			annotation = new SystemAnnotation();
+			annotation = new ApplicationAnnotation();
 			annotation.setId("ANN");
 
-			InterfaceAnnotation interfaceAnn = new InterfaceAnnotation();
-			interfaceAnn.setAnnotatedInterface(interfRef);
-			PropertyOverride<PropertyOverrideKey.InterfaceLevel> ov = new PropertyOverride<>();
-			ov.setKey(PropertyOverrideKey.HttpInterface.DOMAIN);
+			EndpointAnnotation interfaceAnn = new EndpointAnnotation();
+			interfaceAnn.setAnnotatedEndpoint(interfRef);
+			PropertyOverride<PropertyOverrideKey.EndpointLevel> ov = new PropertyOverride<>();
+			ov.setKey(PropertyOverrideKey.HttpEndpoint.DOMAIN);
 			ov.setValue("localhost");
 			interfaceAnn.addOverride(ov);
-			annotation.getInterfaceAnnotations().add(interfaceAnn);
+			annotation.getEndpointAnnotations().add(interfaceAnn);
 
 			return annotation;
 		}
@@ -124,10 +124,10 @@ public enum AnnotationValidityTestInstance {
 	},
 	ULTIMATE_ANNOTATION("http://ultimate") {
 		@Override
-		protected SystemModel getSystemModel() {
-			SystemModel system = new SystemModel();
+		protected Application getSystemModel() {
+			Application system = new Application();
 
-			HttpInterface interf = new HttpInterface();
+			HttpEndpoint interf = new HttpEndpoint();
 			interf.setDomain("mydomain");
 			interf.setId("login");
 
@@ -136,9 +136,9 @@ public enum AnnotationValidityTestInstance {
 			param.setParameterType(HttpParameterType.REQ_PARAM);
 			interf.getParameters().add(param);
 
-			system.addInterface(interf);
+			system.addEndpoint(interf);
 
-			HttpInterface interf2 = new HttpInterface();
+			HttpEndpoint interf2 = new HttpEndpoint();
 			interf2.setDomain("mydomain");
 			interf2.setId("logout");
 
@@ -147,23 +147,23 @@ public enum AnnotationValidityTestInstance {
 			param2.setParameterType(HttpParameterType.REQ_PARAM);
 			interf2.getParameters().add(param2);
 
-			system.addInterface(interf2);
+			system.addEndpoint(interf2);
 
 			return system;
 		}
 
 		@Override
-		protected SystemAnnotation getAnnotation() {
-			SystemAnnotation annotation = new SystemAnnotation();
+		protected ApplicationAnnotation getAnnotation() {
+			ApplicationAnnotation annotation = new ApplicationAnnotation();
 
-			WeakReference<ServiceInterface<?>> interfRef = WeakReference.create(ServiceInterface.GENERIC_TYPE, "login");
-			WeakReference<ServiceInterface<?>> interf2Ref = WeakReference.create(ServiceInterface.GENERIC_TYPE, "logout");
+			WeakReference<Endpoint<?>> interfRef = WeakReference.create(Endpoint.GENERIC_TYPE, "login");
+			WeakReference<Endpoint<?>> interf2Ref = WeakReference.create(Endpoint.GENERIC_TYPE, "logout");
 			WeakReference<Parameter> paramRef = WeakReference.create(Parameter.class, "user");
 			WeakReference<Parameter> param2Ref = WeakReference.create(Parameter.class, "logoutuser");
 
 			// Input
 
-			DirectDataInput input = new DirectDataInput();
+			DirectListInput input = new DirectListInput();
 			input.setId("DAT1");
 			input.getData().add("foo");
 			input.getData().add("bar");
@@ -186,17 +186,17 @@ public enum AnnotationValidityTestInstance {
 
 			// Annotation
 
-			annotation = new SystemAnnotation();
+			annotation = new ApplicationAnnotation();
 			annotation.getInputs().add(input);
 			annotation.getInputs().add(csvInput);
 			annotation.getInputs().add(extrInput);
 			annotation.getInputs().add(unknownInput);
 			annotation.setId("ANN");
 
-			InterfaceAnnotation interfaceAnn = new InterfaceAnnotation();
-			interfaceAnn.setAnnotatedInterface(interfRef);
-			PropertyOverride<PropertyOverrideKey.InterfaceLevel> ov = new PropertyOverride<>();
-			ov.setKey(PropertyOverrideKey.HttpInterface.DOMAIN);
+			EndpointAnnotation interfaceAnn = new EndpointAnnotation();
+			interfaceAnn.setAnnotatedEndpoint(interfRef);
+			PropertyOverride<PropertyOverrideKey.EndpointLevel> ov = new PropertyOverride<>();
+			ov.setKey(PropertyOverrideKey.HttpEndpoint.DOMAIN);
 			ov.setValue("localhost");
 			interfaceAnn.addOverride(ov);
 
@@ -205,17 +205,17 @@ public enum AnnotationValidityTestInstance {
 			paramAnn.setInput(input);
 
 			interfaceAnn.getParameterAnnotations().add(paramAnn);
-			annotation.getInterfaceAnnotations().add(interfaceAnn);
+			annotation.getEndpointAnnotations().add(interfaceAnn);
 
-			InterfaceAnnotation interface2Ann = new InterfaceAnnotation();
-			interface2Ann.setAnnotatedInterface(interf2Ref);
+			EndpointAnnotation interface2Ann = new EndpointAnnotation();
+			interface2Ann.setAnnotatedEndpoint(interf2Ref);
 
 			ParameterAnnotation param2Ann = new ParameterAnnotation();
 			param2Ann.setAnnotatedParameter(param2Ref);
 			param2Ann.setInput(extrInput);
 			interface2Ann.addParameterAnnotation(param2Ann);
 
-			annotation.getInterfaceAnnotations().add(interface2Ann);
+			annotation.getEndpointAnnotations().add(interface2Ann);
 
 			return annotation;
 		}
@@ -227,15 +227,15 @@ public enum AnnotationValidityTestInstance {
 		this.link = link;
 	}
 
-	protected abstract SystemModel getSystemModel();
+	protected abstract Application getSystemModel();
 
-	protected abstract SystemAnnotation getAnnotation();
+	protected abstract ApplicationAnnotation getAnnotation();
 
-	public ResponseEntity<SystemModel> getSystemEntity() {
+	public ResponseEntity<Application> getSystemEntity() {
 		return new ResponseEntity<>(getSystemModel(), HttpStatus.OK);
 	}
 
-	public ResponseEntity<SystemAnnotation> getAnnotationEntity() {
+	public ResponseEntity<ApplicationAnnotation> getAnnotationEntity() {
 		return new ResponseEntity<>(getAnnotation(), HttpStatus.OK);
 	}
 

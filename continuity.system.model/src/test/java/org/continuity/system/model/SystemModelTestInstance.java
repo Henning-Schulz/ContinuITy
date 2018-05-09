@@ -2,10 +2,10 @@ package org.continuity.system.model;
 
 import java.util.Date;
 
-import org.continuity.annotation.dsl.system.HttpInterface;
-import org.continuity.annotation.dsl.system.HttpParameter;
-import org.continuity.annotation.dsl.system.HttpParameterType;
-import org.continuity.annotation.dsl.system.SystemModel;
+import org.continuity.idpa.application.HttpEndpoint;
+import org.continuity.idpa.application.HttpParameter;
+import org.continuity.idpa.application.HttpParameterType;
+import org.continuity.idpa.application.Application;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -17,12 +17,12 @@ public enum SystemModelTestInstance {
 
 	FIRST("http://first/") {
 		@Override
-		public SystemModel get() {
-			SystemModel model = new SystemModel();
+		public Application get() {
+			Application model = new Application();
 			model.setId("FIRST");
 			model.setTimestamp(new Date(86400000));
 
-			HttpInterface interf = new HttpInterface();
+			HttpEndpoint interf = new HttpEndpoint();
 			interf.setDomain("mydomain");
 			interf.setId("login");
 
@@ -31,18 +31,18 @@ public enum SystemModelTestInstance {
 			param.setParameterType(HttpParameterType.REQ_PARAM);
 			interf.getParameters().add(param);
 
-			model.addInterface(interf);
+			model.addEndpoint(interf);
 			return model;
 		}
 	},
 	SECOND("http://second/") {
 		@Override
-		public SystemModel get() {
-			SystemModel system = new SystemModel();
+		public Application get() {
+			Application system = new Application();
 			system.setId("SECOND");
 			system.setTimestamp(new Date(2 * 86400000));
 
-			HttpInterface interf = new HttpInterface();
+			HttpEndpoint interf = new HttpEndpoint();
 			interf.setDomain("mydomain");
 			interf.setId("login");
 
@@ -51,9 +51,9 @@ public enum SystemModelTestInstance {
 			param.setParameterType(HttpParameterType.REQ_PARAM);
 			interf.getParameters().add(param);
 
-			system.addInterface(interf);
+			system.addEndpoint(interf);
 
-			HttpInterface interf2 = new HttpInterface();
+			HttpEndpoint interf2 = new HttpEndpoint();
 			interf2.setDomain("mydomain");
 			interf2.setId("logout");
 
@@ -62,21 +62,21 @@ public enum SystemModelTestInstance {
 			param2.setParameterType(HttpParameterType.REQ_PARAM);
 			interf2.getParameters().add(param2);
 
-			system.addInterface(interf2);
+			system.addEndpoint(interf2);
 
 			return system;
 		}
 	},
 	THIRD("http://third/") {
 		@Override
-		public SystemModel get() {
-			SystemModel system = new SystemModel();
+		public Application get() {
+			Application system = new Application();
 			system.setId("THIRD");
 			system.setTimestamp(new Date(3 * 86400000));
-			HttpInterface interf = new HttpInterface();
+			HttpEndpoint interf = new HttpEndpoint();
 			interf.setDomain("mydomain");
 			interf.setId("logout");
-			system.addInterface(interf);
+			system.addEndpoint(interf);
 
 			return system;
 		}
@@ -88,9 +88,9 @@ public enum SystemModelTestInstance {
 		this.link = link;
 	}
 
-	public abstract SystemModel get();
+	public abstract Application get();
 
-	public ResponseEntity<SystemModel> getEntity() {
+	public ResponseEntity<Application> getEntity() {
 		return new ResponseEntity<>(get(), HttpStatus.OK);
 	}
 

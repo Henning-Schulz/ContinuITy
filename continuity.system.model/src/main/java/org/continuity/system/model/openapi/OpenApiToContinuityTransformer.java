@@ -7,12 +7,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.continuity.annotation.dsl.system.HttpInterface;
-import org.continuity.annotation.dsl.system.HttpParameter;
-import org.continuity.annotation.dsl.system.HttpParameterType;
-import org.continuity.annotation.dsl.system.ServiceInterface;
-import org.continuity.annotation.dsl.system.SystemModel;
 import org.continuity.commons.utils.StringUtils;
+import org.continuity.idpa.application.HttpEndpoint;
+import org.continuity.idpa.application.HttpParameter;
+import org.continuity.idpa.application.HttpParameterType;
+import org.continuity.idpa.application.Endpoint;
+import org.continuity.idpa.application.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 
 /**
- * Transforms {@link Swagger} objects into {@link SystemModel} instances.
+ * Transforms {@link Swagger} objects into {@link Application} instances.
  *
  * @author Henning Schulz
  *
@@ -34,16 +34,16 @@ public class OpenApiToContinuityTransformer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenApiToContinuityTransformer.class);
 
 	/**
-	 * Transforms the specified {@link Swagger} object into a {@link SystemModel};
+	 * Transforms the specified {@link Swagger} object into a {@link Application};
 	 *
 	 * @param swagger
 	 *            The swagger model to be transformed.
 	 * @return The generated system model.
 	 */
-	public SystemModel transform(Swagger swagger) {
+	public Application transform(Swagger swagger) {
 		LOGGER.info("Transforming the swagger model {} to a system model.", swagger.getInfo().getTitle());
 
-		SystemModel system = new SystemModel();
+		Application system = new Application();
 
 		final String name = swagger.getInfo().getTitle();
 
@@ -51,12 +51,12 @@ public class OpenApiToContinuityTransformer {
 			system.setId(name.replace(" ", "_"));
 		}
 
-		system.setInterfaces(extractInterfaces(swagger));
+		system.setEndpoints(extractInterfaces(swagger));
 
 		return system;
 	}
 
-	private List<ServiceInterface<?>> extractInterfaces(Swagger swagger) {
+	private List<Endpoint<?>> extractInterfaces(Swagger swagger) {
 		final String host = swagger.getHost();
 		final String basePath = swagger.getBasePath();
 		String prot = extractProtocol(swagger.getSchemes());
@@ -82,10 +82,10 @@ public class OpenApiToContinuityTransformer {
 		return swagger.getPaths().entrySet().stream().map(entry -> createInterfacesFromPath(entry, domain, port, basePath, protocol)).flatMap(List::stream).collect(Collectors.toList());
 	}
 
-	private List<ServiceInterface<?>> createInterfacesFromPath(Entry<String, Path> pathEntry, String host, String port, String basePath, String protocol) {
+	private List<Endpoint<?>> createInterfacesFromPath(Entry<String, Path> pathEntry, String host, String port, String basePath, String protocol) {
 		final String path = ("/".equals(basePath) ? "" : basePath) + pathEntry.getKey();
 
-		List<ServiceInterface<?>> interfaces = pathEntry.getValue().getOperationMap().entrySet().stream().map(this::transformToInterface).map(interf -> {
+		List<Endpoint<?>> interfaces = pathEntry.getValue().getOperationMap().entrySet().stream().map(this::transformToInterface).map(interf -> {
 			interf.setDomain(host);
 			interf.setPort(port);
 			interf.setPath(path);
@@ -106,11 +106,11 @@ public class OpenApiToContinuityTransformer {
 		return interfaces;
 	}
 
-	private HttpInterface transformToInterface(Entry<HttpMethod, Operation> operationEntry) {
+	private HttpEndpoint transformToInterface(Entry<HttpMethod, Operation> operationEntry) {
 		String method = operationEntry.getKey().toString();
 		Operation operation = operationEntry.getValue();
 
-		HttpInterface interf = new HttpInterface();
+		HttpEndpoint interf = new HttpEndpoint();
 
 		if (operation.getConsumes() != null) {
 			List<String> headers = operation.getConsumes().stream().map(type -> Arrays.asList("Accept: " + type, "Content-Type: " + type)).flatMap(List::stream).collect(Collectors.toList());
@@ -142,7 +142,7 @@ public class OpenApiToContinuityTransformer {
 		return param;
 	}
 
-	private void setParameterIds(HttpInterface interf) {
+	private void setParameterIds(HttpEndpoint interf) {
 		final Set<String> ids = new HashSet<>();
 
 		for (HttpParameter param : interf.getParameters()) {

@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
-import org.continuity.annotation.dsl.ContinuityModelElement;
-import org.continuity.annotation.dsl.WeakReference;
+import org.continuity.idpa.IdpaElement;
+import org.continuity.idpa.WeakReference;
 
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.KeyDeserializer;
@@ -28,7 +28,7 @@ public class ModelElementReference {
 	public ModelElementReference() {
 	}
 
-	public ModelElementReference(ContinuityModelElement element) {
+	public ModelElementReference(IdpaElement element) {
 		this(element.getClass().getSimpleName(), element.getId());
 	}
 

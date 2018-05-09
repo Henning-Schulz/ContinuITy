@@ -2,10 +2,10 @@ package org.continuity.commons.utils;
 
 import java.io.IOException;
 
-import org.continuity.annotation.dsl.system.HttpInterface;
-import org.continuity.annotation.dsl.system.SystemModel;
-import org.continuity.annotation.dsl.visitor.ContinuityByClassSearcher;
-import org.continuity.annotation.dsl.yaml.ContinuityYamlSerializer;
+import org.continuity.idpa.application.HttpEndpoint;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.visitor.IdpaByClassSearcher;
+import org.continuity.idpa.yaml.IdpaYamlSerializer;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -26,17 +26,17 @@ public class RemoveParametersFromSystemModel {
 	}
 
 	public void removeParameters(String[] args) throws JsonParseException, JsonMappingException, IOException {
-		ContinuityYamlSerializer<SystemModel> serializer = new ContinuityYamlSerializer<>(SystemModel.class);
-		SystemModel system = serializer.readFromYaml(inputFile);
+		IdpaYamlSerializer<Application> serializer = new IdpaYamlSerializer<>(Application.class);
+		Application system = serializer.readFromYaml(inputFile);
 
-		ContinuityByClassSearcher<HttpInterface> interfaceSearcher = new ContinuityByClassSearcher<>(HttpInterface.class, this::removeParameters);
+		IdpaByClassSearcher<HttpEndpoint> interfaceSearcher = new IdpaByClassSearcher<>(HttpEndpoint.class, this::removeParameters);
 		interfaceSearcher.visit(system);
 
 		String newFile = inputFile.substring(0, inputFile.length() - 4) + "-wo-params.yml";
 		serializer.writeToYaml(system, newFile);
 	}
 
-	private void removeParameters(HttpInterface interf) {
+	private void removeParameters(HttpEndpoint interf) {
 		interf.getParameters().clear();
 	}
 

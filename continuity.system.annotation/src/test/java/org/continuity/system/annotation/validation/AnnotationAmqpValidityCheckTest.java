@@ -5,8 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 
-import org.continuity.annotation.dsl.ann.SystemAnnotation;
-import org.continuity.annotation.dsl.system.SystemModel;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
+import org.continuity.idpa.application.Application;
 import org.continuity.system.annotation.amqp.AnnotationAmpqHandler;
 import org.continuity.system.annotation.config.RabbitMqConfig;
 import org.continuity.system.annotation.entities.AnnotationValidityReport;
@@ -58,8 +58,8 @@ public class AnnotationAmqpValidityCheckTest {
 		restMock = Mockito.mock(RestTemplate.class);
 
 		for (AnnotationValidityTestInstance testInstance : AnnotationValidityTestInstance.values()) {
-			Mockito.when(restMock.getForEntity(testInstance.getSystemLink(), SystemModel.class)).thenReturn(testInstance.getSystemEntity());
-			Mockito.when(restMock.getForEntity(testInstance.getAnnotationLink(), SystemAnnotation.class)).thenReturn(testInstance.getAnnotationEntity());
+			Mockito.when(restMock.getForEntity(testInstance.getSystemLink(), Application.class)).thenReturn(testInstance.getSystemEntity());
+			Mockito.when(restMock.getForEntity(testInstance.getAnnotationLink(), ApplicationAnnotation.class)).thenReturn(testInstance.getAnnotationEntity());
 		}
 
 		AnnotationValidationReportBuilder builder = new AnnotationValidationReportBuilder();
@@ -163,19 +163,19 @@ public class AnnotationAmqpValidityCheckTest {
 		report = reportCaptor.getValue();
 		Assert.assertFalse(report.isOk());
 		Assert.assertFalse(report.isBreaking());
-		Assert.assertTrue(storageManager.getAnnotation(TAG).getInterfaceAnnotations().isEmpty());
+		Assert.assertTrue(storageManager.getAnnotation(TAG).getEndpointAnnotations().isEmpty());
 
 		Mockito.reset(amqpMock);
 
 		firstMode = FIRST_BEFORE_FIRST;
 		callSystemModelCreated(AnnotationValidityTestInstance.FIRST);
 		Mockito.verifyZeroInteractions(amqpMock);
-		Assert.assertTrue(storageManager.getAnnotation(TAG).getInterfaceAnnotations().isEmpty());
+		Assert.assertTrue(storageManager.getAnnotation(TAG).getEndpointAnnotations().isEmpty());
 
 		// Reset annotation (has been fixed until it was empty)
 		storageManager.updateAnnotation(TAG, AnnotationValidityTestInstance.FIRST.getAnnotation());
 		Mockito.verifyZeroInteractions(amqpMock);
-		Assert.assertFalse(storageManager.getAnnotation(TAG).getInterfaceAnnotations().isEmpty());
+		Assert.assertFalse(storageManager.getAnnotation(TAG).getEndpointAnnotations().isEmpty());
 	}
 
 	@Test

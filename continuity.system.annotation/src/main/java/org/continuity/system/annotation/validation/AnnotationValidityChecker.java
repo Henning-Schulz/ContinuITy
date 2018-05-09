@@ -4,15 +4,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.continuity.annotation.dsl.ann.Input;
-import org.continuity.annotation.dsl.ann.InterfaceAnnotation;
-import org.continuity.annotation.dsl.ann.ParameterAnnotation;
-import org.continuity.annotation.dsl.ann.RegExExtraction;
-import org.continuity.annotation.dsl.ann.SystemAnnotation;
-import org.continuity.annotation.dsl.system.Parameter;
-import org.continuity.annotation.dsl.system.ServiceInterface;
-import org.continuity.annotation.dsl.system.SystemModel;
-import org.continuity.annotation.dsl.visitor.ContinuityByClassSearcher;
+import org.continuity.idpa.annotation.Input;
+import org.continuity.idpa.annotation.EndpointAnnotation;
+import org.continuity.idpa.annotation.ParameterAnnotation;
+import org.continuity.idpa.annotation.RegExExtraction;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
+import org.continuity.idpa.application.Parameter;
+import org.continuity.idpa.application.Endpoint;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.visitor.IdpaByClassSearcher;
 import org.continuity.system.annotation.entities.AnnotationValidityReport;
 import org.continuity.system.annotation.entities.AnnotationViolation;
 import org.continuity.system.annotation.entities.AnnotationViolationType;
@@ -28,7 +28,7 @@ import org.continuity.system.annotation.entities.ModelElementReference;
  */
 public class AnnotationValidityChecker {
 
-	private final SystemModel newSystemModel;
+	private final Application newSystemModel;
 
 	private final AnnotationValidationReportBuilder reportBuilder = new AnnotationValidationReportBuilder();
 
@@ -38,7 +38,7 @@ public class AnnotationValidityChecker {
 	 * @param newSystemModel
 	 *            The current system model.
 	 */
-	public AnnotationValidityChecker(SystemModel newSystemModel) {
+	public AnnotationValidityChecker(Application newSystemModel) {
 		this.newSystemModel = newSystemModel;
 	}
 
@@ -52,13 +52,13 @@ public class AnnotationValidityChecker {
 	 * @param annotation
 	 *            An annotation.
 	 */
-	public void checkAnnotation(SystemAnnotation annotation) {
+	public void checkAnnotation(ApplicationAnnotation annotation) {
 		checkAnnotationInternally(annotation);
 		checkAnnotationForExternalReferences(annotation);
 	}
 
-	private void checkAnnotationInternally(SystemAnnotation annotation) {
-		ContinuityByClassSearcher<ParameterAnnotation> paramSearcher = new ContinuityByClassSearcher<>(ParameterAnnotation.class, ann -> {
+	private void checkAnnotationInternally(ApplicationAnnotation annotation) {
+		IdpaByClassSearcher<ParameterAnnotation> paramSearcher = new IdpaByClassSearcher<>(ParameterAnnotation.class, ann -> {
 			List<Input> inputs = annotation.getInputs();
 			boolean inputNotPresent = inputs.stream().map(Input::getId).filter(id -> Objects.equals(id, ann.getInput().getId())).collect(Collectors.toList()).isEmpty();
 
@@ -72,12 +72,12 @@ public class AnnotationValidityChecker {
 		paramSearcher.visit(annotation);
 	}
 
-	private void checkAnnotationForExternalReferences(SystemAnnotation annotation) {
-		ContinuityByClassSearcher<InterfaceAnnotation> interfaceSearcher = new ContinuityByClassSearcher<>(InterfaceAnnotation.class, ann -> {
-			ServiceInterface<?> interf = ann.getAnnotatedInterface().resolve(newSystemModel);
+	private void checkAnnotationForExternalReferences(ApplicationAnnotation annotation) {
+		IdpaByClassSearcher<EndpointAnnotation> interfaceSearcher = new IdpaByClassSearcher<>(EndpointAnnotation.class, ann -> {
+			Endpoint<?> interf = ann.getAnnotatedEndpoint().resolve(newSystemModel);
 
 			if (interf == null) {
-				ModelElementReference interfRef = new ModelElementReference(ann.getAnnotatedInterface());
+				ModelElementReference interfRef = new ModelElementReference(ann.getAnnotatedEndpoint());
 				ModelElementReference annRef = new ModelElementReference(ann);
 				reportBuilder.addViolation(annRef, new AnnotationViolation(AnnotationViolationType.ILLEAL_INTERFACE_REFERENCE, interfRef));
 			}
@@ -87,7 +87,7 @@ public class AnnotationValidityChecker {
 
 		interfaceSearcher.visit(annotation);
 
-		ContinuityByClassSearcher<ParameterAnnotation> paramSearcher = new ContinuityByClassSearcher<>(ParameterAnnotation.class, ann -> {
+		IdpaByClassSearcher<ParameterAnnotation> paramSearcher = new IdpaByClassSearcher<>(ParameterAnnotation.class, ann -> {
 			Parameter param = ann.getAnnotatedParameter().resolve(newSystemModel);
 
 			if (param == null) {
@@ -101,8 +101,8 @@ public class AnnotationValidityChecker {
 
 		paramSearcher.visit(annotation);
 
-		ContinuityByClassSearcher<RegExExtraction> extractionSearcher = new ContinuityByClassSearcher<>(RegExExtraction.class, extraction -> {
-			ServiceInterface<?> interf = extraction.getFrom().resolve(newSystemModel);
+		IdpaByClassSearcher<RegExExtraction> extractionSearcher = new IdpaByClassSearcher<>(RegExExtraction.class, extraction -> {
+			Endpoint<?> interf = extraction.getFrom().resolve(newSystemModel);
 
 			if (interf == null) {
 				ModelElementReference interfRef = new ModelElementReference(extraction.getFrom());

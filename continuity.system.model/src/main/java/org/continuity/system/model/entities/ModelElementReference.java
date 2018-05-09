@@ -3,8 +3,8 @@ package org.continuity.system.model.entities;
 import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
-import org.continuity.annotation.dsl.ContinuityModelElement;
-import org.continuity.annotation.dsl.WeakReference;
+import org.continuity.idpa.IdpaElement;
+import org.continuity.idpa.WeakReference;
 
 /**
  * @author Henning Schulz
@@ -24,7 +24,7 @@ public class ModelElementReference {
 	public ModelElementReference() {
 	}
 
-	public ModelElementReference(ContinuityModelElement element) {
+	public ModelElementReference(IdpaElement element) {
 		this(element.getClass().getSimpleName(), element.getId());
 	}
 

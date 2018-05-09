@@ -9,9 +9,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 
-import org.continuity.annotation.dsl.ann.SystemAnnotation;
-import org.continuity.annotation.dsl.system.SystemModel;
-import org.continuity.annotation.dsl.yaml.ContinuityYamlSerializer;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.yaml.IdpaYamlSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveOrUpdate(String tag, SystemModel systemModel, SystemAnnotation annotation, String suffix) throws IOException {
+	public boolean saveOrUpdate(String tag, Application systemModel, ApplicationAnnotation annotation, String suffix) throws IOException {
 		boolean created = saveOrUpdate(tag, systemModel);
 		created = created || saveOrUpdate(tag, annotation, suffix);
 
@@ -79,7 +79,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveOrUpdate(String tag, SystemModel systemModel, SystemAnnotation annotation) throws IOException {
+	public boolean saveOrUpdate(String tag, Application systemModel, ApplicationAnnotation annotation) throws IOException {
 		return saveOrUpdate(tag, systemModel, annotation, null);
 	}
 
@@ -97,7 +97,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveOrUpdate(String tag, SystemModel systemModel, String suffix) throws IOException {
+	public boolean saveOrUpdate(String tag, Application systemModel, String suffix) throws IOException {
 		Path dirPath = getDir(tag, false, false);
 
 		if (dirPath == null) {
@@ -114,7 +114,7 @@ public class AnnotationStorage {
 
 		filename += FILE_EXTENSION;
 
-		ContinuityYamlSerializer<SystemModel> serializer = new ContinuityYamlSerializer<>(SystemModel.class);
+		IdpaYamlSerializer<Application> serializer = new IdpaYamlSerializer<>(Application.class);
 		serializer.writeToYaml(systemModel, dirPath.resolve(filename));
 
 		LOGGER.debug("Wrote system model to {}.", dirPath);
@@ -134,7 +134,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveOrUpdate(String tag, SystemModel systemModel) throws IOException {
+	public boolean saveOrUpdate(String tag, Application systemModel) throws IOException {
 		return saveOrUpdate(tag, systemModel, (String) null);
 	}
 
@@ -152,7 +152,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveOrUpdate(String tag, SystemAnnotation annotation, String suffix) throws IOException {
+	public boolean saveOrUpdate(String tag, ApplicationAnnotation annotation, String suffix) throws IOException {
 		Path dirPath = getDir(tag, false, false);
 
 		if (dirPath == null) {
@@ -161,7 +161,7 @@ public class AnnotationStorage {
 
 		boolean created = dirPath.toFile().mkdirs();
 
-		ContinuityYamlSerializer<SystemAnnotation> serializer = new ContinuityYamlSerializer<>(SystemAnnotation.class);
+		IdpaYamlSerializer<ApplicationAnnotation> serializer = new IdpaYamlSerializer<>(ApplicationAnnotation.class);
 
 		String filename = ANNOTATION_FILE_NAME;
 
@@ -190,7 +190,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveOrUpdate(String tag, SystemAnnotation annotation) throws IOException {
+	public boolean saveOrUpdate(String tag, ApplicationAnnotation annotation) throws IOException {
 		return saveOrUpdate(tag, annotation, (String) null);
 	}
 
@@ -205,7 +205,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveIfNotPresent(String tag, SystemAnnotation annotation) throws IOException {
+	public boolean saveIfNotPresent(String tag, ApplicationAnnotation annotation) throws IOException {
 		return saveIfNotPresent(tag, annotation, null);
 	}
 
@@ -222,7 +222,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveIfNotPresent(String tag, SystemAnnotation annotation, String suffix) throws IOException {
+	public boolean saveIfNotPresent(String tag, ApplicationAnnotation annotation, String suffix) throws IOException {
 		Path dirPath = getDir(tag, true, false);
 
 		if (dirPath == null) {
@@ -241,7 +241,7 @@ public class AnnotationStorage {
 		boolean exists = new File(annotationPath.toString()).exists();
 
 		if (!exists) {
-			ContinuityYamlSerializer<SystemAnnotation> serializer = new ContinuityYamlSerializer<>(SystemAnnotation.class);
+			IdpaYamlSerializer<ApplicationAnnotation> serializer = new IdpaYamlSerializer<>(ApplicationAnnotation.class);
 			serializer.writeToYaml(annotation, annotationPath);
 
 			LOGGER.debug("Wrote annotation to {}.", dirPath);
@@ -263,7 +263,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveIfNotPresent(String tag, SystemModel system) throws IOException {
+	public boolean saveIfNotPresent(String tag, Application system) throws IOException {
 		return saveIfNotPresent(tag, system, null);
 	}
 
@@ -280,7 +280,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveIfNotPresent(String tag, SystemModel system, String suffix) throws IOException {
+	public boolean saveIfNotPresent(String tag, Application system, String suffix) throws IOException {
 		Path dirPath = getDir(tag, true, false);
 
 		if (dirPath == null) {
@@ -298,7 +298,7 @@ public class AnnotationStorage {
 		boolean exists = new File(systemPath.toString()).exists();
 
 		if (!exists) {
-			ContinuityYamlSerializer<SystemModel> serializer = new ContinuityYamlSerializer<>(SystemModel.class);
+			IdpaYamlSerializer<Application> serializer = new IdpaYamlSerializer<>(Application.class);
 			serializer.writeToYaml(system, systemPath);
 
 			LOGGER.debug("Wrote annotation to {}.", dirPath);
@@ -318,7 +318,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during reading the model occur.
 	 */
-	public SystemModel readSystemModel(String tag, String suffix) throws IOException {
+	public Application readSystemModel(String tag, String suffix) throws IOException {
 		Path dirPath = getDir(tag, false, true);
 
 		if (dirPath == null) {
@@ -340,7 +340,7 @@ public class AnnotationStorage {
 			return null;
 		}
 
-		ContinuityYamlSerializer<SystemModel> serializer = new ContinuityYamlSerializer<>(SystemModel.class);
+		IdpaYamlSerializer<Application> serializer = new IdpaYamlSerializer<>(Application.class);
 
 		LOGGER.debug("Reading system model from {}.", systemPath);
 		return serializer.readFromYaml(systemPath);
@@ -355,7 +355,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during reading the model occur.
 	 */
-	public SystemModel readSystemModel(String tag) throws IOException {
+	public Application readSystemModel(String tag) throws IOException {
 		return readSystemModel(tag, null);
 	}
 
@@ -370,14 +370,14 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during reading the annotation occur.
 	 */
-	public SystemAnnotation readAnnotation(String tag, String suffix) throws IOException {
+	public ApplicationAnnotation readAnnotation(String tag, String suffix) throws IOException {
 		Path dirPath = getDir(tag, false, true);
 
 		if (dirPath == null) {
 			return null;
 		}
 
-		ContinuityYamlSerializer<SystemAnnotation> serializer = new ContinuityYamlSerializer<>(SystemAnnotation.class);
+		IdpaYamlSerializer<ApplicationAnnotation> serializer = new IdpaYamlSerializer<>(ApplicationAnnotation.class);
 
 		String filename = ANNOTATION_FILE_NAME;
 
@@ -407,7 +407,7 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during reading the annotation occur.
 	 */
-	public SystemAnnotation readAnnotation(String tag) throws IOException {
+	public ApplicationAnnotation readAnnotation(String tag) throws IOException {
 		return readAnnotation(tag, null);
 	}
 

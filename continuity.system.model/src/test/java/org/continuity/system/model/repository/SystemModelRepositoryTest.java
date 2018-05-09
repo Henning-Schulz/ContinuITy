@@ -9,9 +9,9 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.continuity.annotation.dsl.system.SystemModel;
-import org.continuity.annotation.dsl.yaml.ContinuityYamlSerializer;
 import org.continuity.commons.format.CommonFormats;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.yaml.IdpaYamlSerializer;
 import org.continuity.system.model.SystemModelTestInstance;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,9 +30,9 @@ public class SystemModelRepositoryTest {
 
 	private static final String TAG = "SystemModelRepositoryTest";
 
-	private static final SystemModel FIRST = SystemModelTestInstance.FIRST.get();
-	private static final SystemModel SECOND = SystemModelTestInstance.SECOND.get();
-	private static final SystemModel THIRD = SystemModelTestInstance.THIRD.get();
+	private static final Application FIRST = SystemModelTestInstance.FIRST.get();
+	private static final Application SECOND = SystemModelTestInstance.SECOND.get();
+	private static final Application THIRD = SystemModelTestInstance.THIRD.get();
 
 	private Path firstPath;
 	private Path secondPath;
@@ -41,7 +41,7 @@ public class SystemModelRepositoryTest {
 	private Path pathMock;
 	private File fileMock;
 
-	private ContinuityYamlSerializer<SystemModel> serializerMock;
+	private IdpaYamlSerializer<Application> serializerMock;
 
 	private SystemModelRepository repository;
 
@@ -51,7 +51,7 @@ public class SystemModelRepositoryTest {
 		pathMock = Mockito.mock(Path.class);
 		fileMock = Mockito.mock(File.class);
 
-		serializerMock = Mockito.mock(ContinuityYamlSerializer.class);
+		serializerMock = Mockito.mock(IdpaYamlSerializer.class);
 
 		firstPath = Paths.get(toFileName(FIRST.getTimestamp()));
 		secondPath = Paths.get(toFileName(SECOND.getTimestamp()));
@@ -94,7 +94,7 @@ public class SystemModelRepositoryTest {
 	}
 
 	private void checkFirst() throws IOException {
-		SystemModel read = repository.readLatestBefore(TAG, new Date(100000000));
+		Application read = repository.readLatestBefore(TAG, new Date(100000000));
 		assertThat(read).as("Check the system model at a date after the first date").isEqualTo(FIRST);
 
 		read = repository.readLatestBefore(TAG, new Date(0));
@@ -105,7 +105,7 @@ public class SystemModelRepositoryTest {
 	}
 
 	private void checkSecond() throws IOException {
-		SystemModel read = repository.readLatestBefore(TAG, new Date(200000000));
+		Application read = repository.readLatestBefore(TAG, new Date(200000000));
 		assertThat(read).as("Check the system model at a date after the second date").isEqualTo(SECOND);
 
 		read = repository.readLatestBefore(TAG, SECOND.getTimestamp());
@@ -113,7 +113,7 @@ public class SystemModelRepositoryTest {
 	}
 
 	private void checkThird() throws IOException {
-		SystemModel read = repository.readLatestBefore(TAG, new Date(300000000));
+		Application read = repository.readLatestBefore(TAG, new Date(300000000));
 		assertThat(read).as("Check the system model at a date after the third date").isEqualTo(THIRD);
 
 		read = repository.readLatestBefore(TAG, THIRD.getTimestamp());
@@ -121,7 +121,7 @@ public class SystemModelRepositoryTest {
 	}
 
 	private void checkNext() throws IOException {
-		SystemModel read = repository.readOldestAfter(TAG, new Date(0));
+		Application read = repository.readOldestAfter(TAG, new Date(0));
 		assertThat(read).as("Check the next system model after a date before the first date").isEqualTo(FIRST);
 
 		read = repository.readOldestAfter(TAG, FIRST.getTimestamp());

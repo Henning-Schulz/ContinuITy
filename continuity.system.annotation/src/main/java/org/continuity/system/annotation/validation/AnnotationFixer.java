@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.continuity.annotation.dsl.ann.ExtractedInput;
-import org.continuity.annotation.dsl.ann.InterfaceAnnotation;
-import org.continuity.annotation.dsl.ann.RegExExtraction;
-import org.continuity.annotation.dsl.ann.SystemAnnotation;
-import org.continuity.annotation.dsl.visitor.ContinuityByClassSearcher;
+import org.continuity.idpa.annotation.ExtractedInput;
+import org.continuity.idpa.annotation.EndpointAnnotation;
+import org.continuity.idpa.annotation.RegExExtraction;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
+import org.continuity.idpa.visitor.IdpaByClassSearcher;
 import org.continuity.system.annotation.entities.AnnotationValidityReport;
 import org.continuity.system.annotation.entities.AnnotationViolation;
 import org.continuity.system.annotation.entities.AnnotationViolationType;
@@ -31,7 +31,7 @@ public class AnnotationFixer {
 	 *            The report holding the violations.
 	 * @return An annotation that might be fixed.
 	 */
-	public SystemAnnotation createFixedAnnotation(SystemAnnotation brokenAnnotation, AnnotationValidityReport report) {
+	public ApplicationAnnotation createFixedAnnotation(ApplicationAnnotation brokenAnnotation, AnnotationValidityReport report) {
 		if (!report.isBreaking()) {
 			return brokenAnnotation;
 		}
@@ -39,7 +39,7 @@ public class AnnotationFixer {
 		return removeUnknownInterfaceReferences(brokenAnnotation, report);
 	}
 
-	private SystemAnnotation removeUnknownInterfaceReferences(SystemAnnotation brokenAnnotation, AnnotationValidityReport report) {
+	private ApplicationAnnotation removeUnknownInterfaceReferences(ApplicationAnnotation brokenAnnotation, AnnotationValidityReport report) {
 		Set<String> removedInterfaces = new HashSet<>();
 
 		for (AnnotationViolation systemChange : report.getSystemChanges()) {
@@ -48,29 +48,29 @@ public class AnnotationFixer {
 			}
 		}
 
-		SystemAnnotation fixedAnnotation = new SystemAnnotation();
+		ApplicationAnnotation fixedAnnotation = new ApplicationAnnotation();
 		fixedAnnotation.setId(brokenAnnotation.getId() + "-wouir");
 		fixedAnnotation.setInputs(brokenAnnotation.getInputs().stream().filter(input -> !(input instanceof ExtractedInput)).collect(Collectors.toList()));
 		fixedAnnotation.setOverrides(brokenAnnotation.getOverrides());
 
-		ContinuityByClassSearcher<InterfaceAnnotation> interfSearcher = new ContinuityByClassSearcher<>(InterfaceAnnotation.class,
+		IdpaByClassSearcher<EndpointAnnotation> interfSearcher = new IdpaByClassSearcher<>(EndpointAnnotation.class,
 				ann -> addInterfaceAnnotationIfNotRemoved(ann, fixedAnnotation, removedInterfaces));
 		interfSearcher.visit(brokenAnnotation);
 
-		ContinuityByClassSearcher<ExtractedInput> inputSearcher = new ContinuityByClassSearcher<>(ExtractedInput.class,
+		IdpaByClassSearcher<ExtractedInput> inputSearcher = new IdpaByClassSearcher<>(ExtractedInput.class,
 				input -> addExtracedInputIfNoReferenceRemoved(input, fixedAnnotation, removedInterfaces));
 		inputSearcher.visit(brokenAnnotation);
 
 		return fixedAnnotation;
 	}
 
-	private void addInterfaceAnnotationIfNotRemoved(InterfaceAnnotation annotation, SystemAnnotation fixedAnnotation, Set<String> removedInterfaces) {
-		if (!removedInterfaces.contains(annotation.getAnnotatedInterface().getId())) {
-			fixedAnnotation.getInterfaceAnnotations().add(annotation);
+	private void addInterfaceAnnotationIfNotRemoved(EndpointAnnotation annotation, ApplicationAnnotation fixedAnnotation, Set<String> removedInterfaces) {
+		if (!removedInterfaces.contains(annotation.getAnnotatedEndpoint().getId())) {
+			fixedAnnotation.getEndpointAnnotations().add(annotation);
 		}
 	}
 
-	private void addExtracedInputIfNoReferenceRemoved(ExtractedInput input, SystemAnnotation fixedAnnotation, Set<String> removedInterfaces) {
+	private void addExtracedInputIfNoReferenceRemoved(ExtractedInput input, ApplicationAnnotation fixedAnnotation, Set<String> removedInterfaces) {
 		boolean broken = false;
 
 		for (RegExExtraction extraction : input.getExtractions()) {

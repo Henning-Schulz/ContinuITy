@@ -8,12 +8,12 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
-import org.continuity.annotation.dsl.system.HttpInterface;
-import org.continuity.annotation.dsl.system.HttpParameter;
-import org.continuity.annotation.dsl.system.HttpParameterType;
-import org.continuity.annotation.dsl.system.Parameter;
-import org.continuity.annotation.dsl.system.ServiceInterface;
-import org.continuity.annotation.dsl.system.SystemModel;
+import org.continuity.idpa.application.HttpEndpoint;
+import org.continuity.idpa.application.HttpParameter;
+import org.continuity.idpa.application.HttpParameterType;
+import org.continuity.idpa.application.Parameter;
+import org.continuity.idpa.application.Endpoint;
+import org.continuity.idpa.application.Application;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,9 +42,9 @@ public class OpenApiTransformationTest {
 
 	@Test
 	public void testForEqualSystemModels() throws JsonGenerationException, JsonMappingException, IOException {
-		SystemModel system = transformer.transform(swagger);
+		Application system = transformer.transform(swagger);
 
-		assertThat(system.getInterfaces()).extracting(ServiceInterface::getId).containsExactlyInAnyOrder("viewUpdateAccountUsingGET", "base_account_POST", "viewCustomerAddressesUsingGET");
+		assertThat(system.getEndpoints()).extracting(Endpoint::getId).containsExactlyInAnyOrder("viewUpdateAccountUsingGET", "base_account_POST", "viewCustomerAddressesUsingGET");
 
 		String interfName = "viewUpdateAccountUsingGET";
 		testInterfaceProperties(system, interfName, "localhost", "8080", "GET", "/base/account", "http");
@@ -66,38 +66,38 @@ public class OpenApiTransformationTest {
 
 	}
 
-	private void testInterfaceProperties(SystemModel system, String interfaceName, String domain, String port, String method, String path, String protocol) {
-		assertThat(system.getInterfaces()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpInterface) interf).extracting(HttpInterface::getDomain)
+	private void testInterfaceProperties(Application system, String interfaceName, String domain, String port, String method, String path, String protocol) {
+		assertThat(system.getEndpoints()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpEndpoint) interf).extracting(HttpEndpoint::getDomain)
 		.containsExactly(domain);
 
-		assertThat(system.getInterfaces()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpInterface) interf).extracting(HttpInterface::getPort)
+		assertThat(system.getEndpoints()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpEndpoint) interf).extracting(HttpEndpoint::getPort)
 		.containsExactly(port);
 
-		assertThat(system.getInterfaces()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpInterface) interf).extracting(HttpInterface::getMethod)
+		assertThat(system.getEndpoints()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpEndpoint) interf).extracting(HttpEndpoint::getMethod)
 		.containsExactly(method);
 
-		assertThat(system.getInterfaces()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpInterface) interf).extracting(HttpInterface::getPath)
+		assertThat(system.getEndpoints()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpEndpoint) interf).extracting(HttpEndpoint::getPath)
 		.containsExactly(path);
 
-		assertThat(system.getInterfaces()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpInterface) interf).extracting(HttpInterface::getProtocol)
+		assertThat(system.getEndpoints()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpEndpoint) interf).extracting(HttpEndpoint::getProtocol)
 		.containsExactly(protocol);
 	}
 
-	private void testHeaders(SystemModel system, String interfaceName, String... headers) {
-		assertThat(system.getInterfaces()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpInterface) interf).flatExtracting(HttpInterface::getHeaders)
+	private void testHeaders(Application system, String interfaceName, String... headers) {
+		assertThat(system.getEndpoints()).filteredOn(interf -> interf.getId().equals(interfaceName)).extracting(interf -> (HttpEndpoint) interf).flatExtracting(HttpEndpoint::getHeaders)
 		.containsExactlyInAnyOrder(headers);
 	}
 
-	private void testParameterIds(SystemModel system, String interfaceName, String... ids) {
-		assertThat(system.getInterfaces()).filteredOn(interf -> interf.getId().equals(interfaceName)).flatExtracting(ServiceInterface::getParameters).extracting(param -> (HttpParameter) param)
+	private void testParameterIds(Application system, String interfaceName, String... ids) {
+		assertThat(system.getEndpoints()).filteredOn(interf -> interf.getId().equals(interfaceName)).flatExtracting(Endpoint::getParameters).extracting(param -> (HttpParameter) param)
 		.extracting(Parameter::getId).containsExactlyInAnyOrder(ids);
 	}
 
-	private void testParameterNamesAndType(SystemModel system, String interfaceName, HttpParameterType type, String... names) {
-		assertThat(system.getInterfaces()).filteredOn(interf -> interf.getId().equals(interfaceName)).flatExtracting(ServiceInterface::getParameters).extracting(param -> (HttpParameter) param)
+	private void testParameterNamesAndType(Application system, String interfaceName, HttpParameterType type, String... names) {
+		assertThat(system.getEndpoints()).filteredOn(interf -> interf.getId().equals(interfaceName)).flatExtracting(Endpoint::getParameters).extracting(param -> (HttpParameter) param)
 		.extracting(HttpParameter::getName).containsExactlyInAnyOrder(names);
 
-		assertThat(system.getInterfaces()).filteredOn(interf -> interf.getId().equals(interfaceName)).flatExtracting(ServiceInterface::getParameters).extracting(param -> (HttpParameter) param)
+		assertThat(system.getEndpoints()).filteredOn(interf -> interf.getId().equals(interfaceName)).flatExtracting(Endpoint::getParameters).extracting(param -> (HttpParameter) param)
 		.extracting(HttpParameter::getParameterType).containsOnly(type);
 	}
 

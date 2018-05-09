@@ -1,6 +1,6 @@
 package org.continuity.commons.exceptions;
 
-import org.continuity.annotation.dsl.custom.CustomAnnotation;
+import org.continuity.idpa.custom.CustomAnnotation;
 
 /**
  * Exception signaling that a passed {@link CustomAnnotation} is not supported by the load

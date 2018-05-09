@@ -6,8 +6,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.EnumSet;
 
-import org.continuity.annotation.dsl.system.SystemModel;
 import org.continuity.commons.format.CommonFormats;
+import org.continuity.idpa.application.Application;
 import org.continuity.system.model.config.RabbitMqConfig;
 import org.continuity.system.model.entities.SystemChangeReport;
 import org.continuity.system.model.entities.SystemChangeType;
@@ -63,7 +63,7 @@ public class SystemModelController {
 	 * @return The current model.
 	 */
 	@RequestMapping(path = "/{tag}", method = RequestMethod.GET)
-	public ResponseEntity<SystemModel> getSystemModel(@PathVariable String tag) {
+	public ResponseEntity<Application> getSystemModel(@PathVariable String tag) {
 		try {
 			return ResponseEntity.ok(manager.read(tag));
 		} catch (IOException e) {
@@ -116,7 +116,7 @@ public class SystemModelController {
 	 * @return A report holding the differences between the passed model and the next older one.
 	 */
 	@RequestMapping(path = "/{tag}", method = RequestMethod.POST)
-	public ResponseEntity<String> updateSystemModel(@PathVariable String tag, @RequestBody SystemModel system,
+	public ResponseEntity<String> updateSystemModel(@PathVariable String tag, @RequestBody Application system,
 			@RequestParam(name = "ignore-interface-changed", defaultValue = "false") boolean ignoreInterfaceChanged,
 			@RequestParam(name = "ignore-interface-removed", defaultValue = "false") boolean ignoreInterfaceRemoved,
 			@RequestParam(name = "ignore-interface-added", defaultValue = "false") boolean ignoreInterfaceAdded,
@@ -151,7 +151,7 @@ public class SystemModelController {
 	 *            The system model to be stored.
 	 * @return A report holding the differences between the passed model and the next older one.
 	 */
-	public ResponseEntity<String> updateSystemModel(@PathVariable String tag, @RequestBody SystemModel system) {
+	public ResponseEntity<String> updateSystemModel(@PathVariable String tag, @RequestBody Application system) {
 		return updateSystemModel(tag, system, false, false, false, false, false, false);
 	}
 

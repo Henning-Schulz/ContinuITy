@@ -2,9 +2,9 @@ package org.continuity.system.annotation.amqp;
 
 import java.io.IOException;
 
-import org.continuity.annotation.dsl.ann.SystemAnnotation;
-import org.continuity.annotation.dsl.system.SystemModel;
 import org.continuity.commons.utils.WebUtils;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
+import org.continuity.idpa.application.Application;
 import org.continuity.system.annotation.config.RabbitMqConfig;
 import org.continuity.system.annotation.entities.AnnotationValidityReport;
 import org.continuity.system.annotation.entities.SystemAnnotationLink;
@@ -45,9 +45,9 @@ public class AnnotationAmpqHandler {
 	public void onAnnotationModelCreated(SystemAnnotationLink link) {
 		LOGGER.info("Received system annotation link: {}", link);
 
-		ResponseEntity<SystemAnnotation> annResponse;
+		ResponseEntity<ApplicationAnnotation> annResponse;
 		try {
-			annResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getAnnotationLink()), SystemAnnotation.class);
+			annResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getAnnotationLink()), ApplicationAnnotation.class);
 		} catch (RestClientResponseException e) {
 			LOGGER.error("Received error response! Ignoring the new annotation.", e);
 			return;
@@ -66,9 +66,9 @@ public class AnnotationAmpqHandler {
 	public void onSystemModelCreated(SystemAnnotationLink link) {
 		LOGGER.info("Received system annotation link: {}", link);
 
-		ResponseEntity<SystemModel> systemResponse;
+		ResponseEntity<Application> systemResponse;
 		try {
-			systemResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getSystemModelLink()), SystemModel.class);
+			systemResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getSystemModelLink()), Application.class);
 		} catch (RestClientResponseException e) {
 			LOGGER.error("Received error response! Ignoring the new system model.", e);
 			return;

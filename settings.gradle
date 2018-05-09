@@ -1,6 +1,6 @@
 rootProject.name = "continuity.root"
 
-include "continuity.annotation.dsl"
+include "continuity.idpa"
 include "continuity.benchflow"
 include "continuity.cli"
 include "continuity.commons"

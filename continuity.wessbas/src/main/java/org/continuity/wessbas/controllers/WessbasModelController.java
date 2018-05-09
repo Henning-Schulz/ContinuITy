@@ -5,8 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.continuity.annotation.dsl.ann.SystemAnnotation;
-import org.continuity.annotation.dsl.system.SystemModel;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
+import org.continuity.idpa.application.Application;
 import org.continuity.wessbas.entities.WorkloadModelPack;
 import org.continuity.wessbas.entities.WorkloadModelStorageEntry;
 import org.continuity.wessbas.storage.SimpleModelStorage;
@@ -32,9 +32,9 @@ public class WessbasModelController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WessbasModelController.class);
 
-	private final ConcurrentMap<String, SystemModel> systemModelBuffer = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, Application> systemModelBuffer = new ConcurrentHashMap<>();
 
-	private final ConcurrentMap<String, SystemAnnotation> annotationBuffer = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, ApplicationAnnotation> annotationBuffer = new ConcurrentHashMap<>();
 
 	@Value("${spring.application.name}")
 	private String applicationName;
@@ -103,8 +103,8 @@ public class WessbasModelController {
 	 *         model.
 	 */
 	@RequestMapping(path = "{id}/system", method = RequestMethod.GET)
-	public ResponseEntity<SystemModel> getSystemModel(@PathVariable String id) {
-		SystemModel systemModel = createSystemModelAndAnnotation(id).getLeft();
+	public ResponseEntity<Application> getSystemModel(@PathVariable String id) {
+		Application systemModel = createSystemModelAndAnnotation(id).getLeft();
 
 		if (systemModel == null) {
 			return ResponseEntity.notFound().build();
@@ -122,8 +122,8 @@ public class WessbasModelController {
 	 *         model.
 	 */
 	@RequestMapping(path = "{id}/annotation", method = RequestMethod.GET)
-	public ResponseEntity<SystemAnnotation> getSystemAnnotation(@PathVariable String id) {
-		SystemAnnotation annotation = createSystemModelAndAnnotation(id).getRight();
+	public ResponseEntity<ApplicationAnnotation> getSystemAnnotation(@PathVariable String id) {
+		ApplicationAnnotation annotation = createSystemModelAndAnnotation(id).getRight();
 
 		if (annotation == null) {
 			return ResponseEntity.notFound().build();
@@ -132,9 +132,9 @@ public class WessbasModelController {
 		}
 	}
 
-	private Pair<SystemModel, SystemAnnotation> createSystemModelAndAnnotation(String id) {
-		SystemModel systemModel = systemModelBuffer.get(id);
-		SystemAnnotation annotation = annotationBuffer.get(id);
+	private Pair<Application, ApplicationAnnotation> createSystemModelAndAnnotation(String id) {
+		Application systemModel = systemModelBuffer.get(id);
+		ApplicationAnnotation annotation = annotationBuffer.get(id);
 
 		if ((systemModel == null) || (annotation == null)) {
 			WorkloadModelStorageEntry entry = SimpleModelStorage.instance().get(id);

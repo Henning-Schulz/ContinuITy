@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.EnumSet;
 
-import org.continuity.annotation.dsl.system.HttpInterface;
-import org.continuity.annotation.dsl.system.Parameter;
-import org.continuity.annotation.dsl.system.ServiceInterface;
-import org.continuity.annotation.dsl.system.SystemModel;
+import org.continuity.idpa.application.HttpEndpoint;
+import org.continuity.idpa.application.Parameter;
+import org.continuity.idpa.application.Endpoint;
+import org.continuity.idpa.application.Application;
 import org.continuity.system.model.SystemModelTestInstance;
 import org.continuity.system.model.entities.ModelElementReference;
 import org.continuity.system.model.entities.SystemChange;
@@ -42,7 +42,7 @@ public class SystemModelRepositoryManagerTest {
 		testWithSameModel(SystemModelTestInstance.THIRD.get());
 	}
 
-	private void testWithSameModel(SystemModel systemModel) {
+	private void testWithSameModel(Application systemModel) {
 		Mockito.when(repositoryMock.readLatestBefore(Mockito.anyString(), Mockito.any())).thenReturn(systemModel);
 
 		SystemChangeReport report = manager.saveOrUpdate("SystemModelRepositoryManagerTest", systemModel);
@@ -52,9 +52,9 @@ public class SystemModelRepositoryManagerTest {
 
 	@Test
 	public void testSaveModelWithAddedInterface() throws IOException {
-		SystemModel firstModel = SystemModelTestInstance.FIRST.get();
-		SystemModel secondModel = SystemModelTestInstance.SECOND.get();
-		SystemModel thirdModel = SystemModelTestInstance.THIRD.get();
+		Application firstModel = SystemModelTestInstance.FIRST.get();
+		Application secondModel = SystemModelTestInstance.SECOND.get();
+		Application thirdModel = SystemModelTestInstance.THIRD.get();
 
 		Mockito.when(repositoryMock.readLatestBefore(Mockito.anyString(), Mockito.any())).thenReturn(firstModel);
 
@@ -66,7 +66,7 @@ public class SystemModelRepositoryManagerTest {
 		.extracting(SystemChange::getChangedElement).extracting(ModelElementReference::getId).containsExactlyInAnyOrder("logoutuser", "user");
 		assertThat(report.getIgnoredSystemChanges()).as("Expect the ignored changes of the report to be empty.").isEmpty();
 
-		ArgumentCaptor<SystemModel> modelCaptor = ArgumentCaptor.forClass(SystemModel.class);
+		ArgumentCaptor<Application> modelCaptor = ArgumentCaptor.forClass(Application.class);
 		Mockito.verify(repositoryMock).save(Mockito.eq("SystemModelRepositoryManagerTest"), modelCaptor.capture());
 		assertThat(modelCaptor.getValue()).as("Expected the second model to be stored").isEqualTo(secondModel);
 
@@ -106,14 +106,14 @@ public class SystemModelRepositoryManagerTest {
 		.as("Expected that there are no other changes than the removal of login").isEmpty();
 
 		Mockito.verify(repositoryMock).save(Mockito.eq("SystemModelRepositoryManagerTest"), modelCaptor.capture());
-		assertThat(modelCaptor.getValue().getInterfaces()).as("Expected the stored model to be empty").isEmpty();
+		assertThat(modelCaptor.getValue().getEndpoints()).as("Expected the stored model to be empty").isEmpty();
 	}
 
 	@Test
 	public void testSaveModelWithRemovedInterface() throws IOException {
-		SystemModel firstModel = SystemModelTestInstance.FIRST.get();
-		SystemModel secondModel = SystemModelTestInstance.SECOND.get();
-		SystemModel thirdModel = SystemModelTestInstance.THIRD.get();
+		Application firstModel = SystemModelTestInstance.FIRST.get();
+		Application secondModel = SystemModelTestInstance.SECOND.get();
+		Application thirdModel = SystemModelTestInstance.THIRD.get();
 
 		Mockito.when(repositoryMock.readLatestBefore(Mockito.anyString(), Mockito.any())).thenReturn(secondModel);
 
@@ -122,7 +122,7 @@ public class SystemModelRepositoryManagerTest {
 		.extracting(ModelElementReference::getId).as("Expected that the interface login has been removed").containsExactly("login");
 		assertThat(report.getIgnoredSystemChanges()).as("Expect the ignored changes of the report to be empty.").isEmpty();
 
-		ArgumentCaptor<SystemModel> modelCaptor = ArgumentCaptor.forClass(SystemModel.class);
+		ArgumentCaptor<Application> modelCaptor = ArgumentCaptor.forClass(Application.class);
 		Mockito.verify(repositoryMock).save(Mockito.eq("SystemModelRepositoryManagerTest"), modelCaptor.capture());
 		assertThat(modelCaptor.getValue()).as("Expected the third model to be stored").isEqualTo(thirdModel);
 
@@ -159,14 +159,14 @@ public class SystemModelRepositoryManagerTest {
 		.as("Expected that there are no other changes than the addition of logout").isEmpty();
 
 		Mockito.verify(repositoryMock).save(Mockito.eq("SystemModelRepositoryManagerTest"), modelCaptor.capture());
-		assertThat(modelCaptor.getValue().getInterfaces()).extracting(ServiceInterface::getId).as("Expected the stored model to contain exactly the interfaces login and logout")
+		assertThat(modelCaptor.getValue().getEndpoints()).extracting(Endpoint::getId).as("Expected the stored model to contain exactly the interfaces login and logout")
 		.containsExactlyInAnyOrder("login", "logout");
 	}
 
 	@Test
 	public void testWithIgnoredParameterRemovals() throws IOException {
-		SystemModel firstModel = SystemModelTestInstance.FIRST.get();
-		SystemModel secondModel = SystemModelTestInstance.SECOND.get();
+		Application firstModel = SystemModelTestInstance.FIRST.get();
+		Application secondModel = SystemModelTestInstance.SECOND.get();
 
 		Mockito.when(repositoryMock.readLatestBefore(Mockito.anyString(), Mockito.any())).thenReturn(firstModel);
 		SystemChangeReport report = manager.saveOrUpdate("SystemModelRepositoryManagerTest", secondModel, EnumSet.of(SystemChangeType.PARAMETER_REMOVED));
@@ -177,11 +177,11 @@ public class SystemModelRepositoryManagerTest {
 		assertThat(report.getIgnoredSystemChanges()).filteredOn(change -> change.getType() == SystemChangeType.PARAMETER_REMOVED).extracting(SystemChange::getChangedElement)
 		.extracting(ModelElementReference::getId).containsExactly("user");
 
-		ArgumentCaptor<SystemModel> modelCaptor = ArgumentCaptor.forClass(SystemModel.class);
+		ArgumentCaptor<Application> modelCaptor = ArgumentCaptor.forClass(Application.class);
 		Mockito.verify(repositoryMock).save(Mockito.eq("SystemModelRepositoryManagerTest"), modelCaptor.capture());
 
-		assertThat(modelCaptor.getValue().getInterfaces()).filteredOn(interf -> "login".equals(interf.getId())).extracting(interf -> (HttpInterface) interf)
-		.flatExtracting(ServiceInterface::getParameters).extracting(Parameter::getId).containsExactlyInAnyOrder("user", "logoutuser");
+		assertThat(modelCaptor.getValue().getEndpoints()).filteredOn(interf -> "login".equals(interf.getId())).extracting(interf -> (HttpEndpoint) interf)
+		.flatExtracting(Endpoint::getParameters).extracting(Parameter::getId).containsExactlyInAnyOrder("user", "logoutuser");
 	}
 
 }

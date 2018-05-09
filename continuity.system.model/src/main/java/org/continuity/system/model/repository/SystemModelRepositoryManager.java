@@ -6,12 +6,12 @@ import java.util.EnumSet;
 
 import javax.ws.rs.NotSupportedException;
 
-import org.continuity.annotation.dsl.system.Parameter;
-import org.continuity.annotation.dsl.system.ServiceInterface;
-import org.continuity.annotation.dsl.system.SystemModel;
-import org.continuity.annotation.dsl.visitor.ContinuityByClassSearcher;
-import org.continuity.annotation.dsl.visitor.FindById;
 import org.continuity.commons.utils.DataHolder;
+import org.continuity.idpa.application.Parameter;
+import org.continuity.idpa.application.Endpoint;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.visitor.IdpaByClassSearcher;
+import org.continuity.idpa.visitor.FindById;
 import org.continuity.system.model.changes.SystemChangeDetector;
 import org.continuity.system.model.entities.SystemChange;
 import org.continuity.system.model.entities.SystemChangeReport;
@@ -44,7 +44,7 @@ public class SystemModelRepositoryManager {
 	 *            The system model to be stored.
 	 * @return A report containing the changes of the system model since the version before.
 	 */
-	public SystemChangeReport saveOrUpdate(String tag, SystemModel system) {
+	public SystemChangeReport saveOrUpdate(String tag, Application system) {
 		return saveOrUpdate(tag, system, EnumSet.noneOf(SystemChangeType.class));
 	}
 
@@ -60,11 +60,11 @@ public class SystemModelRepositoryManager {
 	 * @return A report containing the changes of the system model since the latest version before.
 	 *         If the model is older than the latest one, an empty report will be returned.
 	 */
-	public SystemChangeReport saveOrUpdate(String tag, SystemModel system, EnumSet<SystemChangeType> ignoredChanges) {
+	public SystemChangeReport saveOrUpdate(String tag, Application system, EnumSet<SystemChangeType> ignoredChanges) {
 		SystemChangeDetector detector = new SystemChangeDetector(system, ignoredChanges);
 		SystemChangeReport report = SystemChangeReport.empty(system.getTimestamp());
 
-		SystemModel before = repository.readLatestBefore(tag, system.getTimestamp());
+		Application before = repository.readLatestBefore(tag, system.getTimestamp());
 
 		if (before != null) {
 			detector.compareTo(before);
@@ -74,7 +74,7 @@ public class SystemModelRepositoryManager {
 		}
 
 		if (report.changed()) {
-			SystemModel oldestAfter = repository.readOldestAfter(tag, system.getTimestamp());
+			Application oldestAfter = repository.readOldestAfter(tag, system.getTimestamp());
 
 			boolean changed = false;
 
@@ -112,15 +112,15 @@ public class SystemModelRepositoryManager {
 		return report;
 	}
 
-	private SystemModel mergeIgnoredChanges(SystemModel oldModel, SystemModel newModel, SystemChangeReport report) {
+	private Application mergeIgnoredChanges(Application oldModel, Application newModel, SystemChangeReport report) {
 		for (SystemChange change : report.getIgnoredSystemChanges()) {
 			switch (change.getType()) {
 			case INTERFACE_ADDED:
-				newModel.getInterfaces().removeIf(interf -> interf.getId().equals(change.getChangedElement().getId()));
+				newModel.getEndpoints().removeIf(interf -> interf.getId().equals(change.getChangedElement().getId()));
 				break;
 			case INTERFACE_CHANGED:
-				ServiceInterface<?> oldInterf = FindById.find(change.getChangedElement().getId(), ServiceInterface.GENERIC_TYPE).in(oldModel).getFound();
-				ServiceInterface<?> newInterf = FindById.find(change.getChangedElement().getId(), ServiceInterface.GENERIC_TYPE).in(newModel).getFound();
+				Endpoint<?> oldInterf = FindById.find(change.getChangedElement().getId(), Endpoint.GENERIC_TYPE).in(oldModel).getFound();
+				Endpoint<?> newInterf = FindById.find(change.getChangedElement().getId(), Endpoint.GENERIC_TYPE).in(newModel).getFound();
 
 				if ((oldInterf == null) || (newInterf == null)) {
 					LOGGER.error("There is a change {}, but I could not find the interface in both system versions! Ignoring the change.", change);
@@ -129,7 +129,7 @@ public class SystemModelRepositoryManager {
 				}
 				break;
 			case INTERFACE_REMOVED:
-				newModel.addInterface(oldModel.getInterfaces().stream().filter(interf -> interf.getId().equals(change.getChangedElement().getId())).findFirst().get());
+				newModel.addEndpoint(oldModel.getEndpoints().stream().filter(interf -> interf.getId().equals(change.getChangedElement().getId())).findFirst().get());
 				break;
 			case PARAMETER_CHANGED:
 				throw new NotSupportedException("Ignoring PARAMETER_CHANGED is currently not supported!");
@@ -139,7 +139,7 @@ public class SystemModelRepositoryManager {
 				final DataHolder<String> idHolder = new DataHolder<>();
 				final DataHolder<Parameter> paramHolder = new DataHolder<>();
 
-				new ContinuityByClassSearcher<>(ServiceInterface.GENERIC_TYPE, interf -> {
+				new IdpaByClassSearcher<>(Endpoint.GENERIC_TYPE, interf -> {
 					final Parameter param = FindById.find(change.getChangedElement().getId(), Parameter.class).in(interf).getFound();
 
 					if (param != null) {
@@ -148,7 +148,7 @@ public class SystemModelRepositoryManager {
 					}
 				}).visit(oldModel);
 
-				ServiceInterface<?> newInterface = FindById.find(idHolder.get(), ServiceInterface.GENERIC_TYPE).in(newModel).getFound();
+				Endpoint<?> newInterface = FindById.find(idHolder.get(), Endpoint.GENERIC_TYPE).in(newModel).getFound();
 
 				if (newInterface != null) {
 					addParameter(paramHolder.get(), newInterface);
@@ -164,7 +164,7 @@ public class SystemModelRepositoryManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <P extends Parameter> void addParameter(Parameter param, ServiceInterface<P> interf) {
+	private <P extends Parameter> void addParameter(Parameter param, Endpoint<P> interf) {
 		interf.addParameter((P) param);
 	}
 
@@ -177,7 +177,7 @@ public class SystemModelRepositoryManager {
 	 * @throws IOException
 	 *             If an error occurs during reading.
 	 */
-	public SystemModel read(String tag) throws IOException {
+	public Application read(String tag) throws IOException {
 		return repository.readLatest(tag);
 	}
 
@@ -191,16 +191,16 @@ public class SystemModelRepositoryManager {
 	 * @return A report holding the changes.
 	 */
 	public SystemChangeReport getDeltaSince(String tag, Date date) {
-		SystemModel latest = repository.readLatest(tag);
+		Application latest = repository.readLatest(tag);
 
 		if (latest == null) {
 			return SystemChangeReport.empty(date);
 		}
 
-		SystemModel latestBefore = repository.readLatestBefore(tag, date);
+		Application latestBefore = repository.readLatestBefore(tag, date);
 
 		if (latestBefore == null) {
-			latestBefore = new SystemModel();
+			latestBefore = new Application();
 		}
 
 		SystemChangeDetector checker = new SystemChangeDetector(latest);

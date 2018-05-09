@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.continuity.annotation.dsl.ann.SystemAnnotation;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.system.annotation.entities.AnnotationValidityReport;
 import org.continuity.system.annotation.storage.AnnotationStorageManager;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ public class AnnotationController {
 	 */
 	@RequestMapping(path = "{tag}/annotation", method = RequestMethod.GET)
 	public ResponseEntity<?> getAnnotation(@PathVariable("tag") String tag) {
-		SystemAnnotation annotation;
+		ApplicationAnnotation annotation;
 
 		try {
 			annotation = storageManager.getAnnotation(tag);
@@ -83,8 +83,8 @@ public class AnnotationController {
 	 *          will be returned.
 	 */
 	@RequestMapping(path = "{tag}/annotation/base", method = RequestMethod.GET)
-	public ResponseEntity<SystemAnnotation> getBaseAnnotation(@PathVariable("tag") String tag) {
-		SystemAnnotation annotation;
+	public ResponseEntity<ApplicationAnnotation> getBaseAnnotation(@PathVariable("tag") String tag) {
+		ApplicationAnnotation annotation;
 
 		try {
 			annotation = storageManager.getBaseAnnotation(tag);
@@ -110,7 +110,7 @@ public class AnnotationController {
 	 * @return
 	 */
 	@RequestMapping(path = "{tag}/annotation", method = RequestMethod.POST)
-	public ResponseEntity<String> updateAnnotation(@PathVariable("tag") String tag, @RequestBody SystemAnnotation annotation) {
+	public ResponseEntity<String> updateAnnotation(@PathVariable("tag") String tag, @RequestBody ApplicationAnnotation annotation) {
 		AnnotationValidityReport report = null;
 
 		try {

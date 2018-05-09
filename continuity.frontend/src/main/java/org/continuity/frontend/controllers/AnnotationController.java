@@ -3,10 +3,10 @@ package org.continuity.frontend.controllers;
 import java.io.IOException;
 import java.util.Map;
 
-import org.continuity.annotation.dsl.ann.SystemAnnotation;
-import org.continuity.annotation.dsl.system.SystemModel;
 import org.continuity.commons.utils.WebUtils;
 import org.continuity.frontend.config.RabbitMqConfig;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
+import org.continuity.idpa.application.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -50,8 +50,8 @@ public class AnnotationController {
 	 * @return The system model.
 	 */
 	@RequestMapping(path = "{tag}/system", method = RequestMethod.GET)
-	public ResponseEntity<SystemModel> getSystemModel(@PathVariable("tag") String tag) {
-		return restTemplate.getForEntity("http://system-model/system/" + tag, SystemModel.class);
+	public ResponseEntity<Application> getSystemModel(@PathVariable("tag") String tag) {
+		return restTemplate.getForEntity("http://system-model/system/" + tag, Application.class);
 	}
 
 	/**
@@ -62,9 +62,9 @@ public class AnnotationController {
 	 * @return The annotation.
 	 */
 	@RequestMapping(path = "{tag}/annotation", method = RequestMethod.GET)
-	public ResponseEntity<SystemAnnotation> getAnnotation(@PathVariable("tag") String tag) {
+	public ResponseEntity<ApplicationAnnotation> getAnnotation(@PathVariable("tag") String tag) {
 		try {
-			return restTemplate.getForEntity("http://system-annotation/ann/" + tag + "/annotation", SystemAnnotation.class);
+			return restTemplate.getForEntity("http://system-annotation/ann/" + tag + "/annotation", ApplicationAnnotation.class);
 		} catch (HttpStatusCodeException e) {
 			if (e.getStatusCode() == HttpStatus.LOCKED) {
 				ObjectMapper mapper = new ObjectMapper();
@@ -82,7 +82,7 @@ public class AnnotationController {
 
 				LOGGER.warn("Tried to get the annotation for tag {}, but got a {} ({}) response: \"{}\". Trying the redirect {}.", tag, e.getStatusCode(), e.getStatusCode().getReasonPhrase(), message,
 						redirect);
-				return restTemplate.getForEntity(WebUtils.addProtocolIfMissing(redirect), SystemAnnotation.class);
+				return restTemplate.getForEntity(WebUtils.addProtocolIfMissing(redirect), ApplicationAnnotation.class);
 			}
 
 			return ResponseEntity.status(e.getStatusCode()).build();
@@ -98,7 +98,7 @@ public class AnnotationController {
 	 *            The system model.
 	 */
 	@RequestMapping(path = "{tag}/system", method = RequestMethod.POST)
-	public ResponseEntity<String> updateSystemModel(@PathVariable("tag") String tag, @RequestBody SystemModel system) {
+	public ResponseEntity<String> updateSystemModel(@PathVariable("tag") String tag, @RequestBody Application system) {
 		try {
 			return restTemplate.postForEntity("http://system-model/system/" + tag, system, String.class);
 		} catch (HttpStatusCodeException e) {
@@ -159,7 +159,7 @@ public class AnnotationController {
 	 *            The annotation.
 	 */
 	@RequestMapping(path = "{tag}/annotation", method = RequestMethod.POST)
-	public ResponseEntity<String> updateAnnotation(@PathVariable("tag") String tag, @RequestBody SystemAnnotation annotation) {
+	public ResponseEntity<String> updateAnnotation(@PathVariable("tag") String tag, @RequestBody ApplicationAnnotation annotation) {
 		try {
 			return restTemplate.postForEntity("http://system-annotation/ann/" + tag + "/annotation", annotation, String.class);
 		} catch (HttpStatusCodeException e) {

@@ -14,9 +14,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.continuity.annotation.dsl.system.SystemModel;
-import org.continuity.annotation.dsl.yaml.ContinuityYamlSerializer;
 import org.continuity.commons.format.CommonFormats;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.yaml.IdpaYamlSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class SystemModelRepository {
 
 	private static final DateFormat DATE_FORMAT = CommonFormats.DATE_FORMAT;
 
-	private final ContinuityYamlSerializer<SystemModel> serializer;
+	private final IdpaYamlSerializer<Application> serializer;
 
 	private final Path storagePath;
 
@@ -45,10 +45,10 @@ public class SystemModelRepository {
 	}
 
 	public SystemModelRepository(Path storagePath) {
-		this(storagePath, new ContinuityYamlSerializer<>(SystemModel.class));
+		this(storagePath, new IdpaYamlSerializer<>(Application.class));
 	}
 
-	public SystemModelRepository(Path storagePath, ContinuityYamlSerializer<SystemModel> serializer) {
+	public SystemModelRepository(Path storagePath, IdpaYamlSerializer<Application> serializer) {
 		this.storagePath = storagePath;
 		this.serializer = serializer;
 
@@ -65,7 +65,7 @@ public class SystemModelRepository {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public void save(String tag, SystemModel systemModel) throws IOException {
+	public void save(String tag, Application systemModel) throws IOException {
 		Path path = getDirPath(tag).resolve(createFileName(systemModel.getTimestamp()));
 		serializer.writeToYaml(systemModel, path);
 
@@ -83,7 +83,7 @@ public class SystemModelRepository {
 	 *            The tag of the system model.
 	 * @return The latest system model.
 	 */
-	public SystemModel readLatest(String tag) {
+	public Application readLatest(String tag) {
 		for (SystemModelEntry entry : iterate(tag)) {
 			return entry.getSystemModel();
 		}
@@ -102,7 +102,7 @@ public class SystemModelRepository {
 	 * @throws IOException
 	 *             If an error during reading the system model occurs.
 	 */
-	public SystemModel readLatestBefore(String tag, Date date) {
+	public Application readLatestBefore(String tag, Date date) {
 		for (SystemModelEntry entry : iterate(tag)) {
 			if (!date.before(entry.getDate())) {
 				return entry.getSystemModel();
@@ -123,8 +123,8 @@ public class SystemModelRepository {
 	 * @throws IOException
 	 *             If an error during reading the system model occurs.
 	 */
-	public SystemModel readOldestAfter(String tag, Date date) {
-		SystemModel next = null;
+	public Application readOldestAfter(String tag, Date date) {
+		Application next = null;
 
 		for (SystemModelEntry entry : iterate(tag)) {
 			if (!date.before(entry.getDate())) {
@@ -158,7 +158,7 @@ public class SystemModelRepository {
 			throw new IllegalArgumentException("Cannot update system model with tag " + tag + " to date " + newTimestamp + "! This date is not before the original one: " + oldTimestamp);
 		}
 
-		SystemModel system = readLatestBefore(tag, oldTimestamp);
+		Application system = readLatestBefore(tag, oldTimestamp);
 
 		if (!oldTimestamp.equals(system.getTimestamp())) {
 			throw new IllegalArgumentException("There is no system model with tag " + tag + " at date " + oldTimestamp + "!");
@@ -283,7 +283,7 @@ public class SystemModelRepository {
 	 */
 	public static class SystemModelEntry {
 
-		private final ContinuityYamlSerializer<SystemModel> serializer;
+		private final IdpaYamlSerializer<Application> serializer;
 
 		private final Path path;
 		private final Date date;
@@ -303,7 +303,7 @@ public class SystemModelRepository {
 			return this.date;
 		}
 
-		public SystemModel getSystemModel() {
+		public Application getSystemModel() {
 			if (path == null) {
 				return null;
 			}

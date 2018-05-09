@@ -3,9 +3,9 @@ package org.continuity.wessbas.transform.jmeter;
 import java.io.IOException;
 
 import org.apache.jorphan.collections.ListedHashTree;
-import org.continuity.annotation.dsl.custom.CustomAnnotation;
-import org.continuity.annotation.dsl.custom.CustomAnnotationElement;
 import org.continuity.commons.exceptions.AnnotationNotSupportedException;
+import org.continuity.idpa.custom.CustomAnnotation;
+import org.continuity.idpa.custom.CustomAnnotationElement;
 import org.continuity.wessbas.entities.JMeterTestPlanBundle;
 
 import m4jdsl.BehaviorModel;

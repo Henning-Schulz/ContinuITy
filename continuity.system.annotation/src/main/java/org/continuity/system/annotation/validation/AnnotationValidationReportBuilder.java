@@ -6,10 +6,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.continuity.annotation.dsl.WeakReference;
-import org.continuity.annotation.dsl.ann.InterfaceAnnotation;
-import org.continuity.annotation.dsl.ann.ParameterAnnotation;
-import org.continuity.annotation.dsl.system.Parameter;
+import org.continuity.idpa.WeakReference;
+import org.continuity.idpa.annotation.EndpointAnnotation;
+import org.continuity.idpa.annotation.ParameterAnnotation;
+import org.continuity.idpa.application.Parameter;
 import org.continuity.system.annotation.entities.AnnotationValidityReport;
 import org.continuity.system.annotation.entities.AnnotationViolation;
 import org.continuity.system.annotation.entities.ModelElementReference;
@@ -56,21 +56,21 @@ public class AnnotationValidationReportBuilder {
 	/**
 	 * Resolves the violations affecting the specified interface annotation. <br>
 	 * <b>Note:</b> The annotated interface has to be resolved (call
-	 * {@link WeakReference#resolve(org.continuity.annotation.dsl.ContinuityModelElement)}.
+	 * {@link WeakReference#resolve(org.continuity.idpa.ContinuityModelElement)}.
 	 *
 	 * @param annotation
 	 *            The interface annotation.
 	 */
-	public void resolveInterfaceAnnotation(InterfaceAnnotation annotation) {
-		AnnotationViolation violation = violationsPerReferenced.get(new ModelElementReference(annotation.getAnnotatedInterface()));
+	public void resolveInterfaceAnnotation(EndpointAnnotation annotation) {
+		AnnotationViolation violation = violationsPerReferenced.get(new ModelElementReference(annotation.getAnnotatedEndpoint()));
 		ModelElementReference ref = new ModelElementReference(annotation);
 
 		if (violation != null) {
 			getViolationSet(ref).add(violation);
 		}
 
-		if (annotation.getAnnotatedInterface().isResolved()) {
-			for (Parameter parameter : annotation.getAnnotatedInterface().getReferred().getParameters()) {
+		if (annotation.getAnnotatedEndpoint().isResolved()) {
+			for (Parameter parameter : annotation.getAnnotatedEndpoint().getReferred().getParameters()) {
 				violation = violationsPerReferenced.get(new ModelElementReference(parameter));
 
 				if (violation != null) {

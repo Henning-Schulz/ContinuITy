@@ -1,8 +1,8 @@
 package org.continuity.commons.workload.dsl;
 
-import org.continuity.annotation.dsl.ann.SystemAnnotation;
-import org.continuity.annotation.dsl.system.SystemModel;
-import org.continuity.annotation.dsl.visitor.ContinuityModelVisitor;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.visitor.IdpaVisitor;
 
 /**
  * Utility calss for extracting initial annotations from system models.
@@ -19,9 +19,9 @@ public class AnnotationExtractor {
 	 *            The system model.
 	 * @return The extracted annotations.
 	 */
-	public SystemAnnotation extractAnnotation(SystemModel system) {
+	public ApplicationAnnotation extractAnnotation(Application system) {
 		SystemToAnnotationTransformer transformer = new SystemToAnnotationTransformer();
-		ContinuityModelVisitor visitor = new ContinuityModelVisitor(transformer::onModelElementVisited);
+		IdpaVisitor visitor = new IdpaVisitor(transformer::onModelElementVisited);
 		visitor.visit(system);
 		return transformer.getExtractedAnnotation();
 	}
