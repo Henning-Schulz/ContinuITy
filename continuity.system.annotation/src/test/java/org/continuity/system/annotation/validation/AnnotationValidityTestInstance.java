@@ -1,22 +1,21 @@
 package org.continuity.system.annotation.validation;
 
 import org.continuity.idpa.WeakReference;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.annotation.CsvInput;
-import org.continuity.idpa.annotation.CustomDataInput;
 import org.continuity.idpa.annotation.DirectListInput;
-import org.continuity.idpa.annotation.ExtractedInput;
 import org.continuity.idpa.annotation.EndpointAnnotation;
+import org.continuity.idpa.annotation.ExtractedInput;
 import org.continuity.idpa.annotation.ParameterAnnotation;
 import org.continuity.idpa.annotation.PropertyOverride;
 import org.continuity.idpa.annotation.PropertyOverrideKey;
 import org.continuity.idpa.annotation.RegExExtraction;
-import org.continuity.idpa.annotation.ApplicationAnnotation;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.idpa.application.HttpParameter;
 import org.continuity.idpa.application.HttpParameterType;
 import org.continuity.idpa.application.Parameter;
-import org.continuity.idpa.application.Endpoint;
-import org.continuity.idpa.application.Application;
 import org.continuity.idpa.test.ContinuityModelTestInstance;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -180,9 +179,9 @@ public enum AnnotationValidityTestInstance {
 			extr.setPattern("(.*)");
 			extrInput.getExtractions().add(extr);
 
-			CustomDataInput unknownInput = new CustomDataInput();
+			DirectListInput unknownInput = new DirectListInput();
 			unknownInput.setId("UNK1");
-			unknownInput.setType("MyCustomDataInput");
+			unknownInput.getData().add("something");
 
 			// Annotation
 
