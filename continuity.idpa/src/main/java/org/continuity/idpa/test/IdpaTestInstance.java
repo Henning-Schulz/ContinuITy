@@ -22,12 +22,12 @@ import org.continuity.idpa.yaml.IdpaYamlSerializer;
  * @author Henning Schulz
  *
  */
-public enum ContinuityModelTestInstance {
+public enum IdpaTestInstance {
 
 	SIMPLE {
 
 		@Override
-		protected Application setupSystemModel() {
+		protected Application setupApplication() {
 			Application system = new Application();
 
 			HttpEndpoint interf = new HttpEndpoint();
@@ -102,7 +102,7 @@ public enum ContinuityModelTestInstance {
 
 	DVDSTORE_PARSED {
 		@Override
-		protected Application setupSystemModel() {
+		protected Application setupApplication() {
 			IdpaYamlSerializer<Application> serializer = new IdpaYamlSerializer<>(Application.class);
 
 			try {
@@ -125,28 +125,28 @@ public enum ContinuityModelTestInstance {
 		}
 	};
 
-	private final Application systemModel;
+	private final Application application;
 	private final ApplicationAnnotation annotation;
 
 	/**
 	 *
 	 */
-	private ContinuityModelTestInstance() {
-		this.systemModel = setupSystemModel();
-		this.annotation = setupAnnotation(systemModel);
+	private IdpaTestInstance() {
+		this.application = setupApplication();
+		this.annotation = setupAnnotation(application);
 	}
 
-	protected abstract Application setupSystemModel();
+	protected abstract Application setupApplication();
 
 	protected abstract ApplicationAnnotation setupAnnotation(Application system);
 
 	/**
-	 * Gets {@link #systemModel}.
+	 * Gets {@link #application}.
 	 *
-	 * @return {@link #systemModel}
+	 * @return {@link #application}
 	 */
-	public Application getSystemModel() {
-		return this.systemModel;
+	public Application getApplication() {
+		return this.application;
 	}
 
 	/**

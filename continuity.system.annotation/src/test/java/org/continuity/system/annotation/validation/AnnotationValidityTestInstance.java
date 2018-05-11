@@ -16,7 +16,7 @@ import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.idpa.application.HttpParameter;
 import org.continuity.idpa.application.HttpParameterType;
 import org.continuity.idpa.application.Parameter;
-import org.continuity.idpa.test.ContinuityModelTestInstance;
+import org.continuity.idpa.test.IdpaTestInstance;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -29,12 +29,12 @@ public enum AnnotationValidityTestInstance {
 	FIRST("http://first/") {
 		@Override
 		public Application getSystemModel() {
-			return ContinuityModelTestInstance.SIMPLE.getSystemModel();
+			return IdpaTestInstance.SIMPLE.getApplication();
 		}
 
 		@Override
 		public ApplicationAnnotation getAnnotation() {
-			return ContinuityModelTestInstance.SIMPLE.getAnnotation();
+			return IdpaTestInstance.SIMPLE.getAnnotation();
 		}
 	},
 	SECOND_SYSTEM("http://second/") {
@@ -45,7 +45,7 @@ public enum AnnotationValidityTestInstance {
 
 		@Override
 		public ApplicationAnnotation getAnnotation() {
-			return ContinuityModelTestInstance.SIMPLE.getAnnotation();
+			return IdpaTestInstance.SIMPLE.getAnnotation();
 		}
 	},
 	THIRD_SYSTEM("http://third/") {
@@ -62,14 +62,14 @@ public enum AnnotationValidityTestInstance {
 
 		@Override
 		public ApplicationAnnotation getAnnotation() {
-			return ContinuityModelTestInstance.SIMPLE.getAnnotation();
+			return IdpaTestInstance.SIMPLE.getAnnotation();
 		}
 	},
 	SECOND_ANNOTATION("http://second-ann") {
 
 		@Override
 		protected Application getSystemModel() {
-			return ContinuityModelTestInstance.SIMPLE.getSystemModel();
+			return IdpaTestInstance.SIMPLE.getApplication();
 		}
 
 		@Override
@@ -97,7 +97,7 @@ public enum AnnotationValidityTestInstance {
 
 		@Override
 		protected Application getSystemModel() {
-			return ContinuityModelTestInstance.SIMPLE.getSystemModel();
+			return IdpaTestInstance.SIMPLE.getApplication();
 		}
 
 		@Override
