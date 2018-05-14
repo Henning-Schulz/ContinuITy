@@ -1,8 +1,8 @@
 package org.idpa.application.model.controllers;
 
 import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.ROOT;
-import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.UPDATE_FROM_JSON_PATH;
-import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.UPDATE_FROM_URL_PATH;
+import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.Paths.UPDATE_FROM_JSON;
+import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.Paths.UPDATE_FROM_URL;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -58,7 +58,7 @@ public class OpenApiController {
 	 *            Open API specification (JSON).
 	 * @return
 	 */
-	@RequestMapping(path = UPDATE_FROM_JSON_PATH, method = RequestMethod.POST)
+	@RequestMapping(path = UPDATE_FROM_JSON, method = RequestMethod.POST)
 	public ResponseEntity<String> updateFromJson(@PathVariable String tag, @PathVariable String version, @RequestBody JsonNode json) {
 		Swagger swagger;
 
@@ -85,7 +85,7 @@ public class OpenApiController {
 	 *            URL where the Open API specification can be retrieved from.
 	 * @return
 	 */
-	@RequestMapping(path = UPDATE_FROM_URL_PATH, method = RequestMethod.POST)
+	@RequestMapping(path = UPDATE_FROM_URL, method = RequestMethod.POST)
 	public ResponseEntity<String> updateFromUrl(@PathVariable String tag, @PathVariable String version, @RequestBody String url) {
 		try {
 			new URL(url);

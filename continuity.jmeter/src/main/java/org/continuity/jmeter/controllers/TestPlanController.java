@@ -1,9 +1,11 @@
 package org.continuity.jmeter.controllers;
 
-import static org.continuity.api.rest.RestApi.JMeter.TestPlan.CREATE_AND_GET_PATH;
 import static org.continuity.api.rest.RestApi.JMeter.TestPlan.ROOT;
+import static org.continuity.api.rest.RestApi.JMeter.TestPlan.Paths.CREATE_AND_GET;
 
 import org.apache.jorphan.collections.ListedHashTree;
+import org.continuity.api.rest.RestApi.IdpaAnnotation;
+import org.continuity.api.rest.RestApi.IdpaApplication;
 import org.continuity.commons.utils.WebUtils;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.application.Application;
@@ -49,7 +51,7 @@ public class TestPlanController {
 	 *            The tag to be used to retrieve the annotation.
 	 * @return The transformed JMeter test plan.
 	 */
-	@RequestMapping(value = CREATE_AND_GET_PATH, method = RequestMethod.GET)
+	@RequestMapping(value = CREATE_AND_GET, method = RequestMethod.GET)
 	public TestPlanBundle createAndGetLoadTest(@PathVariable("type") String workloadModelType, @PathVariable("id") String workloadModelId, @RequestParam String tag) {
 		return createAndGetLoadTest(workloadModelType + "/model/" + workloadModelId, tag);
 	}
@@ -90,7 +92,7 @@ public class TestPlanController {
 	private ListedHashTree createAnnotatedTestPlan(TestPlanBundle testPlanPack, String tag) {
 		ApplicationAnnotation annotation;
 		try {
-			annotation = restTemplate.getForObject("http://system-annotation/ann/" + tag + "/annotation", ApplicationAnnotation.class);
+			annotation = restTemplate.getForObject(IdpaAnnotation.Annotation.GET.requestUrl(tag).get(), ApplicationAnnotation.class);
 		} catch (HttpStatusCodeException e) {
 			LOGGER.error("Received a non-200 response: {} ({}) - {}", e.getStatusCode(), e.getStatusCode().getReasonPhrase(), e.getResponseBodyAsString());
 			return null;
@@ -101,15 +103,15 @@ public class TestPlanController {
 			return null;
 		}
 
-		Application systemModel = restTemplate.getForObject("http://system-model/system/" + tag, Application.class);
+		Application application = restTemplate.getForObject(IdpaApplication.Application.GET.requestUrl(tag).get(), Application.class);
 
-		if (systemModel == null) {
-			LOGGER.error("System with tag {} is null! Aborting.", tag);
+		if (application == null) {
+			LOGGER.error("Application with tag {} is null! Aborting.", tag);
 			return null;
 		}
 
 		ListedHashTree testPlan = testPlanPack.getTestPlan();
-		JMeterAnnotator annotator = new JMeterAnnotator(testPlan, systemModel);
+		JMeterAnnotator annotator = new JMeterAnnotator(testPlan, application);
 		annotator.addAnnotations(annotation);
 
 		return testPlan;

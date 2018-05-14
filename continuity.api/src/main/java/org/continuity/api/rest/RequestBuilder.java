@@ -2,21 +2,23 @@ package org.continuity.api.rest;
 
 public class RequestBuilder {
 
-	private final String url;
+	private String host;
 
-	private StringBuilder queryString;
+	private final String path;
+
+	private final StringBuilder queryString = new StringBuilder();
 	private boolean queryStringEmpty = true;
 
-	public RequestBuilder(String url) {
-		this.url = url;
+	public RequestBuilder(String host, String path) {
+		this.host = host;
+		this.path = path;
 	}
 
 	public String get() {
-		return url + queryString;
+		return "http://" + host + path + queryString;
 	}
 
-	public RequestBuilder withQuery(String param, String value)
-	{
+	public RequestBuilder withQuery(String param, String value) {
 		if (queryStringEmpty) {
 			queryString.append("?");
 			queryStringEmpty = false;
@@ -29,6 +31,16 @@ public class RequestBuilder {
 		queryString.append(value);
 
 		return this;
+	}
+
+	public RequestBuilder withHost(String host) {
+		this.host = host;
+		return this;
+	}
+
+	@Override
+	public String toString() {
+		return get();
 	}
 
 }

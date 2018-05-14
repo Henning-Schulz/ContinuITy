@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.continuity.idpa.application.HttpEndpoint;
+import org.continuity.api.rest.RestApi.IdpaApplication;
 import org.continuity.commons.idpa.RequestUriMapper;
 import org.continuity.idpa.application.Application;
 import org.continuity.rest.InspectITRestClient;
@@ -132,7 +133,7 @@ public class SessionLogsPipelineManager {
 		}
 
 		try {
-			return eurekaRestTemplate.getForObject("http://system-model/system/" + tag, Application.class);
+			return eurekaRestTemplate.getForObject(IdpaApplication.Application.GET.requestUrl(tag).get(), Application.class);
 		} catch (HttpStatusCodeException e) {
 			LOGGER.error("Received error status code when asking for system model with tag " + tag, e);
 			return null;

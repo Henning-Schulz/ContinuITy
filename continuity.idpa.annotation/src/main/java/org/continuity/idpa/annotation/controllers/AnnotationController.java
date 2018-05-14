@@ -1,9 +1,9 @@
 package org.continuity.idpa.annotation.controllers;
 
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.GET_BASE_PATH;
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.GET_PATH;
 import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.ROOT;
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.UPDATE_PATH;
+import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.GET_BASE;
+import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.GET;
+import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.UPDATE;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class AnnotationController {
 	 *          returned. If the annotation is broken, a 423 (Locked) will be returned with a link
 	 *          to retrieve the annotation, anyway.
 	 */
-	@RequestMapping(path = GET_PATH, method = RequestMethod.GET)
+	@RequestMapping(path = GET, method = RequestMethod.GET)
 	public ResponseEntity<?> getAnnotation(@PathVariable("tag") String tag) {
 		ApplicationAnnotation annotation;
 
@@ -87,7 +87,7 @@ public class AnnotationController {
 	 *          occurred. If there is no base annotation for the tag, the status 404 (Not Found)
 	 *          will be returned.
 	 */
-	@RequestMapping(path = GET_BASE_PATH, method = RequestMethod.GET)
+	@RequestMapping(path = GET_BASE, method = RequestMethod.GET)
 	public ResponseEntity<ApplicationAnnotation> getBaseAnnotation(@PathVariable("tag") String tag) {
 		ApplicationAnnotation annotation;
 
@@ -114,7 +114,7 @@ public class AnnotationController {
 	 * @param annotation
 	 * @return
 	 */
-	@RequestMapping(path = UPDATE_PATH, method = RequestMethod.POST)
+	@RequestMapping(path = UPDATE, method = RequestMethod.POST)
 	public ResponseEntity<String> updateAnnotation(@PathVariable("tag") String tag, @RequestBody ApplicationAnnotation annotation) {
 		AnnotationValidityReport report = null;
 

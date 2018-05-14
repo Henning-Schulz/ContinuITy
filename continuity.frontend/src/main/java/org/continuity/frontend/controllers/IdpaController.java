@@ -1,18 +1,19 @@
 package org.continuity.frontend.controllers;
 
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.GET_ANNOTATION_PATH;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.GET_APPLICATION_PATH;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.REPORT_PATH;
 import static org.continuity.api.rest.RestApi.Frontend.Idpa.ROOT;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.UPDATE_ANNOTATION_PATH;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.UPDATE_APPLICATION_PATH;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.UPDATE_APP_FROM_OPEN_API_JSON_PATH;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.UPDATE_APP_FROM_OPEN_API_URL_PATH;
+import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.GET_ANNOTATION;
+import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.GET_APPLICATION;
+import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.REPORT;
+import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.UPDATE_ANNOTATION;
+import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.UPDATE_APPLICATION;
+import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.UPDATE_APP_FROM_OPEN_API_JSON;
+import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.UPDATE_APP_FROM_OPEN_API_URL;
 
 import java.io.IOException;
 import java.util.Map;
 
-import org.continuity.api.rest.RestApi;
+import org.continuity.api.rest.RestApi.IdpaAnnotation;
+import org.continuity.api.rest.RestApi.IdpaApplication;
 import org.continuity.commons.utils.WebUtils;
 import org.continuity.frontend.config.RabbitMqConfig;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
@@ -59,9 +60,9 @@ public class IdpaController {
 	 *            The tag of the application.
 	 * @return The application model.
 	 */
-	@RequestMapping(path = GET_APPLICATION_PATH, method = RequestMethod.GET)
+	@RequestMapping(path = GET_APPLICATION, method = RequestMethod.GET)
 	public ResponseEntity<Application> getApplication(@PathVariable("tag") String tag) {
-		return restTemplate.getForEntity(RestApi.IdpaApplication.Application.GET.requestUrl(tag).get(), Application.class);
+		return restTemplate.getForEntity(IdpaApplication.Application.GET.requestUrl(tag).get(), Application.class);
 	}
 
 	/**
@@ -71,10 +72,10 @@ public class IdpaController {
 	 *            The tag of the annotation.
 	 * @return The annotation.
 	 */
-	@RequestMapping(path = GET_ANNOTATION_PATH, method = RequestMethod.GET)
+	@RequestMapping(path = GET_ANNOTATION, method = RequestMethod.GET)
 	public ResponseEntity<ApplicationAnnotation> getAnnotation(@PathVariable("tag") String tag) {
 		try {
-			return restTemplate.getForEntity("http://system-annotation/ann/" + tag + "/annotation", ApplicationAnnotation.class);
+			return restTemplate.getForEntity(IdpaAnnotation.Annotation.GET.requestUrl(tag).get(), ApplicationAnnotation.class);
 		} catch (HttpStatusCodeException e) {
 			if (e.getStatusCode() == HttpStatus.LOCKED) {
 				ObjectMapper mapper = new ObjectMapper();
@@ -107,10 +108,10 @@ public class IdpaController {
 	 * @param application
 	 *            The application model.
 	 */
-	@RequestMapping(path = UPDATE_APPLICATION_PATH, method = RequestMethod.POST)
+	@RequestMapping(path = UPDATE_APPLICATION, method = RequestMethod.POST)
 	public ResponseEntity<String> updateApplication(@PathVariable("tag") String tag, @RequestBody Application application) {
 		try {
-			return restTemplate.postForEntity("http://system-model/system/" + tag, application, String.class);
+			return restTemplate.postForEntity(IdpaApplication.Application.UPDATE.requestUrl("tag").get(), application, String.class);
 		} catch (HttpStatusCodeException e) {
 			LOGGER.warn("Updating the system model with tag {} resulted in a {} - {} response!", tag, e.getStatusCode(), e.getStatusCode().getReasonPhrase());
 			return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
@@ -128,10 +129,10 @@ public class IdpaController {
 	 *            The Open API JSON.
 	 * @return A report about the changes.
 	 */
-	@RequestMapping(path = UPDATE_APP_FROM_OPEN_API_JSON_PATH, method = RequestMethod.POST)
+	@RequestMapping(path = UPDATE_APP_FROM_OPEN_API_JSON, method = RequestMethod.POST)
 	public ResponseEntity<String> updateAppFromOpenApiJson(@PathVariable("tag") String tag, @PathVariable("version") String version, @RequestBody JsonNode json) {
 		try {
-			return restTemplate.postForEntity("http://system-model/openapi/" + tag + "/" + version + "/json/", json, String.class);
+			return restTemplate.postForEntity(IdpaApplication.OpenApi.UPDATE_FROM_JSON.requestUrl(tag, version).get(), json, String.class);
 		} catch (HttpStatusCodeException e) {
 			LOGGER.warn("Updating the system model with tag {} resulted in a {} - {} response!", tag, e.getStatusCode(), e.getStatusCode().getReasonPhrase());
 			return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
@@ -150,10 +151,10 @@ public class IdpaController {
 	 *            The URL to retrieve the Open API specification from.
 	 * @return A report about the changes.
 	 */
-	@RequestMapping(path = UPDATE_APP_FROM_OPEN_API_URL_PATH, method = RequestMethod.POST)
+	@RequestMapping(path = UPDATE_APP_FROM_OPEN_API_URL, method = RequestMethod.POST)
 	public ResponseEntity<String> updateAppFromOpenApiUrl(@PathVariable("tag") String tag, @PathVariable("version") String version, @RequestBody String url) {
 		try {
-			return restTemplate.postForEntity("http://system-model/openapi/" + tag + "/" + version + "/url/", url, String.class);
+			return restTemplate.postForEntity(IdpaApplication.OpenApi.UPDATE_FROM_URL.requestUrl(tag, version).get(), url, String.class);
 		} catch (HttpStatusCodeException e) {
 			LOGGER.warn("Updating the system model with tag {} resulted in a {} - {} response!", tag, e.getStatusCode(), e.getStatusCode().getReasonPhrase());
 			return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
@@ -168,10 +169,10 @@ public class IdpaController {
 	 * @param annotation
 	 *            The annotation.
 	 */
-	@RequestMapping(path = UPDATE_ANNOTATION_PATH, method = RequestMethod.POST)
+	@RequestMapping(path = UPDATE_ANNOTATION, method = RequestMethod.POST)
 	public ResponseEntity<String> updateAnnotation(@PathVariable("tag") String tag, @RequestBody ApplicationAnnotation annotation) {
 		try {
-			return restTemplate.postForEntity("http://system-annotation/ann/" + tag + "/annotation", annotation, String.class);
+			return restTemplate.postForEntity(IdpaAnnotation.Annotation.UPDATE.requestUrl(tag).get(), annotation, String.class);
 		} catch (HttpStatusCodeException e) {
 			LOGGER.warn("Updating the annotation with tag {} resulted in a {} - {} response!", tag, e.getStatusCode(), e.getStatusCode().getReasonPhrase());
 			return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
@@ -185,7 +186,7 @@ public class IdpaController {
 	 *            The timeout to wait for messages.
 	 * @return A response entity (200) holding a report or 204 (no content) if there is no report.
 	 */
-	@RequestMapping(path = REPORT_PATH, method = RequestMethod.GET)
+	@RequestMapping(path = REPORT, method = RequestMethod.GET)
 	public ResponseEntity<?> getAnnotationReport(@RequestParam(value = "timeout", required = true) long timeout) {
 		Map<?, ?> report = amqpTemplate.receiveAndConvert(RabbitMqConfig.WORKLADO_ANNOTATION_MESSAGE_QUEUE_NAME, timeout, ParameterizedTypeReference.forType(Map.class));
 

@@ -1,5 +1,8 @@
 package org.continuity.api.rest;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.RequestMethod;
 
 public class RestApi {
@@ -18,28 +21,35 @@ public class RestApi {
 
 			public static final String ROOT = "/annotation";
 
-			public static final String GET_APPLICATION_PATH = "/{tag}/system";
-			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, GET_APPLICATION_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_APPLICATION, RequestMethod.GET);
 
-			public static final String GET_ANNOTATION_PATH = "/{tag}/annotation";
-			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, GET_ANNOTATION_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_ANNOTATION, RequestMethod.GET);
 
-			public static final String UPDATE_APPLICATION_PATH = "/{tag}/system";
-			public static final RestEndpoint UPDATE_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, UPDATE_APPLICATION_PATH, RequestMethod.POST);
+			public static final RestEndpoint UPDATE_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE_APPLICATION, RequestMethod.POST);
 
-			public static final String UPDATE_APP_FROM_OPEN_API_JSON_PATH = "/{tag}/openapi/{version}/json";
-			public static final RestEndpoint UPDATE_APP_FROM_OPEN_API_JSON = RestEndpoint.of(SERVICE_NAME, ROOT, UPDATE_APP_FROM_OPEN_API_JSON_PATH, RequestMethod.POST);
+			public static final RestEndpoint UPDATE_APP_FROM_OPEN_API_JSON = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE_APP_FROM_OPEN_API_JSON, RequestMethod.POST);
 
-			public static final String UPDATE_APP_FROM_OPEN_API_URL_PATH = "/{tag}/openapi/{version}/url";
-			public static final RestEndpoint UPDATE_APP_FROM_OPEN_API_URL = RestEndpoint.of(SERVICE_NAME, ROOT, UPDATE_APP_FROM_OPEN_API_URL_PATH, RequestMethod.POST);
+			public static final RestEndpoint UPDATE_APP_FROM_OPEN_API_URL = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE_APP_FROM_OPEN_API_URL, RequestMethod.POST);
 
-			public static final String UPDATE_ANNOTATION_PATH = "/{tag}/annotation";
-			public static final RestEndpoint UPDATE_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, UPDATE_ANNOTATION_PATH, RequestMethod.POST);
+			public static final RestEndpoint UPDATE_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE_ANNOTATION, RequestMethod.POST);
 
-			public static final String REPORT_PATH = "/report";
-			public static final RestEndpoint REPORT = RestEndpoint.of(SERVICE_NAME, ROOT, REPORT_PATH, RequestMethod.GET);
+			public static final RestEndpoint REPORT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.REPORT, RequestMethod.GET);
 
 			private Idpa() {
+			}
+
+			public static class Paths {
+
+				public static final String GET_APPLICATION = "/{tag}/system";
+				public static final String GET_ANNOTATION = "/{tag}/annotation";
+				public static final String UPDATE_APPLICATION = "/{tag}/system";
+				public static final String UPDATE_APP_FROM_OPEN_API_JSON = "/{tag}/openapi/{version}/json";
+				public static final String UPDATE_APP_FROM_OPEN_API_URL = "/{tag}/openapi/{version}/url";
+				public static final String UPDATE_ANNOTATION = "/{tag}/annotation";
+				public static final String REPORT = "/report";
+
+				private Paths() {
+				}
 			}
 
 		}
@@ -48,20 +58,27 @@ public class RestApi {
 
 			public static final String ROOT = "/loadtest";
 
-			public static final String CREATE_AND_EXECUTE_PATH = "/{type}/createandexecute";
-			public static final RestEndpoint CREATE_AND_EXECUTE = RestEndpoint.of(SERVICE_NAME, ROOT, CREATE_AND_EXECUTE_PATH, RequestMethod.POST);
+			public static final RestEndpoint CREATE_AND_EXECUTE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE_AND_EXECUTE, RequestMethod.POST);
 
-			public static final String EXECUTE_PATH = "/{type}/execute";
-			public static final RestEndpoint EXECUTE = RestEndpoint.of(SERVICE_NAME, ROOT, EXECUTE_PATH, RequestMethod.POST);
+			public static final RestEndpoint EXECUTE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.EXECUTE, RequestMethod.POST);
 
-			public static final String CREATE_AND_GET_PATH = "/{lt-type}/{wm-type}/model/{id}/create";
-			public static final RestEndpoint CREATE_AND_GET = RestEndpoint.of(SERVICE_NAME, ROOT, CREATE_AND_GET_PATH, RequestMethod.GET);
+			public static final RestEndpoint CREATE_AND_GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE_AND_GET, RequestMethod.GET);
 
-			public static final String REPORT_PATH = "/report";
-			public static final RestEndpoint REPORT = RestEndpoint.of(SERVICE_NAME, ROOT, REPORT_PATH, RequestMethod.GET);
+			public static final RestEndpoint REPORT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.REPORT_PATH, RequestMethod.GET);
 
 
 			private Loadtest() {
+			}
+
+			public static class Paths {
+
+				public static final String CREATE_AND_EXECUTE = "/{type}/createandexecute";
+				public static final String EXECUTE = "/{type}/execute";
+				public static final String CREATE_AND_GET = "/{lt-type}/{wm-type}/model/{id}/create";
+				public static final String REPORT_PATH = "/report";
+
+				private Paths() {
+				}
 			}
 
 		}
@@ -70,16 +87,23 @@ public class RestApi {
 
 			public static final String ROOT = "/workloadmodel";
 
-			public static final String CREATE_PATH = "/{type}/create";
-			public static final RestEndpoint CREATE = RestEndpoint.of(SERVICE_NAME, ROOT, CREATE_PATH, RequestMethod.GET);
+			public static final RestEndpoint CREATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE, RequestMethod.GET);
 
-			public static final String WAIT_PATH = "/wait/{type}/model/{id}";
-			public static final RestEndpoint WAIT = RestEndpoint.of(SERVICE_NAME, ROOT, WAIT_PATH, RequestMethod.GET);
+			public static final RestEndpoint WAIT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.WAIT, RequestMethod.GET);
 
-			public static final String GET_PATH = "/get/{type}/model/{id}";
-			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, GET_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
 			private WorkloadModel() {
+			}
+
+			public static class Paths {
+
+				public static final String CREATE = "/{type}/create";
+				public static final String WAIT = "/wait/{type}/model/{id}";
+				public static final String GET = "/get/{type}/model/{id}";
+
+				private Paths() {
+				}
 			}
 
 		}
@@ -97,16 +121,23 @@ public class RestApi {
 
 			public static final String ROOT = "/ann";
 
-			public static final String GET_PATH = "/{tag}/annotation";
-			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, GET_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
-			public static final String GET_BASE_PATH = "/{tag}/annotation/base";
-			public static final RestEndpoint GET_BASE = RestEndpoint.of(SERVICE_NAME, ROOT, GET_BASE_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET_BASE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_BASE, RequestMethod.GET);
 
-			public static final String UPDATE_PATH = "/{tag}/annotation";
-			public static final RestEndpoint UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, UPDATE_PATH, RequestMethod.POST);
+			public static final RestEndpoint UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE, RequestMethod.POST);
 
 			private Annotation() {
+			}
+
+			public static class Paths {
+
+				public static final String GET = "/{tag}/annotation";
+				public static final String GET_BASE = "/{tag}/annotation/base";
+				public static final String UPDATE = "/{tag}/annotation";
+
+				private Paths() {
+				}
 			}
 		}
 
@@ -114,13 +145,20 @@ public class RestApi {
 
 			public static final String ROOT = "/dummy/dvdstore";
 
-			public static final String GET_APPLICATION_PATH = "/annotation";
-			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, GET_APPLICATION_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_APPLICATION, RequestMethod.GET);
 
-			public static final String GET_ANNOTATION_PATH = "/system";
-			public static final RestEndpoint GET_ANNOTATION_BASE = RestEndpoint.of(SERVICE_NAME, ROOT, GET_ANNOTATION_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_ANNOTATION, RequestMethod.GET);
 
 			private Dummy() {
+			}
+
+			public static class Paths {
+
+				public static final String GET_APPLICATION = "/annotation";
+				public static final String GET_ANNOTATION = "/system";
+
+				private Paths() {
+				}
 			}
 		}
 
@@ -137,16 +175,23 @@ public class RestApi {
 
 			public static final String ROOT = "/system";
 
-			public static final String GET_PATH = "/{tag}";
-			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, GET_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
-			public static final String GET_DELTA_PATH = "/{tag}/delta";
-			public static final RestEndpoint GET_DELTA = RestEndpoint.of(SERVICE_NAME, ROOT, GET_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET_DELTA = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_DELTA, RequestMethod.GET);
 
-			public static final String POST_PATH = "/{tag}";
-			public static final RestEndpoint POST = RestEndpoint.of(SERVICE_NAME, ROOT, GET_PATH, RequestMethod.POST);
+			public static final RestEndpoint UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE, RequestMethod.POST);
 
 			private Application() {
+			}
+
+			public static class Paths {
+
+				public static final String GET = "/{tag}";
+				public static final String GET_DELTA = "/{tag}/delta";
+				public static final String UPDATE = "/{tag}";
+
+				private Paths() {
+				}
 			}
 		}
 
@@ -154,13 +199,20 @@ public class RestApi {
 
 			public static final String ROOT = "/openapi";
 
-			public static final String UPDATE_FROM_JSON_PATH = "/{tag}/{version}/json";
-			public static final RestEndpoint UPDATE_FROM_JSON = RestEndpoint.of(SERVICE_NAME, ROOT, UPDATE_FROM_JSON_PATH, RequestMethod.POST);
+			public static final RestEndpoint UPDATE_FROM_JSON = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE_FROM_JSON, RequestMethod.POST);
 
-			public static final String UPDATE_FROM_URL_PATH = "/{tag}/{version}/url";
-			public static final RestEndpoint UPDATE_FROM_URL = RestEndpoint.of(SERVICE_NAME, ROOT, UPDATE_FROM_URL_PATH, RequestMethod.POST);
+			public static final RestEndpoint UPDATE_FROM_URL = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE_FROM_URL, RequestMethod.POST);
 
 			private OpenApi() {
+			}
+
+			public static class Paths {
+
+				public static final String UPDATE_FROM_JSON = "/{tag}/{version}/json";
+				public static final String UPDATE_FROM_URL = "/{tag}/{version}/url";
+
+				private Paths() {
+				}
 			}
 		}
 
@@ -177,10 +229,17 @@ public class RestApi {
 
 			public static final String ROOT = "/loadtest";
 
-			public static final String CREATE_AND_GET_PATH = "/{type}/model/{id}/create";
-			public static final RestEndpoint CREATE_AND_GET = RestEndpoint.of(SERVICE_NAME, ROOT, CREATE_AND_GET_PATH, RequestMethod.GET);
+			public static final RestEndpoint CREATE_AND_GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE_AND_GET, RequestMethod.GET);
 
 			private TestPlan() {
+			}
+
+			public static class Paths {
+
+				public static final String CREATE_AND_GET = "/{type}/model/{id}/create";
+
+				private Paths() {
+				}
 			}
 		}
 
@@ -192,10 +251,17 @@ public class RestApi {
 
 		public static final String ROOT = "/";
 
-		public static final String GET_PATH = "/";
-		public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, GET_PATH, RequestMethod.GET);
+		public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
 		private SessionLogs() {
+		}
+
+		public static class Paths {
+
+			public static final String GET = "/";
+
+			private Paths() {
+			}
 		}
 
 	}
@@ -211,10 +277,17 @@ public class RestApi {
 
 			public static final String ROOT = "/loadtest/jmeter";
 
-			public static final String CREATE_PATH = "/{id}/create";
-			public static final RestEndpoint CREATE = RestEndpoint.of(SERVICE_NAME, ROOT, CREATE_PATH, RequestMethod.GET);
+			public static final RestEndpoint CREATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE, RequestMethod.GET);
 
 			private JMeter() {
+			}
+
+			public static class Paths {
+
+				public static final String CREATE = "/{id}/create";
+
+				private Paths() {
+				}
 			}
 
 		}
@@ -223,24 +296,54 @@ public class RestApi {
 
 			public static final String ROOT = "/model";
 
-			public static final String OVERVIEW_PATH = "/{id}";
-			public static final RestEndpoint OVERVIEW = RestEndpoint.of(SERVICE_NAME, ROOT, OVERVIEW_PATH, RequestMethod.GET);
+			public static final RestEndpoint OVERVIEW = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.OVERVIEW, RequestMethod.GET);
 
-			public static final String GET_PATH = "/{id}/workload";
-			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, GET_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
-			public static final String REMOVE_PATH = "/{id}";
-			public static final RestEndpoint REMOVE = RestEndpoint.of(SERVICE_NAME, ROOT, REMOVE_PATH, RequestMethod.DELETE);
+			public static final RestEndpoint REMOVE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.REMOVE, RequestMethod.DELETE);
 
-			public static final String GET_APPLICATION_PATH = "/{id}/system";
-			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, GET_APPLICATION_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_APPLICATION, RequestMethod.GET);
 
-			public static final String GET_ANNOTATION_PATH = "/{id}/annotation";
-			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, GET_ANNOTATION_PATH, RequestMethod.GET);
+			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_ANNOTATION, RequestMethod.GET);
+
+			public static final RestEndpoint RESERVE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.RESERVE, RequestMethod.GET);
 
 			private Model() {
 			}
 
+			public static class Paths {
+
+				public static final String OVERVIEW = "/{id}";
+				public static final String GET = "/{id}/workload";
+				public static final String REMOVE = "/{id}";
+				public static final String GET_APPLICATION = "/{id}/system";
+				public static final String GET_ANNOTATION = "/{id}/annotation";
+				public static final String RESERVE = "/{tag}/reserve";
+
+				private Paths() {
+				}
+			}
+
+		}
+
+	}
+
+	public static class Generic {
+
+		public static final Map<String, RestEndpoint> GET_AND_CREATE_LOAD_TEST = new HashMap<>();
+
+		public static final Map<String, RestEndpoint> GET_WORKLOAD_MODEL = new HashMap<>();
+		public static final Map<String, RestEndpoint> RESERVE_WORKLOAD_MODEL = new HashMap<>();
+
+		static {
+			GET_AND_CREATE_LOAD_TEST.put("jmeter", JMeter.TestPlan.CREATE_AND_GET);
+
+			GET_WORKLOAD_MODEL.put("wessbas", Wessbas.Model.GET);
+
+			RESERVE_WORKLOAD_MODEL.put("wessbas", Wessbas.Model.RESERVE);
+		}
+
+		private Generic() {
 		}
 
 	}

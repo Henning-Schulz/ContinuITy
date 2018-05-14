@@ -32,7 +32,7 @@ public class RestEndpoint {
 
 		for (String elem : pathElements) {
 			if (elem.startsWith("{")) {
-				elements.add(StringOrPar.of(PathPar.of(elem.substring(1, elem.length() + 1))));
+				elements.add(StringOrPar.of(PathPar.of(elem.substring(1, elem.length() - 1))));
 			} else {
 				elements.add(StringOrPar.of(elem));
 			}
@@ -45,7 +45,7 @@ public class RestEndpoint {
 		return elements.stream().reduce(StringOrPar.of(root), StringOrPar::concat).toString();
 	}
 
-	public String pathWithValues(Object... values) {
+	public String path(Object... values) {
 		List<Object> valueList = Arrays.asList(values);
 		Collections.reverse(valueList);
 
@@ -56,7 +56,7 @@ public class RestEndpoint {
 	}
 
 	public RequestBuilder requestUrl(Object... values) {
-		return new RequestBuilder("http://" + serviceName + pathWithValues(values));
+		return new RequestBuilder(serviceName, path(values));
 	}
 
 	public RequestMethod method() {
@@ -94,7 +94,7 @@ public class RestEndpoint {
 		 * @return
 		 */
 		public static StringOrPar concatWithValues(StringOrPar first, StringOrPar second, Stack<Object> values) {
-			if (second.toString().equals("/")) {
+			if ("/".equals(second.toString()) || "".equals(second.toString())) {
 				return first;
 			}
 

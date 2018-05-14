@@ -1,11 +1,12 @@
 package org.continuity.frontend.controllers;
 
-import static org.continuity.api.rest.RestApi.Frontend.Loadtest.CREATE_AND_EXECUTE_PATH;
-import static org.continuity.api.rest.RestApi.Frontend.Loadtest.CREATE_AND_GET_PATH;
-import static org.continuity.api.rest.RestApi.Frontend.Loadtest.EXECUTE_PATH;
-import static org.continuity.api.rest.RestApi.Frontend.Loadtest.REPORT_PATH;
 import static org.continuity.api.rest.RestApi.Frontend.Loadtest.ROOT;
+import static org.continuity.api.rest.RestApi.Frontend.Loadtest.Paths.CREATE_AND_EXECUTE;
+import static org.continuity.api.rest.RestApi.Frontend.Loadtest.Paths.CREATE_AND_GET;
+import static org.continuity.api.rest.RestApi.Frontend.Loadtest.Paths.EXECUTE;
+import static org.continuity.api.rest.RestApi.Frontend.Loadtest.Paths.REPORT_PATH;
 
+import org.continuity.api.rest.RestApi.Generic;
 import org.continuity.frontend.config.RabbitMqConfig;
 import org.continuity.frontend.entities.LoadTestSpecification;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class LoadTestController {
 	 *            The specification of the load test.
 	 * @return A report.
 	 */
-	@RequestMapping(path = CREATE_AND_EXECUTE_PATH, method = RequestMethod.POST)
+	@RequestMapping(path = CREATE_AND_EXECUTE, method = RequestMethod.POST)
 	public ResponseEntity<String> createAndExecuteLoadTest(@PathVariable("type") String testType, @RequestBody LoadTestSpecification specification) {
 		String message;
 		HttpStatus status;
@@ -86,7 +87,7 @@ public class LoadTestController {
 	 *            The load test to be executed.
 	 * @return A report.
 	 */
-	@RequestMapping(path = EXECUTE_PATH, method = RequestMethod.POST)
+	@RequestMapping(path = EXECUTE, method = RequestMethod.POST)
 	public ResponseEntity<String> executeLoadTest(@PathVariable("type") String testType, @RequestBody JsonNode testPlan) {
 		String message;
 		HttpStatus status;
@@ -117,11 +118,11 @@ public class LoadTestController {
 	 *            The tag of the annotation to be used.
 	 * @return The load test.
 	 */
-	@RequestMapping(value = CREATE_AND_GET_PATH, method = RequestMethod.GET)
+	@RequestMapping(value = CREATE_AND_GET, method = RequestMethod.GET)
 	public ResponseEntity<JsonNode> createAndGetLoadTest(@PathVariable("lt-type") String loadTestType, @PathVariable("wm-type") String workloadModelType, @PathVariable("id") String workloadModelId,
 			@RequestParam String tag) {
 		LOGGER.debug("load test type: {}, workload model type: {}, workload model id: {}, tag: {}", loadTestType, workloadModelType, workloadModelId, tag);
-		return restTemplate.getForEntity("http://" + loadTestType + "/loadtest/" + workloadModelType + "/model/" + workloadModelId + "/create?tag=" + tag, JsonNode.class);
+		return restTemplate.getForEntity(Generic.GET_AND_CREATE_LOAD_TEST.get(loadTestType).requestUrl(workloadModelType, workloadModelId).withQuery("tag", tag).get(), JsonNode.class);
 	}
 
 	private String extractWorkloadType(String workloadLink) {

@@ -1,13 +1,14 @@
 package org.continuity.frontend.controllers;
 
-import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.CREATE_PATH;
-import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.GET_PATH;
 import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.ROOT;
-import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.WAIT_PATH;
+import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.Paths.CREATE;
+import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.Paths.GET;
+import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.Paths.WAIT;
 
 import java.io.IOException;
 import java.util.Collections;
 
+import org.continuity.api.rest.RestApi.Generic;
 import org.continuity.frontend.config.RabbitMqConfig;
 import org.continuity.frontend.entities.ModelCreatedReport;
 import org.continuity.frontend.entities.WorkloadModelConfig;
@@ -64,7 +65,7 @@ public class WorkloadModelController {
 	 *            Configuration holding the type and data.
 	 * @return A report.
 	 */
-	@RequestMapping(path = CREATE_PATH, method = RequestMethod.POST)
+	@RequestMapping(path = CREATE, method = RequestMethod.POST)
 	public ResponseEntity<ModelCreatedReport> createWorkloadModel(@PathVariable("type") String type, @RequestBody WorkloadModelConfig config) {
 		ModelCreatedReport report;
 		HttpStatus status;
@@ -76,7 +77,7 @@ public class WorkloadModelController {
 			report = new ModelCreatedReport("Need to specify a link to monitoring data.");
 			status = HttpStatus.BAD_REQUEST;
 		} else {
-			ResponseEntity<String> linkResponse = restTemplate.getForEntity("http://" + type + "/model/" + config.getTag() + "/reserve", String.class);
+			ResponseEntity<String> linkResponse = restTemplate.getForEntity(Generic.RESERVE_WORKLOAD_MODEL.get(type).requestUrl(config.getTag()).get(), String.class);
 
 			if (!linkResponse.getStatusCode().is2xxSuccessful()) {
 				status = linkResponse.getStatusCode();
@@ -135,7 +136,7 @@ public class WorkloadModelController {
 	 *            A timeout for stopping waiting.
 	 * @return The workload model
 	 */
-	@RequestMapping(path = WAIT_PATH, method = RequestMethod.GET)
+	@RequestMapping(path = WAIT, method = RequestMethod.GET)
 	public ResponseEntity<JsonNode> waitForModelCreated(@PathVariable String type, @PathVariable String id, @RequestParam long timeout) {
 		String link = type + "/model/" + id;
 		LOGGER.info("Waiting for the workload model at {} to be created", link);
@@ -185,11 +186,10 @@ public class WorkloadModelController {
 	 *            The request.
 	 * @return The workload model.
 	 */
-	@RequestMapping(path = GET_PATH, method = RequestMethod.GET)
+	@RequestMapping(path = GET, method = RequestMethod.GET)
 	public ResponseEntity<JsonNode> getWorkloadModel(@PathVariable String type, @PathVariable String id) {
-		String link = type + "/model/" + id;
-		LOGGER.info("Trying to get the workload model from {}", link);
-		return restTemplate.getForEntity("http://" + link, JsonNode.class);
+		LOGGER.info("Trying to get the workload model from {}", Generic.GET_WORKLOAD_MODEL.get(type).path(id));
+		return restTemplate.getForEntity(Generic.GET_WORKLOAD_MODEL.get(type).requestUrl(id).get(), JsonNode.class);
 	}
 
 }

@@ -4,6 +4,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
+import org.continuity.api.rest.RestApi.Frontend.Idpa;
 import org.continuity.cli.config.PropertiesProvider;
 import org.continuity.commons.idpa.AnnotationExtractor;
 import org.continuity.commons.utils.WebUtils;
@@ -41,8 +42,8 @@ public class AnnotationCommands {
 	public String downloadAnnotation(String tag) throws JsonGenerationException, JsonMappingException, IOException {
 		String url = WebUtils.addProtocolIfMissing(propertiesProvider.get().getProperty(PropertiesProvider.KEY_URL));
 
-		ResponseEntity<Application> systemResponse = restTemplate.getForEntity(url + "/annotation/" + tag + "/system", Application.class);
-		ResponseEntity<ApplicationAnnotation> annotationResponse = restTemplate.getForEntity(url + "/annotation/" + tag + "/annotation", ApplicationAnnotation.class);
+		ResponseEntity<Application> systemResponse = restTemplate.getForEntity(Idpa.GET_APPLICATION.requestUrl(tag).withHost(url).get(), Application.class);
+		ResponseEntity<ApplicationAnnotation> annotationResponse = restTemplate.getForEntity(Idpa.GET_ANNOTATION.requestUrl(tag).withHost(url).get(), ApplicationAnnotation.class);
 
 		if (!systemResponse.getStatusCode().is2xxSuccessful()) {
 			return "Could not get system model: " + systemResponse;
@@ -86,7 +87,7 @@ public class AnnotationCommands {
 		String url = WebUtils.addProtocolIfMissing(propertiesProvider.get().getProperty(PropertiesProvider.KEY_URL));
 		ResponseEntity<String> response;
 		try {
-			response = restTemplate.postForEntity(url + "/annotation/" + tag + "/annotation", annotation, String.class);
+			response = restTemplate.postForEntity(Idpa.GET_ANNOTATION.requestUrl(tag).withHost(url).get(), annotation, String.class);
 		} catch (HttpStatusCodeException e) {
 			response = new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
 		}
@@ -107,7 +108,7 @@ public class AnnotationCommands {
 		String url = WebUtils.addProtocolIfMissing(propertiesProvider.get().getProperty(PropertiesProvider.KEY_URL));
 		ResponseEntity<String> response;
 		try {
-			response = restTemplate.postForEntity(url + "/annotation/" + tag + "/system", system, String.class);
+			response = restTemplate.postForEntity(Idpa.GET_APPLICATION.requestUrl(tag).withHost(url).get(), system, String.class);
 		} catch (HttpStatusCodeException e) {
 			response = new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
 		}

@@ -1,11 +1,12 @@
 package org.continuity.wessbas.controllers;
 
-import static org.continuity.api.rest.RestApi.Wessbas.Model.GET_ANNOTATION_PATH;
-import static org.continuity.api.rest.RestApi.Wessbas.Model.GET_APPLICATION_PATH;
-import static org.continuity.api.rest.RestApi.Wessbas.Model.GET_PATH;
-import static org.continuity.api.rest.RestApi.Wessbas.Model.OVERVIEW_PATH;
-import static org.continuity.api.rest.RestApi.Wessbas.Model.REMOVE_PATH;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.ROOT;
+import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET_ANNOTATION;
+import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET_APPLICATION;
+import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET;
+import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.OVERVIEW;
+import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.REMOVE;
+import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.RESERVE;
 
 import java.net.URI;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,7 +54,7 @@ public class WessbasModelController {
 	 *            The id of the stored model.
 	 * @return The stored model or a 404 (Not Found) if there is no such model.
 	 */
-	@RequestMapping(path = OVERVIEW_PATH, method = RequestMethod.GET)
+	@RequestMapping(path = OVERVIEW, method = RequestMethod.GET)
 	public ResponseEntity<WorkloadModelPack> getOverview(@PathVariable String id) {
 		WorkloadModelStorageEntry entry = SimpleModelStorage.instance().get(id);
 		if (entry == null) {
@@ -72,7 +73,7 @@ public class WessbasModelController {
 	 *            The id of the stored model.
 	 * @return The stored model or a 404 (Not Found) if there is no such model.
 	 */
-	@RequestMapping(path = GET_PATH, method = RequestMethod.GET)
+	@RequestMapping(path = GET, method = RequestMethod.GET)
 	public ResponseEntity<WorkloadModelStorageEntry> getModel(@PathVariable String id) {
 		WorkloadModelStorageEntry entry = SimpleModelStorage.instance().get(id);
 
@@ -90,7 +91,7 @@ public class WessbasModelController {
 	 *            The id of the stored model.
 	 * @return 200 (Ok) if the model has been successfully deleted or 404 (Not Found) otherwise.
 	 */
-	@RequestMapping(path = REMOVE_PATH, method = RequestMethod.DELETE)
+	@RequestMapping(path = REMOVE, method = RequestMethod.DELETE)
 	public ResponseEntity<?> removeModel(@PathVariable String id) {
 		boolean succ = SimpleModelStorage.instance().remove(id);
 
@@ -109,7 +110,7 @@ public class WessbasModelController {
 	 * @return A system model for the stored WESSBAS model or a 404 (Not Found) if there is no such
 	 *         model.
 	 */
-	@RequestMapping(path = GET_APPLICATION_PATH, method = RequestMethod.GET)
+	@RequestMapping(path = GET_APPLICATION, method = RequestMethod.GET)
 	public ResponseEntity<Application> getSystemModel(@PathVariable String id) {
 		Application systemModel = createSystemModelAndAnnotation(id).getLeft();
 
@@ -128,7 +129,7 @@ public class WessbasModelController {
 	 * @return An annotation for the stored WESSBAS model or a 404 (Not Found) if there is no such
 	 *         model.
 	 */
-	@RequestMapping(path = GET_ANNOTATION_PATH, method = RequestMethod.GET)
+	@RequestMapping(path = GET_ANNOTATION, method = RequestMethod.GET)
 	public ResponseEntity<ApplicationAnnotation> getSystemAnnotation(@PathVariable String id) {
 		ApplicationAnnotation annotation = createSystemModelAndAnnotation(id).getRight();
 
@@ -174,7 +175,7 @@ public class WessbasModelController {
 	 * @return A response entity holding a link to the workload model that will be created. The link
 	 *         is invalid until the creation is finished.
 	 */
-	@RequestMapping(path = "/{tag}/reserve", method = RequestMethod.GET)
+	@RequestMapping(path = RESERVE, method = RequestMethod.GET)
 	public ResponseEntity<String> reserveModelLink(@PathVariable String tag) {
 		String storageId = SimpleModelStorage.instance().reserve(tag);
 		String link = applicationName + "/model/" + storageId;
