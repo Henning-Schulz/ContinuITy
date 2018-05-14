@@ -26,7 +26,7 @@ public class SwaggerConfig {
 	}
 
 	private ApiInfo apiInfo() {
-		return new ApiInfo("System Annotation REST API", "Enables retrieval and management of system annotations.", "0.1.0", "Terms of service",
+		return new ApiInfo("IDPA Annotation REST API", "Enables retrieval and management of system annotations.", "0.1.0", "Terms of service",
 				new Contact("ContinuITy Project", "https://continuity-project.github.io/", ""), "Apache 2.0", "http://www.apache.org/licenses/LICENSE-2.0", Collections.emptyList());
 	}
 

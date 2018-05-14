@@ -10,10 +10,10 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
  */
 @SpringBootApplication
 @EnableEurekaClient
-public class SystemAnnotationApplication {
+public class IdpaAnnotationApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SystemAnnotationApplication.class, args);
+		SpringApplication.run(IdpaAnnotationApplication.class, args);
 	}
 
 }

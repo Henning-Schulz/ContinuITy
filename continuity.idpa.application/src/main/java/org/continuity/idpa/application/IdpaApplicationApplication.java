@@ -1,4 +1,4 @@
-package org.idpa.application.model;
+package org.continuity.idpa.application;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,10 +10,10 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
  */
 @SpringBootApplication
 @EnableEurekaClient
-public class SystemModelApplication {
+public class IdpaApplicationApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SystemModelApplication.class, args);
+		SpringApplication.run(IdpaApplicationApplication.class, args);
 	}
 
 }

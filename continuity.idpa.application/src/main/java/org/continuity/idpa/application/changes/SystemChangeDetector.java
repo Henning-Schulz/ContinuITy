@@ -1,4 +1,4 @@
-package org.idpa.application.model.changes;
+package org.continuity.idpa.application.changes;
 
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.continuity.idpa.application.Parameter;
+import org.continuity.idpa.application.entities.ModelElementReference;
+import org.continuity.idpa.application.entities.SystemChange;
+import org.continuity.idpa.application.entities.SystemChangeReport;
+import org.continuity.idpa.application.entities.SystemChangeType;
 import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.Application;
 import org.continuity.idpa.visitor.IdpaByClassSearcher;
-import org.idpa.application.model.entities.ModelElementReference;
-import org.idpa.application.model.entities.SystemChange;
-import org.idpa.application.model.entities.SystemChangeReport;
-import org.idpa.application.model.entities.SystemChangeType;
 
 import com.google.common.base.Objects;
 

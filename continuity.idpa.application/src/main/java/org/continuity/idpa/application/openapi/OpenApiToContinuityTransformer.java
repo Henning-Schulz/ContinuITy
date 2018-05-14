@@ -1,4 +1,4 @@
-package org.idpa.application.model.openapi;
+package org.continuity.idpa.application.openapi;
 
 import java.util.Arrays;
 import java.util.HashSet;

@@ -1,4 +1,4 @@
-package org.idpa.application.model.config;
+package org.continuity.idpa.application.config;
 
 import org.continuity.commons.amqp.DeadLetterSpecification;
 import org.springframework.amqp.core.AmqpTemplate;

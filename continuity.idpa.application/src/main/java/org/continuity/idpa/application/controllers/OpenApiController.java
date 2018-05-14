@@ -1,4 +1,4 @@
-package org.idpa.application.model.controllers;
+package org.continuity.idpa.application.controllers;
 
 import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.ROOT;
 import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.Paths.UPDATE_FROM_JSON;
@@ -8,7 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.continuity.idpa.application.Application;
-import org.idpa.application.model.openapi.OpenApiToContinuityTransformer;
+import org.continuity.idpa.application.openapi.OpenApiToContinuityTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

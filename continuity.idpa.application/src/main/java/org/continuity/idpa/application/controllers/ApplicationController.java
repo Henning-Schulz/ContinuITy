@@ -1,4 +1,4 @@
-package org.idpa.application.model.controllers;
+package org.continuity.idpa.application.controllers;
 
 import static org.continuity.api.rest.RestApi.IdpaApplication.Application.ROOT;
 import static org.continuity.api.rest.RestApi.IdpaApplication.Application.Paths.GET_DELTA;
@@ -13,11 +13,11 @@ import java.util.EnumSet;
 
 import org.continuity.commons.format.CommonFormats;
 import org.continuity.idpa.application.Application;
-import org.idpa.application.model.config.RabbitMqConfig;
-import org.idpa.application.model.entities.SystemChangeReport;
-import org.idpa.application.model.entities.SystemChangeType;
-import org.idpa.application.model.entities.SystemModelLink;
-import org.idpa.application.model.repository.SystemModelRepositoryManager;
+import org.continuity.idpa.application.config.RabbitMqConfig;
+import org.continuity.idpa.application.entities.SystemChangeReport;
+import org.continuity.idpa.application.entities.SystemChangeType;
+import org.continuity.idpa.application.entities.SystemModelLink;
+import org.continuity.idpa.application.repository.SystemModelRepositoryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;

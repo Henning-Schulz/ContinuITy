@@ -12,7 +12,7 @@ import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.idpa.application.HttpParameter;
 import org.continuity.idpa.application.HttpParameterType;
 import org.continuity.idpa.application.Parameter;
-import org.idpa.application.model.openapi.OpenApiToContinuityTransformer;
+import org.continuity.idpa.application.openapi.OpenApiToContinuityTransformer;
 import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.Application;
 import org.junit.Before;

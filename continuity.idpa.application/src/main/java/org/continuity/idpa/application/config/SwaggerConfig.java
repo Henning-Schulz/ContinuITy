@@ -1,4 +1,4 @@
-package org.idpa.application.model.config;
+package org.continuity.idpa.application.config;
 
 import java.util.Collections;
 
@@ -26,7 +26,7 @@ public class SwaggerConfig {
 	}
 
 	private ApiInfo apiInfo() {
-		return new ApiInfo("System Model REST API", "Enables retrieval and management of system models.", "0.1.0", "Terms of service",
+		return new ApiInfo("IDPA Application REST API", "Enables retrieval and management of system models.", "0.1.0", "Terms of service",
 				new Contact("ContinuITy Project", "https://continuity-project.github.io/", ""), "Apache 2.0", "http://www.apache.org/licenses/LICENSE-2.0", Collections.emptyList());
 	}
 

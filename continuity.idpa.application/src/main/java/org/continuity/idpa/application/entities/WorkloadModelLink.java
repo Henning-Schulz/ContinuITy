@@ -1,4 +1,4 @@
-package org.idpa.application.model.entities;
+package org.continuity.idpa.application.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -1,4 +1,4 @@
-package org.idpa.application.model.config;
+package org.continuity.idpa.application.config;
 
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;

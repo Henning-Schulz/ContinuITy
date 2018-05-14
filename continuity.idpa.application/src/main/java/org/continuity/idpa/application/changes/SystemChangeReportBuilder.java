@@ -1,13 +1,13 @@
-package org.idpa.application.model.changes;
+package org.continuity.idpa.application.changes;
 
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.idpa.application.model.entities.SystemChange;
-import org.idpa.application.model.entities.SystemChangeReport;
-import org.idpa.application.model.entities.SystemChangeType;
+import org.continuity.idpa.application.entities.SystemChange;
+import org.continuity.idpa.application.entities.SystemChangeReport;
+import org.continuity.idpa.application.entities.SystemChangeType;
 
 /**
  * @author Henning Schulz

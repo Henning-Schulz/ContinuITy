@@ -11,9 +11,9 @@ import java.util.Date;
 
 import org.continuity.commons.format.CommonFormats;
 import org.continuity.idpa.application.Application;
+import org.continuity.idpa.application.repository.SystemModelRepository;
 import org.continuity.idpa.yaml.IdpaYamlSerializer;
 import org.continuity.system.model.SystemModelTestInstance;
-import org.idpa.application.model.repository.SystemModelRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;

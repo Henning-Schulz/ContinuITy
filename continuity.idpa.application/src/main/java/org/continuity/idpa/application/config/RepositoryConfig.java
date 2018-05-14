@@ -1,7 +1,7 @@
-package org.idpa.application.model.config;
+package org.continuity.idpa.application.config;
 
-import org.idpa.application.model.repository.SystemModelRepository;
-import org.idpa.application.model.repository.SystemModelRepositoryManager;
+import org.continuity.idpa.application.repository.SystemModelRepository;
+import org.continuity.idpa.application.repository.SystemModelRepositoryManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

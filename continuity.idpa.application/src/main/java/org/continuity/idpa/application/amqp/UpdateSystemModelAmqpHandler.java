@@ -1,15 +1,15 @@
-package org.idpa.application.model.amqp;
+package org.continuity.idpa.application.amqp;
 
 import java.util.EnumSet;
 
 import org.continuity.commons.utils.WebUtils;
 import org.continuity.idpa.application.Application;
-import org.idpa.application.model.config.RabbitMqConfig;
-import org.idpa.application.model.entities.SystemChangeReport;
-import org.idpa.application.model.entities.SystemChangeType;
-import org.idpa.application.model.entities.SystemModelLink;
-import org.idpa.application.model.entities.WorkloadModelLink;
-import org.idpa.application.model.repository.SystemModelRepositoryManager;
+import org.continuity.idpa.application.config.RabbitMqConfig;
+import org.continuity.idpa.application.entities.SystemChangeReport;
+import org.continuity.idpa.application.entities.SystemChangeType;
+import org.continuity.idpa.application.entities.SystemModelLink;
+import org.continuity.idpa.application.entities.WorkloadModelLink;
+import org.continuity.idpa.application.repository.SystemModelRepositoryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;

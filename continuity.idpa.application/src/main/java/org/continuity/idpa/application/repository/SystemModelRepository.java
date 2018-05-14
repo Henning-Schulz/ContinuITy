@@ -1,4 +1,4 @@
-package org.idpa.application.model.repository;
+package org.continuity.idpa.application.repository;
 
 import java.io.File;
 import java.io.IOException;
