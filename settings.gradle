@@ -1,15 +1,15 @@
 rootProject.name = "continuity.root"
 
-include "continuity.idpa"
 include "continuity.benchflow"
 include "continuity.cli"
 include "continuity.commons"
 include "continuity.eureka"
 include "continuity.frontend"
+include "continuity.idpa"
+include "continuity.idpa.annotation"
+include "continuity.idpa.application"
 include "continuity.jmeter"
 include "continuity.session.logs"
-include "continuity.system.annotation"
-include "continuity.system.model"
 include "continuity.wessbas"
 
 /**
