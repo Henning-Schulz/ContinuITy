@@ -1,5 +1,10 @@
 package org.continuity.idpa.annotation.controllers;
 
+import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.GET_BASE_PATH;
+import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.GET_PATH;
+import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.ROOT;
+import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.UPDATE_PATH;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  */
 @RestController
-@RequestMapping("/ann")
+@RequestMapping(ROOT)
 public class AnnotationController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AnnotationController.class);
@@ -49,7 +54,7 @@ public class AnnotationController {
 	 *          returned. If the annotation is broken, a 423 (Locked) will be returned with a link
 	 *          to retrieve the annotation, anyway.
 	 */
-	@RequestMapping(path = "{tag}/annotation", method = RequestMethod.GET)
+	@RequestMapping(path = GET_PATH, method = RequestMethod.GET)
 	public ResponseEntity<?> getAnnotation(@PathVariable("tag") String tag) {
 		ApplicationAnnotation annotation;
 
@@ -82,7 +87,7 @@ public class AnnotationController {
 	 *          occurred. If there is no base annotation for the tag, the status 404 (Not Found)
 	 *          will be returned.
 	 */
-	@RequestMapping(path = "{tag}/annotation/base", method = RequestMethod.GET)
+	@RequestMapping(path = GET_BASE_PATH, method = RequestMethod.GET)
 	public ResponseEntity<ApplicationAnnotation> getBaseAnnotation(@PathVariable("tag") String tag) {
 		ApplicationAnnotation annotation;
 
@@ -109,7 +114,7 @@ public class AnnotationController {
 	 * @param annotation
 	 * @return
 	 */
-	@RequestMapping(path = "{tag}/annotation", method = RequestMethod.POST)
+	@RequestMapping(path = UPDATE_PATH, method = RequestMethod.POST)
 	public ResponseEntity<String> updateAnnotation(@PathVariable("tag") String tag, @RequestBody ApplicationAnnotation annotation) {
 		AnnotationValidityReport report = null;
 

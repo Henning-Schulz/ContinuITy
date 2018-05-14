@@ -1,8 +1,13 @@
 package org.continuity.frontend.controllers;
 
+import static org.continuity.api.rest.RestApi.Frontend.Annotation.GET_ANNOTATION_PATH;
+import static org.continuity.api.rest.RestApi.Frontend.Annotation.GET_APPLICATION_PATH;
+import static org.continuity.api.rest.RestApi.Frontend.Annotation.ROOT;
+
 import java.io.IOException;
 import java.util.Map;
 
+import org.continuity.api.rest.RestApi;
 import org.continuity.commons.utils.WebUtils;
 import org.continuity.frontend.config.RabbitMqConfig;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
@@ -31,7 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 @RestController
-@RequestMapping("annotation")
+@RequestMapping(ROOT)
 public class AnnotationController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AnnotationController.class);
@@ -43,15 +48,15 @@ public class AnnotationController {
 	private AmqpTemplate amqpTemplate;
 
 	/**
-	 * Gets the system model for the specified tag.
+	 * Gets the application model for the specified tag.
 	 *
 	 * @param tag
-	 *            The tag of the model.
-	 * @return The system model.
+	 *            The tag of the application.
+	 * @return The application model.
 	 */
-	@RequestMapping(path = "{tag}/system", method = RequestMethod.GET)
-	public ResponseEntity<Application> getSystemModel(@PathVariable("tag") String tag) {
-		return restTemplate.getForEntity("http://system-model/system/" + tag, Application.class);
+	@RequestMapping(path = GET_APPLICATION_PATH, method = RequestMethod.GET)
+	public ResponseEntity<Application> getApplication(@PathVariable("tag") String tag) {
+		return restTemplate.getForEntity(RestApi.IdpaApplication.Application.GET.requestUrl(tag).get(), Application.class);
 	}
 
 	/**
@@ -61,7 +66,7 @@ public class AnnotationController {
 	 *            The tag of the annotation.
 	 * @return The annotation.
 	 */
-	@RequestMapping(path = "{tag}/annotation", method = RequestMethod.GET)
+	@RequestMapping(path = GET_ANNOTATION_PATH, method = RequestMethod.GET)
 	public ResponseEntity<ApplicationAnnotation> getAnnotation(@PathVariable("tag") String tag) {
 		try {
 			return restTemplate.getForEntity("http://system-annotation/ann/" + tag + "/annotation", ApplicationAnnotation.class);

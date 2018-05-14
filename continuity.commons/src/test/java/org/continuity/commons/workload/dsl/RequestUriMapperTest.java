@@ -3,6 +3,7 @@ package org.continuity.commons.workload.dsl;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.continuity.idpa.application.HttpEndpoint;
+import org.continuity.commons.idpa.RequestUriMapper;
 import org.continuity.idpa.application.Application;
 import org.junit.Before;
 import org.junit.Test;

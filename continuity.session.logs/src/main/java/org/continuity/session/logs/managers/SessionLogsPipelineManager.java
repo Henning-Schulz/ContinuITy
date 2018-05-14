@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.continuity.commons.workload.dsl.RequestUriMapper;
 import org.continuity.idpa.application.HttpEndpoint;
+import org.continuity.commons.idpa.RequestUriMapper;
 import org.continuity.idpa.application.Application;
 import org.continuity.rest.InspectITRestClient;
 import org.continuity.session.logs.converter.SessionConverter;

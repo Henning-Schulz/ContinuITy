@@ -1,4 +1,4 @@
-package org.continuity.commons.workload.dsl;
+package org.continuity.commons.idpa;
 
 import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.idpa.application.Application;

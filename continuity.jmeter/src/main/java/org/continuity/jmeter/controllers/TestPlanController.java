@@ -1,5 +1,8 @@
 package org.continuity.jmeter.controllers;
 
+import static org.continuity.api.rest.RestApi.JMeter.TestPlan.CREATE_AND_GET_PATH;
+import static org.continuity.api.rest.RestApi.JMeter.TestPlan.ROOT;
+
 import org.apache.jorphan.collections.ListedHashTree;
 import org.continuity.commons.utils.WebUtils;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
@@ -26,7 +29,7 @@ import org.springframework.web.client.RestTemplate;
  *
  */
 @RestController
-@RequestMapping("loadtest")
+@RequestMapping(ROOT)
 public class TestPlanController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestPlanAmqpHandler.class);
@@ -46,7 +49,7 @@ public class TestPlanController {
 	 *            The tag to be used to retrieve the annotation.
 	 * @return The transformed JMeter test plan.
 	 */
-	@RequestMapping(value = "{type}/model/{id}/create", method = RequestMethod.GET)
+	@RequestMapping(value = CREATE_AND_GET_PATH, method = RequestMethod.GET)
 	public TestPlanBundle createAndGetLoadTest(@PathVariable("type") String workloadModelType, @PathVariable("id") String workloadModelId, @RequestParam String tag) {
 		return createAndGetLoadTest(workloadModelType + "/model/" + workloadModelId, tag);
 	}

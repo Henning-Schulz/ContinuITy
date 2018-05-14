@@ -1,5 +1,6 @@
 rootProject.name = "continuity.root"
 
+include "continuity.api"
 include "continuity.benchflow"
 include "continuity.cli"
 include "continuity.commons"

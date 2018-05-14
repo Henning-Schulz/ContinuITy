@@ -1,5 +1,9 @@
 package org.idpa.application.model.controllers;
 
+import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.ROOT;
+import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.UPDATE_FROM_JSON_PATH;
+import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.UPDATE_FROM_URL_PATH;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -27,7 +31,7 @@ import io.swagger.parser.SwaggerParser;
  *
  */
 @RestController
-@RequestMapping("openapi")
+@RequestMapping(ROOT)
 public class OpenApiController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenApiController.class);
@@ -54,7 +58,7 @@ public class OpenApiController {
 	 *            Open API specification (JSON).
 	 * @return
 	 */
-	@RequestMapping(path = "{tag}/{version}/json/", method = RequestMethod.POST)
+	@RequestMapping(path = UPDATE_FROM_JSON_PATH, method = RequestMethod.POST)
 	public ResponseEntity<String> updateFromJson(@PathVariable String tag, @PathVariable String version, @RequestBody JsonNode json) {
 		Swagger swagger;
 
@@ -81,7 +85,7 @@ public class OpenApiController {
 	 *            URL where the Open API specification can be retrieved from.
 	 * @return
 	 */
-	@RequestMapping(path = "{tag}/{version}/url/", method = RequestMethod.POST)
+	@RequestMapping(path = UPDATE_FROM_URL_PATH, method = RequestMethod.POST)
 	public ResponseEntity<String> updateFromUrl(@PathVariable String tag, @PathVariable String version, @RequestBody String url) {
 		try {
 			new URL(url);

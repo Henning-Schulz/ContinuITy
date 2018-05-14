@@ -1,5 +1,10 @@
 package org.idpa.application.model.controllers;
 
+import static org.continuity.api.rest.RestApi.IdpaApplication.Application.GET_DELTA_PATH;
+import static org.continuity.api.rest.RestApi.IdpaApplication.Application.GET_PATH;
+import static org.continuity.api.rest.RestApi.IdpaApplication.Application.POST_PATH;
+import static org.continuity.api.rest.RestApi.IdpaApplication.Application.ROOT;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -35,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  */
 @RestController
-@RequestMapping("system")
+@RequestMapping(ROOT)
 public class SystemModelController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SystemModelController.class);
@@ -62,7 +67,7 @@ public class SystemModelController {
 	 *            The tag of the system model.
 	 * @return The current model.
 	 */
-	@RequestMapping(path = "/{tag}", method = RequestMethod.GET)
+	@RequestMapping(path = GET_PATH, method = RequestMethod.GET)
 	public ResponseEntity<Application> getSystemModel(@PathVariable String tag) {
 		try {
 			return ResponseEntity.ok(manager.read(tag));
@@ -81,7 +86,7 @@ public class SystemModelController {
 	 *            The date to compare against in the format {@link CommonFormats#DATE_FORMAT}.
 	 * @return The delta report.
 	 */
-	@RequestMapping(path = "/{tag}/delta", method = RequestMethod.GET)
+	@RequestMapping(path = GET_DELTA_PATH, method = RequestMethod.GET)
 	public ResponseEntity<SystemChangeReport> getDeltaSince(@PathVariable String tag, @RequestParam("since") String since) {
 		Date date;
 		try {
@@ -115,7 +120,7 @@ public class SystemModelController {
 	 *            Ignore {@link SystemChangeType#PARAMETER_ADDED}.
 	 * @return A report holding the differences between the passed model and the next older one.
 	 */
-	@RequestMapping(path = "/{tag}", method = RequestMethod.POST)
+	@RequestMapping(path = POST_PATH, method = RequestMethod.POST)
 	public ResponseEntity<String> updateSystemModel(@PathVariable String tag, @RequestBody Application system,
 			@RequestParam(name = "ignore-interface-changed", defaultValue = "false") boolean ignoreInterfaceChanged,
 			@RequestParam(name = "ignore-interface-removed", defaultValue = "false") boolean ignoreInterfaceRemoved,

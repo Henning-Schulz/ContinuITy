@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.util.Pair;
-import org.continuity.commons.workload.dsl.AnnotationExtractor;
 import org.continuity.idpa.annotation.Input;
 import org.continuity.idpa.annotation.ParameterAnnotation;
+import org.continuity.commons.idpa.AnnotationExtractor;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.application.Parameter;
 import org.continuity.idpa.application.Application;

@@ -1,4 +1,4 @@
-package org.continuity.commons.workload.dsl;
+package org.continuity.commons.idpa;
 
 import java.util.Collections;
 

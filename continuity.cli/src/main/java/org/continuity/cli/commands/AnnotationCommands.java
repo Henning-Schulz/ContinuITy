@@ -5,8 +5,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.continuity.cli.config.PropertiesProvider;
+import org.continuity.commons.idpa.AnnotationExtractor;
 import org.continuity.commons.utils.WebUtils;
-import org.continuity.commons.workload.dsl.AnnotationExtractor;
 import org.continuity.idpa.IdpaElement;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.application.Application;
