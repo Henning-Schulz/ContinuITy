@@ -25,7 +25,7 @@ import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 
 /**
- * Offers a REST API for updating system models from Open API specifications.
+ * Offers a REST API for updating application models from Open API specifications.
  *
  * @author Henning Schulz
  *
@@ -38,20 +38,20 @@ public class OpenApiController {
 
 	private final OpenApiToContinuityTransformer transformer;
 
-	private final SystemModelController systemModelController;
+	private final ApplicationController systemModelController;
 
 	@Autowired
-	public OpenApiController(SystemModelController systemModelController) {
+	public OpenApiController(ApplicationController systemModelController) {
 		this.transformer = new OpenApiToContinuityTransformer();
 		this.systemModelController = systemModelController;
 	}
 
 	/**
 	 * Parses the specified Open API JSON, transforms it to a {@link Application} and updates the
-	 * already stored system model.
+	 * already stored application model.
 	 *
 	 * @param tag
-	 *            Tag of the system model.
+	 *            Tag of the application model.
 	 * @param version
 	 *            Open API version (currently, only 2.0 is supported).
 	 * @param json
@@ -70,15 +70,15 @@ public class OpenApiController {
 
 		Application system = transformer.transform(swagger);
 
-		return systemModelController.updateSystemModel(tag, system);
+		return systemModelController.updateApplication(tag, system);
 	}
 
 	/**
 	 * Reads the Open API specification from the specified URL, transforms it to a
-	 * {@link Application} and updates the already stored system model.
+	 * {@link Application} and updates the already stored application model.
 	 *
 	 * @param tag
-	 *            Tag of the system model.
+	 *            Tag of the application model.
 	 * @param version
 	 *            Open API version (currently, only 2.0 is supported).
 	 * @param url
@@ -105,7 +105,7 @@ public class OpenApiController {
 
 		Application system = transformer.transform(swagger);
 
-		return systemModelController.updateSystemModel(tag, system);
+		return systemModelController.updateApplication(tag, system);
 	}
 
 }

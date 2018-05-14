@@ -14,7 +14,7 @@ public class RestApi {
 		private Frontend() {
 		}
 
-		public static class Annotation {
+		public static class Idpa {
 
 			public static final String ROOT = "/annotation";
 
@@ -24,7 +24,62 @@ public class RestApi {
 			public static final String GET_ANNOTATION_PATH = "/{tag}/annotation";
 			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, GET_ANNOTATION_PATH, RequestMethod.GET);
 
-			private Annotation() {
+			public static final String UPDATE_APPLICATION_PATH = "/{tag}/system";
+			public static final RestEndpoint UPDATE_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, UPDATE_APPLICATION_PATH, RequestMethod.POST);
+
+			public static final String UPDATE_APP_FROM_OPEN_API_JSON_PATH = "/{tag}/openapi/{version}/json";
+			public static final RestEndpoint UPDATE_APP_FROM_OPEN_API_JSON = RestEndpoint.of(SERVICE_NAME, ROOT, UPDATE_APP_FROM_OPEN_API_JSON_PATH, RequestMethod.POST);
+
+			public static final String UPDATE_APP_FROM_OPEN_API_URL_PATH = "/{tag}/openapi/{version}/url";
+			public static final RestEndpoint UPDATE_APP_FROM_OPEN_API_URL = RestEndpoint.of(SERVICE_NAME, ROOT, UPDATE_APP_FROM_OPEN_API_URL_PATH, RequestMethod.POST);
+
+			public static final String UPDATE_ANNOTATION_PATH = "/{tag}/annotation";
+			public static final RestEndpoint UPDATE_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, UPDATE_ANNOTATION_PATH, RequestMethod.POST);
+
+			public static final String REPORT_PATH = "/report";
+			public static final RestEndpoint REPORT = RestEndpoint.of(SERVICE_NAME, ROOT, REPORT_PATH, RequestMethod.GET);
+
+			private Idpa() {
+			}
+
+		}
+
+		public static class Loadtest {
+
+			public static final String ROOT = "/loadtest";
+
+			public static final String CREATE_AND_EXECUTE_PATH = "/{type}/createandexecute";
+			public static final RestEndpoint CREATE_AND_EXECUTE = RestEndpoint.of(SERVICE_NAME, ROOT, CREATE_AND_EXECUTE_PATH, RequestMethod.POST);
+
+			public static final String EXECUTE_PATH = "/{type}/execute";
+			public static final RestEndpoint EXECUTE = RestEndpoint.of(SERVICE_NAME, ROOT, EXECUTE_PATH, RequestMethod.POST);
+
+			public static final String CREATE_AND_GET_PATH = "/{lt-type}/{wm-type}/model/{id}/create";
+			public static final RestEndpoint CREATE_AND_GET = RestEndpoint.of(SERVICE_NAME, ROOT, CREATE_AND_GET_PATH, RequestMethod.GET);
+
+			public static final String REPORT_PATH = "/report";
+			public static final RestEndpoint REPORT = RestEndpoint.of(SERVICE_NAME, ROOT, REPORT_PATH, RequestMethod.GET);
+
+
+			private Loadtest() {
+			}
+
+		}
+
+		public static class WorkloadModel {
+
+			public static final String ROOT = "/workloadmodel";
+
+			public static final String CREATE_PATH = "/{type}/create";
+			public static final RestEndpoint CREATE = RestEndpoint.of(SERVICE_NAME, ROOT, CREATE_PATH, RequestMethod.GET);
+
+			public static final String WAIT_PATH = "/wait/{type}/model/{id}";
+			public static final RestEndpoint WAIT = RestEndpoint.of(SERVICE_NAME, ROOT, WAIT_PATH, RequestMethod.GET);
+
+			public static final String GET_PATH = "/get/{type}/model/{id}";
+			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, GET_PATH, RequestMethod.GET);
+
+			private WorkloadModel() {
 			}
 
 		}

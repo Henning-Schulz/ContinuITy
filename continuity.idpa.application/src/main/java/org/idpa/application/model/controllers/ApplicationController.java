@@ -41,9 +41,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(ROOT)
-public class SystemModelController {
+public class ApplicationController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SystemModelController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationController.class);
 
 	private static final DateFormat DATE_FORMAT = CommonFormats.DATE_FORMAT;
 
@@ -55,20 +55,20 @@ public class SystemModelController {
 	private final SystemModelRepositoryManager manager;
 
 	@Autowired
-	public SystemModelController(SystemModelRepositoryManager manager, AmqpTemplate amqpTemplate) {
+	public ApplicationController(SystemModelRepositoryManager manager, AmqpTemplate amqpTemplate) {
 		this.manager = manager;
 		this.amqpTemplate = amqpTemplate;
 	}
 
 	/**
-	 * Retrieves the current system model.
+	 * Retrieves the current application model.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
-	 * @return The current model.
+	 *            The tag of the application.
+	 * @return The current application model.
 	 */
 	@RequestMapping(path = GET_PATH, method = RequestMethod.GET)
-	public ResponseEntity<Application> getSystemModel(@PathVariable String tag) {
+	public ResponseEntity<Application> getApplication(@PathVariable String tag) {
 		try {
 			return ResponseEntity.ok(manager.read(tag));
 		} catch (IOException e) {
@@ -78,10 +78,11 @@ public class SystemModelController {
 	}
 
 	/**
-	 * Gets a report holding the difference between the current system model and a date in the past.
+	 * Gets a report holding the difference between the current application model and a date in the
+	 * past.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
+	 *            The tag of the application model.
 	 * @param since
 	 *            The date to compare against in the format {@link CommonFormats#DATE_FORMAT}.
 	 * @return The delta report.
@@ -101,11 +102,11 @@ public class SystemModelController {
 	}
 
 	/**
-	 * Stores a new system model if it differs from existing ones, possibly ignoring specific change
-	 * types.
+	 * Stores a new application model if it differs from existing ones, possibly ignoring specific
+	 * change types.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
+	 *            The tag of the application model.
 	 * @param system
 	 *            The system model to be stored.
 	 * @param ignoreInterfaceChanged
@@ -121,7 +122,7 @@ public class SystemModelController {
 	 * @return A report holding the differences between the passed model and the next older one.
 	 */
 	@RequestMapping(path = POST_PATH, method = RequestMethod.POST)
-	public ResponseEntity<String> updateSystemModel(@PathVariable String tag, @RequestBody Application system,
+	public ResponseEntity<String> updateApplication(@PathVariable String tag, @RequestBody Application system,
 			@RequestParam(name = "ignore-interface-changed", defaultValue = "false") boolean ignoreInterfaceChanged,
 			@RequestParam(name = "ignore-interface-removed", defaultValue = "false") boolean ignoreInterfaceRemoved,
 			@RequestParam(name = "ignore-interface-added", defaultValue = "false") boolean ignoreInterfaceAdded,
@@ -147,17 +148,17 @@ public class SystemModelController {
 	}
 
 	/**
-	 * Stores a new system model if it differs from existing ones. None of the change types will be
-	 * ignored.
+	 * Stores a new application model if it differs from existing ones. None of the change types
+	 * will be ignored.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
+	 *            The tag of the application model.
 	 * @param system
-	 *            The system model to be stored.
+	 *            The application model to be stored.
 	 * @return A report holding the differences between the passed model and the next older one.
 	 */
-	public ResponseEntity<String> updateSystemModel(@PathVariable String tag, @RequestBody Application system) {
-		return updateSystemModel(tag, system, false, false, false, false, false, false);
+	public ResponseEntity<String> updateApplication(@PathVariable String tag, @RequestBody Application system) {
+		return updateApplication(tag, system, false, false, false, false, false, false);
 	}
 
 	private EnumSet<SystemChangeType> changeTypesFromBooleans(boolean ignoreInterfaceChanged, boolean ignoreInterfaceRemoved, boolean ignoreInterfaceAdded, boolean ignoreParameterChanged,

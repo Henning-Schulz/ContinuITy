@@ -1,5 +1,11 @@
 package org.continuity.frontend.controllers;
 
+import static org.continuity.api.rest.RestApi.Frontend.Loadtest.CREATE_AND_EXECUTE_PATH;
+import static org.continuity.api.rest.RestApi.Frontend.Loadtest.CREATE_AND_GET_PATH;
+import static org.continuity.api.rest.RestApi.Frontend.Loadtest.EXECUTE_PATH;
+import static org.continuity.api.rest.RestApi.Frontend.Loadtest.REPORT_PATH;
+import static org.continuity.api.rest.RestApi.Frontend.Loadtest.ROOT;
+
 import org.continuity.frontend.config.RabbitMqConfig;
 import org.continuity.frontend.entities.LoadTestSpecification;
 import org.slf4j.Logger;
@@ -26,7 +32,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  */
 @RestController
-@RequestMapping("loadtest")
+@RequestMapping(ROOT)
 public class LoadTestController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LoadTestController.class);
@@ -46,7 +52,7 @@ public class LoadTestController {
 	 *            The specification of the load test.
 	 * @return A report.
 	 */
-	@RequestMapping(path = "{type}/createandexecute", method = RequestMethod.POST)
+	@RequestMapping(path = CREATE_AND_EXECUTE_PATH, method = RequestMethod.POST)
 	public ResponseEntity<String> createAndExecuteLoadTest(@PathVariable("type") String testType, @RequestBody LoadTestSpecification specification) {
 		String message;
 		HttpStatus status;
@@ -80,7 +86,7 @@ public class LoadTestController {
 	 *            The load test to be executed.
 	 * @return A report.
 	 */
-	@RequestMapping(path = "{type}/execute", method = RequestMethod.POST)
+	@RequestMapping(path = EXECUTE_PATH, method = RequestMethod.POST)
 	public ResponseEntity<String> executeLoadTest(@PathVariable("type") String testType, @RequestBody JsonNode testPlan) {
 		String message;
 		HttpStatus status;
@@ -111,7 +117,7 @@ public class LoadTestController {
 	 *            The tag of the annotation to be used.
 	 * @return The load test.
 	 */
-	@RequestMapping(value = "{lt-type}/{wm-type}/model/{id}/create", method = RequestMethod.GET)
+	@RequestMapping(value = CREATE_AND_GET_PATH, method = RequestMethod.GET)
 	public ResponseEntity<JsonNode> createAndGetLoadTest(@PathVariable("lt-type") String loadTestType, @PathVariable("wm-type") String workloadModelType, @PathVariable("id") String workloadModelId,
 			@RequestParam String tag) {
 		LOGGER.debug("load test type: {}, workload model type: {}, workload model id: {}, tag: {}", loadTestType, workloadModelType, workloadModelId, tag);
@@ -124,12 +130,12 @@ public class LoadTestController {
 
 	/**
 	 * Get Report of Loadtest.
-	 * 
+	 *
 	 * @param timeout
 	 *            the time in millis, how long should be waited for the report.
 	 * @return
 	 */
-	@RequestMapping(value = "/report", method = RequestMethod.GET)
+	@RequestMapping(value = REPORT_PATH, method = RequestMethod.GET)
 	public ResponseEntity<String> getReportOfLoadtest(@RequestParam(value = "timeout", required = true) long timeout) {
 		return new ResponseEntity<String>(amqpTemplate.receiveAndConvert(RabbitMqConfig.PROVIDE_REPORT_QUEUE_NAME, timeout, new ParameterizedTypeReference<String>() {
 		}), HttpStatus.OK);
