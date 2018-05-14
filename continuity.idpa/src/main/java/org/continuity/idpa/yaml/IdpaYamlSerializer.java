@@ -78,7 +78,7 @@ public class IdpaYamlSerializer<T extends IdpaElement> {
 	}
 
 	public T readFromJsonNode(JsonNode root) throws JsonParseException, JsonMappingException, IOException {
-		return createReadMapper().reader().readValue(root);
+		return createReadMapper().readerFor(type).readValue(root);
 	}
 
 	private ObjectMapper createReadMapper() {

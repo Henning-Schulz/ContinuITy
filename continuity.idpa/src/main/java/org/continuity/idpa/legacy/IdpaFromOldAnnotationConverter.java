@@ -1,6 +1,10 @@
 package org.continuity.idpa.legacy;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.annotation.PropertyOverrideKey;
@@ -9,8 +13,6 @@ import org.continuity.idpa.yaml.IdpaYamlSerializer;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class IdpaFromOldAnnotationConverter {
 
@@ -18,59 +20,61 @@ public class IdpaFromOldAnnotationConverter {
 
 	private final IdpaYamlSerializer<ApplicationAnnotation> annotationSerializer = new IdpaYamlSerializer<>(ApplicationAnnotation.class);
 
-	public Application convertFromSystemModel(ObjectNode systemModel) throws JsonParseException, JsonMappingException, IOException {
-		rename(systemModel, "interfaces", "endpoints");
+	public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException {
+		IdpaFromOldAnnotationConverter converter = new IdpaFromOldAnnotationConverter();
+		Path basePath = Paths.get("src", "main", "resources");
 
-		return applicationSerializer.readFromJsonNode(systemModel);
+		converter.convertAnnotation(basePath.resolve("dvdstore-annotation-old.yml"), basePath.resolve("dvdstore-annotation.yml"));
+		converter.convertSystemModel(basePath.resolve("dvdstore-systemmodel.yml"), basePath.resolve("dvdstore-application.yml"));
 	}
 
-	public ApplicationAnnotation convertFromAnnotation(ObjectNode annotation) throws JsonParseException, JsonMappingException, IOException {
-		rename(annotation, "interface-annotations", "endpoint-annotations");
-		renameOverrides(annotation);
+	public void convertSystemModel(Path systemModelPath, Path applicationPath) throws JsonParseException, JsonMappingException, IOException {
+		String systemModel = reduceLinesToString(Files.readAllLines(systemModelPath));
+		Application converted = convertFromSystemModel(systemModel);
+		applicationSerializer.writeToYaml(converted, applicationPath);
+	}
 
-		JsonNode endpointAnnotations = annotation.get("endpoint-annotations");
-		int i = 0;
+	public void convertAnnotation(Path oldPath, Path newPath) throws JsonParseException, JsonMappingException, IOException {
+		String annotation = reduceLinesToString(Files.readAllLines(oldPath));
+		ApplicationAnnotation converted = convertFromAnnotation(annotation);
+		annotationSerializer.writeToYaml(converted, newPath);
+	}
 
-		while (endpointAnnotations.has(i)) {
-			JsonNode endpointAnn = endpointAnnotations.get(i);
-			rename((ObjectNode) endpointAnn, "interface", "endpoint");
+	private String reduceLinesToString(List<String> lines) {
+		StringBuilder builder = new StringBuilder();
 
-			renameOverrides(endpointAnn);
+		lines.forEach(l -> {
+			builder.append(l);
+			builder.append("\n");
+		});
 
-			JsonNode parameterAnnotations = endpointAnn.get("parameter-annotations");
-			int j = 0;
+		return builder.toString();
+	}
 
-			while (parameterAnnotations.has(j)) {
-				renameOverrides(parameterAnnotations.get(j));
+	public Application convertFromSystemModel(String systemModel) throws JsonParseException, JsonMappingException, IOException {
+		systemModel = systemModel.replaceFirst("interfaces:", "endpoints:");
 
-				j++;
-			}
+		return applicationSerializer.readFromYamlString(systemModel);
+	}
 
-			i++;
+	public ApplicationAnnotation convertFromAnnotation(String annotation) throws JsonParseException, JsonMappingException, IOException {
+		annotation = annotation.replaceFirst("interface-annotations:", "endpoint-annotations:");
+		annotation = annotation.replaceAll("  interface: ", "  endpoint: ");
+
+		annotation = renameOverrides(annotation);
+
+		return annotationSerializer.readFromYamlString(annotation);
+	}
+
+	private String renameOverrides(String annotation) {
+		for (PropertyOverrideKey.HttpEndpoint key : PropertyOverrideKey.HttpEndpoint.values()) {
+			String oldKey = "- HttpInterface." + key.name().toLowerCase() + ": ";
+			String newKey = "- " + key.toString() + ": ";
+
+			annotation = annotation.replaceAll(oldKey, newKey);
 		}
 
-		return annotationSerializer.readFromJsonNode(annotation);
-	}
-
-	private void renameOverrides(JsonNode node) {
-		JsonNode overrides = node.get("overrides");
-		int i = 0;
-
-		while (overrides.has(i)) {
-			JsonNode ov = overrides.get(i);
-
-			for (PropertyOverrideKey.HttpEndpoint key : PropertyOverrideKey.HttpEndpoint.values()) {
-				if (ov.has("HttpInterface." + key.name().toLowerCase())) {
-					rename((ObjectNode) ov, "HttpInterface." + key.name().toLowerCase(), key.toString());
-				}
-			}
-		}
-	}
-
-	private void rename(ObjectNode root, String oldName, String newName) {
-		JsonNode node = root.get(oldName);
-		root.remove(oldName);
-		root.set(newName, node);
+		return annotation;
 	}
 
 }

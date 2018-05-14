@@ -106,7 +106,7 @@ public enum IdpaTestInstance {
 			IdpaYamlSerializer<Application> serializer = new IdpaYamlSerializer<>(Application.class);
 
 			try {
-				return serializer.readFromYamlInputStream(getClass().getResourceAsStream("/dvdstore-systemmodel.yml"));
+				return serializer.readFromYamlInputStream(getClass().getResourceAsStream("/dvdstore-application.yml"));
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;

@@ -1,6 +1,6 @@
 ---
 overrides:
-- HttpInterface.domain: 192.168.99.100
+- HttpEndpoint.domain: 192.168.99.100
 inputs:
 - !<direct>
   &Input_ApplicationPerformanceSettingsGET_actionMethod data:
@@ -20,8 +20,8 @@ inputs:
   - Empty+Cart
 - !<extracted>
   &CartPOST_ViewStateExtractedInput extractions:
-  - pattern: id="javax.faces.ViewState" value="(.*)"
-    from: CartGET
+  - from: CartGET
+    pattern: id="javax.faces.ViewState" value="(.*)"
 - !<direct>
   &Input_CartPOST_c_CartDetailsForm data:
   - cartdetails%3ACartDetailsForm
@@ -44,8 +44,8 @@ inputs:
   - Login
 - !<extracted>
   &LatestOrdersPOST_ViewStateExtractedInput extractions:
-  - pattern: id="javax.faces.ViewState" value="(.*)"
-    from: LatestOrdersGET
+  - from: LatestOrdersGET
+    pattern: id="javax.faces.ViewState" value="(.*)"
 - !<direct>
   &Input_LatestOrdersPOST_LoginForm data:
   - LoginForm
@@ -74,102 +74,102 @@ inputs:
   - Madagascar
 - !<extracted>
   &ShopPOST_ViewStateExtractedInput extractions:
-  - pattern: id="javax.faces.ViewState" value="(.*)"
-    from: ShopGET
-interface-annotations:
-- overrides: []
-  interface: ApplicationPerformanceSettingsGET
+  - from: ShopGET
+    pattern: id="javax.faces.ViewState" value="(.*)"
+endpoint-annotations:
+- endpoint: ApplicationPerformanceSettingsGET
+  overrides: []
   parameter-annotations:
-  - overrides: []
+  - parameter: ApplicationPerformanceSettingsGET_actionMethod
     input: *Input_ApplicationPerformanceSettingsGET_actionMethod
-    parameter: ApplicationPerformanceSettingsGET_actionMethod
-  - overrides: []
+    overrides: []
+  - parameter: ApplicationPerformanceSettingsGET_conversationId
     input: *Input_ApplicationPerformanceSettingsGET_conversationId
-    parameter: ApplicationPerformanceSettingsGET_conversationId
-- overrides: []
-  interface: CartGET
+    overrides: []
+- endpoint: CartGET
+  overrides: []
   parameter-annotations:
-  - overrides: []
+  - parameter: CartGET_conversationId
     input: *Input_CartGET_conversationId
-    parameter: CartGET_conversationId
-- overrides: []
-  interface: CartPOST
+    overrides: []
+- endpoint: CartPOST
+  overrides: []
   parameter-annotations:
-  - overrides: []
+  - parameter: CartPOST_c_C_C_QuantityValueText
     input: *Input_CartPOST_c_C_C_QuantityValueText
-    parameter: CartPOST_c_C_C_QuantityValueText
-  - overrides: []
+    overrides: []
+  - parameter: CartPOST_c_C_ResetCartButton
     input: *Input_CartPOST_c_C_ResetCartButton
-    parameter: CartPOST_c_C_ResetCartButton
-  - overrides:
-    - HttpParameter.encoded: true
+    overrides: []
+  - parameter: CartPOST_j_f_ViewState
     input: *CartPOST_ViewStateExtractedInput
-    parameter: CartPOST_j_f_ViewState
-  - overrides: []
+    overrides:
+    - HttpParameter.encoded: "true"
+  - parameter: CartPOST_c_CartDetailsForm
     input: *Input_CartPOST_c_CartDetailsForm
-    parameter: CartPOST_c_CartDetailsForm
-- overrides: []
-  interface: DVDGET
+    overrides: []
+- endpoint: DVDGET
+  overrides: []
   parameter-annotations:
-  - overrides: []
+  - parameter: DVDGET_actionMethod
     input: *Input_DVDGET_actionMethod
-    parameter: DVDGET_actionMethod
-  - overrides: []
+    overrides: []
+  - parameter: DVDGET_conversationId
     input: *Input_DVDGET_conversationId
-    parameter: DVDGET_conversationId
-- overrides: []
-  interface: HomeGET
+    overrides: []
+- endpoint: HomeGET
+  overrides: []
   parameter-annotations: []
-- overrides: []
-  interface: LatestOrdersGET
+- endpoint: LatestOrdersGET
+  overrides: []
   parameter-annotations: []
-- overrides: []
-  interface: LatestOrdersPOST
+- endpoint: LatestOrdersPOST
+  overrides: []
   parameter-annotations:
-  - overrides: []
+  - parameter: LatestOrdersPOST_L_Password
     input: *Input_LatestOrdersPOST_L_Password
-    parameter: LatestOrdersPOST_L_Password
-  - overrides: []
+    overrides: []
+  - parameter: LatestOrdersPOST_L_Logout
     input: *Input_LatestOrdersPOST_L_Logout
-    parameter: LatestOrdersPOST_L_Logout
-  - overrides: []
+    overrides: []
+  - parameter: LatestOrdersPOST_L_Login
     input: *Input_LatestOrdersPOST_L_Login
-    parameter: LatestOrdersPOST_L_Login
-  - overrides:
-    - HttpParameter.encoded: true
+    overrides: []
+  - parameter: LatestOrdersPOST_j_f_ViewState
     input: *LatestOrdersPOST_ViewStateExtractedInput
-    parameter: LatestOrdersPOST_j_f_ViewState
-  - overrides: []
+    overrides:
+    - HttpParameter.encoded: "true"
+  - parameter: LatestOrdersPOST_LoginForm
     input: *Input_LatestOrdersPOST_LoginForm
-    parameter: LatestOrdersPOST_LoginForm
-  - overrides: []
+    overrides: []
+  - parameter: LatestOrdersPOST_L_Username
     input: *Input_LatestOrdersPOST_L_Username
-    parameter: LatestOrdersPOST_L_Username
-  - overrides: []
+    overrides: []
+  - parameter: LatestOrdersPOST_LogoutForm
     input: *Input_LatestOrdersPOST_LogoutForm
-    parameter: LatestOrdersPOST_LogoutForm
-- overrides: []
-  interface: ShopGET
+    overrides: []
+- endpoint: ShopGET
+  overrides: []
   parameter-annotations:
-  - overrides: []
+  - parameter: ShopGET_conversationId
     input: *Input_ShopGET_conversationId
-    parameter: ShopGET_conversationId
-- overrides: []
-  interface: ShopPOST
+    overrides: []
+- endpoint: ShopPOST
+  overrides: []
   parameter-annotations:
-  - overrides: []
+  - parameter: ShopPOST_S_Search
     input: *Input_ShopPOST_S_Search
-    parameter: ShopPOST_S_Search
-  - overrides: []
+    overrides: []
+  - parameter: ShopPOST_S_PageSize
     input: *Input_ShopPOST_S_PageSize
-    parameter: ShopPOST_S_PageSize
-  - overrides:
-    - HttpParameter.encoded: true
+    overrides: []
+  - parameter: ShopPOST_j_f_ViewState
     input: *ShopPOST_ViewStateExtractedInput
-    parameter: ShopPOST_j_f_ViewState
-  - overrides: []
+    overrides:
+    - HttpParameter.encoded: "true"
+  - parameter: ShopPOST_SearchForm
     input: *Input_ShopPOST_SearchForm
-    parameter: ShopPOST_SearchForm
-  - overrides: []
+    overrides: []
+  - parameter: ShopPOST_S_Query
     input: *Input_ShopPOST_S_Query
-    parameter: ShopPOST_S_Query
+    overrides: []
