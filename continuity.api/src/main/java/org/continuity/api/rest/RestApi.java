@@ -43,15 +43,15 @@ public class RestApi {
 		 */
 		public static class Idpa {
 
-			public static final String ROOT = "/annotation";
+			public static final String ROOT = "/idpa";
 
-			/** {@value #ROOT}/{tag}/system */
+			/** {@value #ROOT}/{tag}/application */
 			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_APPLICATION, RequestMethod.GET);
 
 			/** {@value #ROOT}/{tag}/annotation */
 			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_ANNOTATION, RequestMethod.GET);
 
-			/** {@value #ROOT}/{tag}/system */
+			/** {@value #ROOT}/{tag}/application */
 			public static final RestEndpoint UPDATE_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE_APPLICATION, RequestMethod.POST);
 
 			/** {@value #ROOT}/{tag}/openapi/{version}/json */
@@ -71,9 +71,9 @@ public class RestApi {
 
 			public static class Paths {
 
-				public static final String GET_APPLICATION = "/{tag}/system";
+				public static final String GET_APPLICATION = "/{tag}/application";
 				public static final String GET_ANNOTATION = "/{tag}/annotation";
-				public static final String UPDATE_APPLICATION = "/{tag}/system";
+				public static final String UPDATE_APPLICATION = "/{tag}/application";
 				public static final String UPDATE_APP_FROM_OPEN_API_JSON = "/{tag}/openapi/{version}/json";
 				public static final String UPDATE_APP_FROM_OPEN_API_URL = "/{tag}/openapi/{version}/url";
 				public static final String UPDATE_ANNOTATION = "/{tag}/annotation";
@@ -181,18 +181,18 @@ public class RestApi {
 		 */
 		public static class Annotation {
 
-			public static final String ROOT = "/ann";
+			public static final String ROOT = "/annotation";
 
-			/** {@value #ROOT}/{tag}/annotation */
+			/** {@value #ROOT}/{tag} */
 			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
-			/** {@value #ROOT}/{tag}/annotation/base */
+			/** {@value #ROOT}/{tag}/base */
 			public static final RestEndpoint GET_BASE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_BASE, RequestMethod.GET);
 
-			/** {@value #ROOT}/{tag}/annotation */
+			/** {@value #ROOT}/{tag} */
 			public static final RestEndpoint UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE, RequestMethod.POST);
 
-			/** {@value #ROOT}/legacy/{tag}/annotation/update */
+			/** {@value #ROOT}/legacy/{tag}/update */
 			public static final RestEndpoint LEGACY_UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.LEGACY_UPDATE, RequestMethod.GET);
 
 			private Annotation() {
@@ -200,10 +200,10 @@ public class RestApi {
 
 			public static class Paths {
 
-				public static final String GET = "/{tag}/annotation";
-				public static final String GET_BASE = "/{tag}/annotation/base";
-				public static final String UPDATE = "/{tag}/annotation";
-				public static final String LEGACY_UPDATE = "/legacy/{tag}/annotation/update";
+				public static final String GET = "/{tag}";
+				public static final String GET_BASE = "/{tag}/base";
+				public static final String UPDATE = "/{tag}";
+				public static final String LEGACY_UPDATE = "/legacy/{tag}/update";
 
 				private Paths() {
 				}
@@ -223,7 +223,7 @@ public class RestApi {
 			/** {@value #ROOT}/annotation */
 			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_APPLICATION, RequestMethod.GET);
 
-			/** {@value #ROOT}/system */
+			/** {@value #ROOT}/application */
 			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_ANNOTATION, RequestMethod.GET);
 
 			private Dummy() {
@@ -232,7 +232,7 @@ public class RestApi {
 			public static class Paths {
 
 				public static final String GET_APPLICATION = "/annotation";
-				public static final String GET_ANNOTATION = "/system";
+				public static final String GET_ANNOTATION = "/application";
 
 				private Paths() {
 				}
@@ -262,7 +262,7 @@ public class RestApi {
 		 */
 		public static class Application {
 
-			public static final String ROOT = "/system";
+			public static final String ROOT = "/application";
 
 			/** {@value #ROOT}/{tag} */
 			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
@@ -448,13 +448,13 @@ public class RestApi {
 			/** {@value #ROOT}/{id} */
 			public static final RestEndpoint REMOVE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.REMOVE, RequestMethod.DELETE);
 
-			/** {@value #ROOT}/{id}/system */
+			/** {@value #ROOT}/{id}/application */
 			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_APPLICATION, RequestMethod.GET);
 
 			/** {@value #ROOT}/{id}/annotation */
 			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_ANNOTATION, RequestMethod.GET);
 
-			/** {@value #ROOT}/{tag}/reserve */
+			/** {@value #ROOT}/reserve/{tag} */
 			public static final RestEndpoint RESERVE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.RESERVE, RequestMethod.GET);
 
 			private Model() {
@@ -465,9 +465,9 @@ public class RestApi {
 				public static final String OVERVIEW = "/{id}";
 				public static final String GET_WORKLOAD = "/{id}/workload";
 				public static final String REMOVE = "/{id}";
-				public static final String GET_APPLICATION = "/{id}/system";
+				public static final String GET_APPLICATION = "/{id}/application";
 				public static final String GET_ANNOTATION = "/{id}/annotation";
-				public static final String RESERVE = "/{tag}/reserve";
+				public static final String RESERVE = "/reserve/{tag}";
 
 				private Paths() {
 				}
