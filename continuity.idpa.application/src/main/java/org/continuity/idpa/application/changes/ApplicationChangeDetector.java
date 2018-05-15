@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.continuity.idpa.application.Parameter;
 import org.continuity.idpa.application.entities.ModelElementReference;
-import org.continuity.idpa.application.entities.SystemChange;
+import org.continuity.idpa.application.entities.ApplicationChange;
 import org.continuity.idpa.application.entities.ApplicationChangeReport;
-import org.continuity.idpa.application.entities.SystemChangeType;
+import org.continuity.idpa.application.entities.ApplicationChangeType;
 import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.Application;
 import org.continuity.idpa.visitor.IdpaByClassSearcher;
@@ -25,7 +25,7 @@ import com.google.common.base.Objects;
  * @author Henning Schulz
  *
  */
-public class SystemChangeDetector {
+public class ApplicationChangeDetector {
 
 	private final Application newSystemModel;
 
@@ -37,11 +37,11 @@ public class SystemChangeDetector {
 	 * @param newSystemModel
 	 *            The current system model.
 	 */
-	public SystemChangeDetector(Application newSystemModel) {
-		this(newSystemModel, EnumSet.noneOf(SystemChangeType.class));
+	public ApplicationChangeDetector(Application newSystemModel) {
+		this(newSystemModel, EnumSet.noneOf(ApplicationChangeType.class));
 	}
 
-	public SystemChangeDetector(Application newSystemModel, EnumSet<SystemChangeType> ignoredChangeTypes) {
+	public ApplicationChangeDetector(Application newSystemModel, EnumSet<ApplicationChangeType> ignoredChangeTypes) {
 		this.newSystemModel = newSystemModel;
 		this.reportBuilder = new SystemChangeReportBuilder(ignoredChangeTypes, newSystemModel.getTimestamp());
 	}
@@ -75,13 +75,13 @@ public class SystemChangeDetector {
 		ModelElementReference ref = new ModelElementReference(newInterf);
 
 		if (interfHolder.element == null) {
-			reportBuilder.addChange(new SystemChange(SystemChangeType.ENDPOINT_ADDED, ref));
+			reportBuilder.addChange(new ApplicationChange(ApplicationChangeType.ENDPOINT_ADDED, ref));
 		} else {
 			Endpoint<?> oldInterf = interfHolder.element;
 
 			for (String changedProperty : oldInterf.getDifferingProperties(newInterf)) {
 				if (!"parameters".equals(changedProperty)) {
-					reportBuilder.addChange(new SystemChange(SystemChangeType.ENDPOINT_CHANGED, ref, changedProperty));
+					reportBuilder.addChange(new ApplicationChange(ApplicationChangeType.ENDPOINT_CHANGED, ref, changedProperty));
 				}
 			}
 
@@ -96,7 +96,7 @@ public class SystemChangeDetector {
 	private boolean reportRemovedInterface(Endpoint<?> oldInterf, Set<ModelElementReference> visited) {
 		ModelElementReference ref = new ModelElementReference(oldInterf);
 		if (!visited.contains(ref)) {
-			reportBuilder.addChange(new SystemChange(SystemChangeType.ENDPOINT_REMOVED, ref));
+			reportBuilder.addChange(new ApplicationChange(ApplicationChangeType.ENDPOINT_REMOVED, ref));
 		}
 
 		return true;
@@ -112,10 +112,10 @@ public class SystemChangeDetector {
 			List<Parameter> oldParams = oldInterf.getParameters().stream().filter(p -> Objects.equal(param.getId(), p.getId())).collect(Collectors.toList());
 
 			if (oldParams.isEmpty()) {
-				reportBuilder.addChange(new SystemChange(SystemChangeType.PARAMETER_ADDED, ref));
+				reportBuilder.addChange(new ApplicationChange(ApplicationChangeType.PARAMETER_ADDED, ref));
 			} else {
 				for (String changedProperty : param.getDifferingProperties(oldParams.get(0))) {
-					reportBuilder.addChange(new SystemChange(SystemChangeType.PARAMETER_CHANGED, ref, changedProperty));
+					reportBuilder.addChange(new ApplicationChange(ApplicationChangeType.PARAMETER_CHANGED, ref, changedProperty));
 				}
 			}
 		}
@@ -124,7 +124,7 @@ public class SystemChangeDetector {
 			List<Parameter> newParams = newInterf.getParameters().stream().filter(p -> Objects.equal(param.getId(), p.getId())).collect(Collectors.toList());
 
 			if (newParams.isEmpty()) {
-				reportBuilder.addChange(new SystemChange(SystemChangeType.PARAMETER_REMOVED, new ModelElementReference(param)));
+				reportBuilder.addChange(new ApplicationChange(ApplicationChangeType.PARAMETER_REMOVED, new ModelElementReference(param)));
 			}
 		}
 	}

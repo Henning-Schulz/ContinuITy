@@ -8,10 +8,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Henning Schulz
  *
  */
-public class SystemChange {
+public class ApplicationChange {
 
 	@JsonProperty("message")
-	private SystemChangeType type;
+	private ApplicationChangeType type;
 
 	@JsonProperty("changed-element")
 	private ModelElementReference changedElement;
@@ -20,21 +20,21 @@ public class SystemChange {
 	@JsonInclude(Include.NON_NULL)
 	private String changedProperty;
 
-	public SystemChange(SystemChangeType type, ModelElementReference referenced, String changedProperty) {
+	public ApplicationChange(ApplicationChangeType type, ModelElementReference referenced, String changedProperty) {
 		this.type = type;
 		this.changedElement = referenced;
 		this.changedProperty = changedProperty;
 	}
 
-	public SystemChange(SystemChangeType type, ModelElementReference referenced) {
+	public ApplicationChange(ApplicationChangeType type, ModelElementReference referenced) {
 		this(type, referenced, null);
 	}
 
-	public SystemChange(SystemChangeType type) {
+	public ApplicationChange(ApplicationChangeType type) {
 		this(type, null);
 	}
 
-	public SystemChange() {
+	public ApplicationChange() {
 	}
 
 	/**
@@ -42,7 +42,7 @@ public class SystemChange {
 	 *
 	 * @return {@link #type}
 	 */
-	public SystemChangeType getType() {
+	public ApplicationChangeType getType() {
 		return this.type;
 	}
 

@@ -4,50 +4,50 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.continuity.idpa.annotation.Input;
+import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.annotation.EndpointAnnotation;
+import org.continuity.idpa.annotation.Input;
 import org.continuity.idpa.annotation.ParameterAnnotation;
 import org.continuity.idpa.annotation.RegExExtraction;
 import org.continuity.idpa.annotation.entities.AnnotationValidityReport;
 import org.continuity.idpa.annotation.entities.AnnotationViolation;
 import org.continuity.idpa.annotation.entities.AnnotationViolationType;
 import org.continuity.idpa.annotation.entities.ModelElementReference;
-import org.continuity.idpa.annotation.ApplicationAnnotation;
-import org.continuity.idpa.application.Parameter;
-import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.Application;
+import org.continuity.idpa.application.Endpoint;
+import org.continuity.idpa.application.Parameter;
 import org.continuity.idpa.visitor.IdpaByClassSearcher;
 
 /**
- * Compares system models and annotations against a base system model. E.g., can be used to
- * determine the differences of an old system model an the new one or to compare an annotation
- * against the new system model.
+ * Compares application models and annotations against a base application model. E.g., can be used
+ * to determine the differences of an old application model an the new one or to compare an
+ * annotation against the new application model.
  *
  * @author Henning Schulz
  *
  */
 public class AnnotationValidityChecker {
 
-	private final Application newSystemModel;
+	private final Application newApplication;
 
 	private final AnnotationValidationReportBuilder reportBuilder = new AnnotationValidationReportBuilder();
 
 	/**
-	 * Creates an instance with the current system model as base.
+	 * Creates an instance with the current application model as base.
 	 *
-	 * @param newSystemModel
-	 *            The current system model.
+	 * @param newApplication
+	 *            The current application model.
 	 */
-	public AnnotationValidityChecker(Application newSystemModel) {
-		this.newSystemModel = newSystemModel;
+	public AnnotationValidityChecker(Application newApplication) {
+		this.newApplication = newApplication;
 	}
 
-	public void registerSystemChanges(AnnotationValidityReport systemChangeReport) {
-		reportBuilder.addViolations(systemChangeReport.getApplicationChanges());
+	public void registerApplicationChanges(AnnotationValidityReport applicationChangeReport) {
+		reportBuilder.addViolations(applicationChangeReport.getApplicationChanges());
 	}
 
 	/**
-	 * Compares an annotation to the stored system model and reports broken references.
+	 * Compares an annotation to the stored application model and reports broken references.
 	 *
 	 * @param annotation
 	 *            An annotation.
@@ -74,7 +74,7 @@ public class AnnotationValidityChecker {
 
 	private void checkAnnotationForExternalReferences(ApplicationAnnotation annotation) {
 		IdpaByClassSearcher<EndpointAnnotation> interfaceSearcher = new IdpaByClassSearcher<>(EndpointAnnotation.class, ann -> {
-			Endpoint<?> interf = ann.getAnnotatedEndpoint().resolve(newSystemModel);
+			Endpoint<?> interf = ann.getAnnotatedEndpoint().resolve(newApplication);
 
 			if (interf == null) {
 				ModelElementReference interfRef = new ModelElementReference(ann.getAnnotatedEndpoint());
@@ -88,7 +88,7 @@ public class AnnotationValidityChecker {
 		interfaceSearcher.visit(annotation);
 
 		IdpaByClassSearcher<ParameterAnnotation> paramSearcher = new IdpaByClassSearcher<>(ParameterAnnotation.class, ann -> {
-			Parameter param = ann.getAnnotatedParameter().resolve(newSystemModel);
+			Parameter param = ann.getAnnotatedParameter().resolve(newApplication);
 
 			if (param == null) {
 				ModelElementReference paramRef = new ModelElementReference(ann.getAnnotatedParameter());
@@ -102,7 +102,7 @@ public class AnnotationValidityChecker {
 		paramSearcher.visit(annotation);
 
 		IdpaByClassSearcher<RegExExtraction> extractionSearcher = new IdpaByClassSearcher<>(RegExExtraction.class, extraction -> {
-			Endpoint<?> interf = extraction.getFrom().resolve(newSystemModel);
+			Endpoint<?> interf = extraction.getFrom().resolve(newApplication);
 
 			if (interf == null) {
 				ModelElementReference interfRef = new ModelElementReference(extraction.getFrom());

@@ -39,7 +39,7 @@ public class AnnotationRestValidityCheckTest {
 	@Before
 	public void setupController() throws IOException {
 		storageMock = Mockito.mock(AnnotationStorage.class);
-		Mockito.when(storageMock.readSystemModel(TAG)).thenReturn(AnnotationValidityTestInstance.FIRST.getSystemModel());
+		Mockito.when(storageMock.readApplication(TAG)).thenReturn(AnnotationValidityTestInstance.FIRST.getSystemModel());
 
 		controller = new AnnotationController(new AnnotationStorageManager(storageMock));
 	}
@@ -55,19 +55,19 @@ public class AnnotationRestValidityCheckTest {
 	@Test
 	public void testChangingAnnotations() throws IOException {
 		ResponseEntity<String> response = controller.updateAnnotation(TAG, AnnotationValidityTestInstance.FIRST.getAnnotation());
-		Mockito.verify(storageMock).readSystemModel(ArgumentMatchers.eq(TAG));
+		Mockito.verify(storageMock).readApplication(ArgumentMatchers.eq(TAG));
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
 		Mockito.clearInvocations(storageMock);
 
 		response = controller.updateAnnotation(TAG, AnnotationValidityTestInstance.SECOND_ANNOTATION.getAnnotation());
-		Mockito.verify(storageMock).readSystemModel(ArgumentMatchers.eq(TAG));
+		Mockito.verify(storageMock).readApplication(ArgumentMatchers.eq(TAG));
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
 		Mockito.clearInvocations(storageMock);
 
 		response = controller.updateAnnotation(TAG, AnnotationValidityTestInstance.THIRD_ANNOTATION.getAnnotation());
-		Mockito.verify(storageMock).readSystemModel(ArgumentMatchers.eq(TAG));
+		Mockito.verify(storageMock).readApplication(ArgumentMatchers.eq(TAG));
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
 
 		AnnotationValidityReport report = mapper.readValue(response.getBody(), AnnotationValidityReport.class);

@@ -16,9 +16,9 @@ import org.continuity.commons.format.CommonFormats;
 import org.continuity.idpa.application.Application;
 import org.continuity.idpa.application.config.RabbitMqConfig;
 import org.continuity.idpa.application.entities.ApplicationChangeReport;
-import org.continuity.idpa.application.entities.SystemChangeType;
+import org.continuity.idpa.application.entities.ApplicationChangeType;
 import org.continuity.idpa.application.entities.SystemModelLink;
-import org.continuity.idpa.application.repository.SystemModelRepositoryManager;
+import org.continuity.idpa.application.repository.ApplicationModelRepositoryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -53,10 +53,10 @@ public class ApplicationController {
 	@Value("${spring.application.name}")
 	private String applicationName;
 
-	private final SystemModelRepositoryManager manager;
+	private final ApplicationModelRepositoryManager manager;
 
 	@Autowired
-	public ApplicationController(SystemModelRepositoryManager manager, AmqpTemplate amqpTemplate) {
+	public ApplicationController(ApplicationModelRepositoryManager manager, AmqpTemplate amqpTemplate) {
 		this.manager = manager;
 		this.amqpTemplate = amqpTemplate;
 	}
@@ -111,15 +111,15 @@ public class ApplicationController {
 	 * @param system
 	 *            The system model to be stored.
 	 * @param ignoreInterfaceChanged
-	 *            Ignore {@link SystemChangeType#ENDPOINT_CHANGED}.
+	 *            Ignore {@link ApplicationChangeType#ENDPOINT_CHANGED}.
 	 * @param ignoreInterfaceRemoved
-	 *            Ignore {@link SystemChangeType#ENDPOINT_REMOVED}.
+	 *            Ignore {@link ApplicationChangeType#ENDPOINT_REMOVED}.
 	 * @param ignoreInterfaceAdded
-	 *            Ignore {@link SystemChangeType#ENDPOINT_ADDED}.
+	 *            Ignore {@link ApplicationChangeType#ENDPOINT_ADDED}.
 	 * @param ignoreParameterRemoved
-	 *            Ignore {@link SystemChangeType#PARAMETER_REMOVED}.
+	 *            Ignore {@link ApplicationChangeType#PARAMETER_REMOVED}.
 	 * @param ignoreParameterAdded
-	 *            Ignore {@link SystemChangeType#PARAMETER_ADDED}.
+	 *            Ignore {@link ApplicationChangeType#PARAMETER_ADDED}.
 	 * @return A report holding the differences between the passed model and the next older one.
 	 */
 	@RequestMapping(path = UPDATE, method = RequestMethod.POST)
@@ -131,7 +131,7 @@ public class ApplicationController {
 			@RequestParam(name = "ignore-parameter-removed", defaultValue = "false") boolean ignoreParameterRemoved,
 			@RequestParam(name = "ignore-parameter-added", defaultValue = "false") boolean ignoreParameterAdded) {
 
-		EnumSet<SystemChangeType> ignoredChangeTypes = changeTypesFromBooleans(ignoreInterfaceChanged, ignoreInterfaceRemoved, ignoreInterfaceAdded, ignoreParameterChanged, ignoreParameterRemoved,
+		EnumSet<ApplicationChangeType> ignoredChangeTypes = changeTypesFromBooleans(ignoreInterfaceChanged, ignoreInterfaceRemoved, ignoreInterfaceAdded, ignoreParameterChanged, ignoreParameterRemoved,
 				ignoreParameterAdded);
 
 		ApplicationChangeReport report = manager.saveOrUpdate(tag, system, ignoredChangeTypes);
@@ -181,33 +181,33 @@ public class ApplicationController {
 		return ResponseEntity.ok("Updated " + numUpdated + " legacy applications.");
 	}
 
-	private EnumSet<SystemChangeType> changeTypesFromBooleans(boolean ignoreInterfaceChanged, boolean ignoreInterfaceRemoved, boolean ignoreInterfaceAdded, boolean ignoreParameterChanged,
+	private EnumSet<ApplicationChangeType> changeTypesFromBooleans(boolean ignoreInterfaceChanged, boolean ignoreInterfaceRemoved, boolean ignoreInterfaceAdded, boolean ignoreParameterChanged,
 			boolean ignoreParameterRemoved,
 			boolean ignoreParameterAdded) {
-		EnumSet<SystemChangeType> set = EnumSet.noneOf(SystemChangeType.class);
+		EnumSet<ApplicationChangeType> set = EnumSet.noneOf(ApplicationChangeType.class);
 
 		if (ignoreInterfaceChanged) {
-			set.add(SystemChangeType.ENDPOINT_CHANGED);
+			set.add(ApplicationChangeType.ENDPOINT_CHANGED);
 		}
 
 		if (ignoreInterfaceRemoved) {
-			set.add(SystemChangeType.ENDPOINT_REMOVED);
+			set.add(ApplicationChangeType.ENDPOINT_REMOVED);
 		}
 
 		if (ignoreInterfaceAdded) {
-			set.add(SystemChangeType.ENDPOINT_ADDED);
+			set.add(ApplicationChangeType.ENDPOINT_ADDED);
 		}
 
 		if (ignoreParameterChanged) {
-			set.add(SystemChangeType.PARAMETER_CHANGED);
+			set.add(ApplicationChangeType.PARAMETER_CHANGED);
 		}
 
 		if (ignoreParameterRemoved) {
-			set.add(SystemChangeType.PARAMETER_REMOVED);
+			set.add(ApplicationChangeType.PARAMETER_REMOVED);
 		}
 
 		if (ignoreParameterAdded) {
-			set.add(SystemChangeType.PARAMETER_ADDED);
+			set.add(ApplicationChangeType.PARAMETER_ADDED);
 		}
 
 		return set;

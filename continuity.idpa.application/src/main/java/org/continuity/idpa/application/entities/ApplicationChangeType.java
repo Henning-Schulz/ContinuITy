@@ -16,9 +16,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  * @author Henning Schulz
  *
  */
-@JsonSerialize(using = SystemChangeType.JsonSerializer.class)
-@JsonDeserialize(using = SystemChangeType.JsonDeserializer.class)
-public enum SystemChangeType {
+@JsonSerialize(using = ApplicationChangeType.JsonSerializer.class)
+@JsonDeserialize(using = ApplicationChangeType.JsonDeserializer.class)
+public enum ApplicationChangeType {
 
 	ENDPOINT_CHANGED("The endpoint has changed."), ENDPOINT_REMOVED("The endpoint has been removed."), ENDPOINT_ADDED("A new endpoint has been added."), PARAMETER_CHANGED(
 			"The parameter has changed."), PARAMETER_REMOVED(
@@ -28,7 +28,7 @@ public enum SystemChangeType {
 
 	private final String description;
 
-	private SystemChangeType(String description) {
+	private ApplicationChangeType(String description) {
 		String tmp = name().replace("_", " ").toLowerCase();
 		this.prettyName = tmp.substring(0, 1).toUpperCase() + tmp.substring(1);
 		this.description = description;
@@ -56,7 +56,7 @@ public enum SystemChangeType {
 		return prettyName() + ": " + description();
 	}
 
-	protected static class JsonSerializer extends StdSerializer<SystemChangeType> {
+	protected static class JsonSerializer extends StdSerializer<ApplicationChangeType> {
 
 		private static final long serialVersionUID = -3584135264314110782L;
 
@@ -64,7 +64,7 @@ public enum SystemChangeType {
 			this(null);
 		}
 
-		public JsonSerializer(Class<SystemChangeType> t) {
+		public JsonSerializer(Class<ApplicationChangeType> t) {
 			super(t);
 		}
 
@@ -72,13 +72,13 @@ public enum SystemChangeType {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void serialize(SystemChangeType value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		public void serialize(ApplicationChangeType value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 			gen.writeString(value.getMessage());
 		}
 
 	}
 
-	protected static class JsonDeserializer extends StdDeserializer<SystemChangeType> {
+	protected static class JsonDeserializer extends StdDeserializer<ApplicationChangeType> {
 
 		private static final long serialVersionUID = 163275591308563017L;
 
@@ -97,10 +97,10 @@ public enum SystemChangeType {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public SystemChangeType deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+		public ApplicationChangeType deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
 			String prettyName = p.getValueAsString().split("\\:")[0];
 			String name = prettyName.toUpperCase().replace(" ", "_");
-			return SystemChangeType.valueOf(name);
+			return ApplicationChangeType.valueOf(name);
 		}
 
 	}

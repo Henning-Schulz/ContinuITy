@@ -6,10 +6,10 @@ import org.continuity.commons.utils.WebUtils;
 import org.continuity.idpa.application.Application;
 import org.continuity.idpa.application.config.RabbitMqConfig;
 import org.continuity.idpa.application.entities.ApplicationChangeReport;
-import org.continuity.idpa.application.entities.SystemChangeType;
+import org.continuity.idpa.application.entities.ApplicationChangeType;
 import org.continuity.idpa.application.entities.SystemModelLink;
 import org.continuity.idpa.application.entities.WorkloadModelLink;
-import org.continuity.idpa.application.repository.SystemModelRepositoryManager;
+import org.continuity.idpa.application.repository.ApplicationModelRepositoryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -33,7 +33,7 @@ public class UpdateSystemModelAmqpHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UpdateSystemModelAmqpHandler.class);
 
-	private final SystemModelRepositoryManager repositoryManager;
+	private final ApplicationModelRepositoryManager repositoryManager;
 
 	private final RestTemplate restTemplate;
 
@@ -43,7 +43,7 @@ public class UpdateSystemModelAmqpHandler {
 	private String applicationName;
 
 	@Autowired
-	public UpdateSystemModelAmqpHandler(SystemModelRepositoryManager repositoryManager, RestTemplate restTemplate, AmqpTemplate amqpTemplate) {
+	public UpdateSystemModelAmqpHandler(ApplicationModelRepositoryManager repositoryManager, RestTemplate restTemplate, AmqpTemplate amqpTemplate) {
 		this.repositoryManager = repositoryManager;
 		this.restTemplate = restTemplate;
 		this.amqpTemplate = amqpTemplate;
@@ -79,7 +79,7 @@ public class UpdateSystemModelAmqpHandler {
 		// A workload model may only contain parts of all available interfaces, possible parameters
 		// and possible properties (e.g., headers).
 		ApplicationChangeReport report = repositoryManager.saveOrUpdate(link.getTag(), systemModel,
-				EnumSet.of(SystemChangeType.ENDPOINT_REMOVED, SystemChangeType.ENDPOINT_CHANGED, SystemChangeType.PARAMETER_REMOVED));
+				EnumSet.of(ApplicationChangeType.ENDPOINT_REMOVED, ApplicationChangeType.ENDPOINT_CHANGED, ApplicationChangeType.PARAMETER_REMOVED));
 
 		if (report.changed()) {
 			try {

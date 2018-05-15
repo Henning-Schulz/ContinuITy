@@ -1,9 +1,9 @@
 package org.continuity.wessbas.controllers;
 
 import static org.continuity.api.rest.RestApi.Wessbas.Model.ROOT;
+import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET_ANNOTATION;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET_APPLICATION;
-import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.OVERVIEW;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.REMOVE;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.RESERVE;
@@ -107,12 +107,12 @@ public class WessbasModelController {
 	 *
 	 * @param id
 	 *            The id of the stored model.
-	 * @return A system model for the stored WESSBAS model or a 404 (Not Found) if there is no such
-	 *         model.
+	 * @return An application model for the stored WESSBAS model or a 404 (Not Found) if there is no
+	 *         such model.
 	 */
 	@RequestMapping(path = GET_APPLICATION, method = RequestMethod.GET)
-	public ResponseEntity<Application> getSystemModel(@PathVariable String id) {
-		Application systemModel = createSystemModelAndAnnotation(id).getLeft();
+	public ResponseEntity<Application> getApplicationModel(@PathVariable String id) {
+		Application systemModel = createIdpa(id).getLeft();
 
 		if (systemModel == null) {
 			return ResponseEntity.notFound().build();
@@ -130,8 +130,8 @@ public class WessbasModelController {
 	 *         model.
 	 */
 	@RequestMapping(path = GET_ANNOTATION, method = RequestMethod.GET)
-	public ResponseEntity<ApplicationAnnotation> getSystemAnnotation(@PathVariable String id) {
-		ApplicationAnnotation annotation = createSystemModelAndAnnotation(id).getRight();
+	public ResponseEntity<ApplicationAnnotation> getApplicationAnnotation(@PathVariable String id) {
+		ApplicationAnnotation annotation = createIdpa(id).getRight();
 
 		if (annotation == null) {
 			return ResponseEntity.notFound().build();
@@ -140,7 +140,7 @@ public class WessbasModelController {
 		}
 	}
 
-	private Pair<Application, ApplicationAnnotation> createSystemModelAndAnnotation(String id) {
+	private Pair<Application, ApplicationAnnotation> createIdpa(String id) {
 		Application systemModel = systemModelBuffer.get(id);
 		ApplicationAnnotation annotation = annotationBuffer.get(id);
 

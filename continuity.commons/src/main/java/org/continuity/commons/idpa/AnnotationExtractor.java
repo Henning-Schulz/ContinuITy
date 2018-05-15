@@ -5,7 +5,7 @@ import org.continuity.idpa.application.Application;
 import org.continuity.idpa.visitor.IdpaVisitor;
 
 /**
- * Utility calss for extracting initial annotations from system models.
+ * Utility calss for extracting initial annotations from application models.
  *
  * @author Henning Schulz
  *
@@ -13,16 +13,16 @@ import org.continuity.idpa.visitor.IdpaVisitor;
 public class AnnotationExtractor {
 
 	/**
-	 * Extracts the annotations from the specified system model.
+	 * Extracts the annotations from the specified application model.
 	 *
-	 * @param system
-	 *            The system model.
+	 * @param application
+	 *            The application model.
 	 * @return The extracted annotations.
 	 */
-	public ApplicationAnnotation extractAnnotation(Application system) {
-		SystemToAnnotationTransformer transformer = new SystemToAnnotationTransformer();
+	public ApplicationAnnotation extractAnnotation(Application application) {
+		ApplicationToAnnotationTransformer transformer = new ApplicationToAnnotationTransformer();
 		IdpaVisitor visitor = new IdpaVisitor(transformer::onModelElementVisited);
-		visitor.visit(system);
+		visitor.visit(application);
 		return transformer.getExtractedAnnotation();
 	}
 

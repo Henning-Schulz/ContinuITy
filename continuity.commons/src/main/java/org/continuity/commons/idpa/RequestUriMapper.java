@@ -12,10 +12,10 @@ import org.continuity.idpa.visitor.IdpaByClassSearcher;
  */
 public class RequestUriMapper {
 
-	private final Application system;
+	private final Application application;
 
-	public RequestUriMapper(Application system) {
-		this.system = system;
+	public RequestUriMapper(Application application) {
+		this.application = application;
 	}
 
 	/**
@@ -34,7 +34,7 @@ public class RequestUriMapper {
 	public HttpEndpoint mapExactly(String uri, String method) {
 		MappingFinder finder = new MappingFinder(uri, method);
 		IdpaByClassSearcher<HttpEndpoint> searcher = new IdpaByClassSearcher<>(HttpEndpoint.class, finder::testExactly);
-		searcher.visit(system);
+		searcher.visit(application);
 
 		return finder.getFound();
 	}
@@ -54,7 +54,7 @@ public class RequestUriMapper {
 	public HttpEndpoint mapRespectingWildcards(String uri, String method) {
 		MappingFinder finder = new MappingFinder(uri, method);
 		IdpaByClassSearcher<HttpEndpoint> searcher = new IdpaByClassSearcher<>(HttpEndpoint.class, finder::testRespectingWildcards);
-		searcher.visit(system);
+		searcher.visit(application);
 
 		return finder.getFound();
 	}

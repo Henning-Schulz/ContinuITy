@@ -85,7 +85,7 @@ public class AnnotationAmpqHandler {
 		}
 
 		try {
-			report = storageManager.updateSystemModel(link.getTag(), systemResponse.getBody(), report);
+			report = storageManager.updateApplication(link.getTag(), systemResponse.getBody(), report);
 		} catch (IOException e) {
 			LOGGER.error("Error during storing the new system model with tag {}!", link.getTag());
 			LOGGER.error("Exception: ", e);

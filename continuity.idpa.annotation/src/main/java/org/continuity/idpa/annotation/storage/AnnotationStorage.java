@@ -50,8 +50,8 @@ public class AnnotationStorage {
 	 *
 	 * @param tag
 	 *            The tag of the models.
-	 * @param systemModel
-	 *            The system model.
+	 * @param applicationModel
+	 *            The application model.
 	 * @param annotation
 	 *            The annotation
 	 * @param suffix
@@ -60,8 +60,8 @@ public class AnnotationStorage {
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveOrUpdate(String tag, Application systemModel, ApplicationAnnotation annotation, String suffix) throws IOException {
-		boolean created = saveOrUpdate(tag, systemModel);
+	public boolean saveOrUpdate(String tag, Application applicationModel, ApplicationAnnotation annotation, String suffix) throws IOException {
+		boolean created = saveOrUpdate(tag, applicationModel);
 		created = created || saveOrUpdate(tag, annotation, suffix);
 
 		return !created;
@@ -73,33 +73,33 @@ public class AnnotationStorage {
 	 *
 	 * @param tag
 	 *            The tag of the models.
-	 * @param systemModel
-	 *            The system model.
+	 * @param applicationModel
+	 *            The application model.
 	 * @param annotation
 	 *            The annotation
 	 * @return {@code true} if and only if existing models were overwritten.
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveOrUpdate(String tag, Application systemModel, ApplicationAnnotation annotation) throws IOException {
-		return saveOrUpdate(tag, systemModel, annotation, null);
+	public boolean saveOrUpdate(String tag, Application applicationModel, ApplicationAnnotation annotation) throws IOException {
+		return saveOrUpdate(tag, applicationModel, annotation, null);
 	}
 
 	/**
-	 * Stores the specified system model with the specified tag. If there are already models with
-	 * the same tag, they will be overwritten.
+	 * Stores the specified application model with the specified tag. If there are already models
+	 * with the same tag, they will be overwritten.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
-	 * @param systemModel
-	 *            The system model.
+	 *            The tag of the application model.
+	 * @param applicationModel
+	 *            The application model.
 	 * @param suffix
 	 *            A suffix to be appended to the file name.
 	 * @return {@code true} if and only if existing models were overwritten.
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveOrUpdate(String tag, Application systemModel, String suffix) throws IOException {
+	public boolean saveOrUpdate(String tag, Application applicationModel, String suffix) throws IOException {
 		Path dirPath = getDir(tag, false, false);
 
 		if (dirPath == null) {
@@ -117,27 +117,27 @@ public class AnnotationStorage {
 		filename += FILE_EXTENSION;
 
 		IdpaYamlSerializer<Application> serializer = new IdpaYamlSerializer<>(Application.class);
-		serializer.writeToYaml(systemModel, dirPath.resolve(filename));
+		serializer.writeToYaml(applicationModel, dirPath.resolve(filename));
 
-		LOGGER.debug("Wrote system model to {}.", dirPath);
+		LOGGER.debug("Wrote application model to {}.", dirPath);
 
 		return !created;
 	}
 
 	/**
-	 * Stores the specified system model with the specified tag. If there are already models with
-	 * the same tag, they will be overwritten.
+	 * Stores the specified application model with the specified tag. If there are already models
+	 * with the same tag, they will be overwritten.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
-	 * @param systemModel
-	 *            The system model.
+	 *            The tag of the application model.
+	 * @param applicationModel
+	 *            The application model.
 	 * @return {@code true} if and only if existing models were overwritten.
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveOrUpdate(String tag, Application systemModel) throws IOException {
-		return saveOrUpdate(tag, systemModel, (String) null);
+	public boolean saveOrUpdate(String tag, Application applicationModel) throws IOException {
+		return saveOrUpdate(tag, applicationModel, (String) null);
 	}
 
 	/**
@@ -255,34 +255,34 @@ public class AnnotationStorage {
 	}
 
 	/**
-	 * Stores the specified system model with the specified tag if there is no such model.
+	 * Stores the specified application model with the specified tag if there is no such model.
 	 *
 	 * @param tag
 	 *            The tag of the annotation.
-	 * @param system
-	 *            The system model.
-	 * @return {@code true} if and only if the system model was stored.
+	 * @param application
+	 *            The application model.
+	 * @return {@code true} if and only if the application model was stored.
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveIfNotPresent(String tag, Application system) throws IOException {
-		return saveIfNotPresent(tag, system, null);
+	public boolean saveIfNotPresent(String tag, Application application) throws IOException {
+		return saveIfNotPresent(tag, application, null);
 	}
 
 	/**
-	 * Stores the specified system model with the specified tag if there is no such model.
+	 * Stores the specified application model with the specified tag if there is no such model.
 	 *
 	 * @param tag
 	 *            The tag of the annotation.
-	 * @param system
-	 *            The system model.
+	 * @param application
+	 *            The application model.
 	 * @param suffix
 	 *            A suffix to be appended to the filename.
-	 * @return {@code true} if and only if the system model was stored.
+	 * @return {@code true} if and only if the application model was stored.
 	 * @throws IOException
 	 *             If errors during writing to files occur.
 	 */
-	public boolean saveIfNotPresent(String tag, Application system, String suffix) throws IOException {
+	public boolean saveIfNotPresent(String tag, Application application, String suffix) throws IOException {
 		Path dirPath = getDir(tag, true, false);
 
 		if (dirPath == null) {
@@ -301,7 +301,7 @@ public class AnnotationStorage {
 
 		if (!exists) {
 			IdpaYamlSerializer<Application> serializer = new IdpaYamlSerializer<>(Application.class);
-			serializer.writeToYaml(system, systemPath);
+			serializer.writeToYaml(application, systemPath);
 
 			LOGGER.debug("Wrote annotation to {}.", dirPath);
 		} else {
@@ -312,15 +312,15 @@ public class AnnotationStorage {
 	}
 
 	/**
-	 * Retrieves the system model from the specified tag if possible.
+	 * Retrieves the application model from the specified tag if possible.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
-	 * @return The stored system model or {@code null} if there is no such model.
+	 *            The tag of the application model.
+	 * @return The stored application model or {@code null} if there is no such model.
 	 * @throws IOException
 	 *             If errors during reading the model occur.
 	 */
-	public Application readSystemModel(String tag, String suffix) throws IOException {
+	public Application readApplication(String tag, String suffix) throws IOException {
 		Path dirPath = getDir(tag, false, true);
 
 		if (dirPath == null) {
@@ -344,21 +344,21 @@ public class AnnotationStorage {
 
 		IdpaYamlSerializer<Application> serializer = new IdpaYamlSerializer<>(Application.class);
 
-		LOGGER.debug("Reading system model from {}.", systemPath);
+		LOGGER.debug("Reading application model from {}.", systemPath);
 		return serializer.readFromYaml(systemPath);
 	}
 
 	/**
-	 * Retrieves the system model from the specified tag if possible.
+	 * Retrieves the application model from the specified tag if possible.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
-	 * @return The stored system model or {@code null} if there is no such model.
+	 *            The tag of the application model.
+	 * @return The stored application model or {@code null} if there is no such model.
 	 * @throws IOException
 	 *             If errors during reading the model occur.
 	 */
-	public Application readSystemModel(String tag) throws IOException {
-		return readSystemModel(tag, null);
+	public Application readApplication(String tag) throws IOException {
+		return readApplication(tag, null);
 	}
 
 	/**
@@ -414,16 +414,16 @@ public class AnnotationStorage {
 	}
 
 	/**
-	 * Removes the specified system model from the storage if possible.
+	 * Removes the specified application model from the storage if possible.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
+	 *            The tag of the application model.
 	 * @param suffix
-	 *            The suffix of the system model.
-	 * @return {@code true} if and only if there was a system model and is was successfully deleted,
-	 *         {@code false} otherwise.
+	 *            The suffix of the application model.
+	 * @return {@code true} if and only if there was a application model and is was successfully
+	 *         deleted, {@code false} otherwise.
 	 */
-	public boolean removeSystemIfPresent(String tag, String suffix) {
+	public boolean removeApplicationIfPresent(String tag, String suffix) {
 		String filename = APPLICATION_FILE_NAME;
 
 		if (suffix != null) {
@@ -472,16 +472,16 @@ public class AnnotationStorage {
 	}
 
 	/**
-	 * Returns whether there is a system model file for the specified tag and with the specified
-	 * suffix.
+	 * Returns whether there is a application model file for the specified tag and with the
+	 * specified suffix.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
+	 *            The tag of the application model.
 	 * @param suffix
 	 *            A suffix to be appended to the file name.
-	 * @return {@code true} if there is a system model with the tag and suffix.
+	 * @return {@code true} if there is a application model with the tag and suffix.
 	 */
-	public boolean systemSuffixExists(String tag, String suffix) {
+	public boolean applicationSuffixExists(String tag, String suffix) {
 		String filename = APPLICATION_FILE_NAME;
 
 		if (suffix != null) {

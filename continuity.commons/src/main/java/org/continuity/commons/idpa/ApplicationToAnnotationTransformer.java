@@ -18,7 +18,7 @@ import org.continuity.utils.enums.EnumForClassHolder;
  * @author Henning Schulz
  *
  */
-public class SystemToAnnotationTransformer {
+public class ApplicationToAnnotationTransformer {
 
 	private ApplicationAnnotation extractedAnnotation = new ApplicationAnnotation();
 

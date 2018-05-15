@@ -30,16 +30,16 @@ public class AnnotationStorageManager {
 	}
 
 	/**
-	 * Retrieves the specified system model if present.
+	 * Retrieves the specified application model if present.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
-	 * @return A {@link Application}. If there is no system model for the tag, {@code null} will be
+	 *            The tag of the application model.
+	 * @return A {@link Application}. If there is no application model for the tag, {@code null} will be
 	 *         returned.
 	 * @throws IOException
 	 */
-	public Application getSystemModel(String tag) throws IOException {
-		return storage.readSystemModel(tag);
+	public Application getApplication(String tag) throws IOException {
+		return storage.readApplication(tag);
 	}
 
 	/**
@@ -69,35 +69,35 @@ public class AnnotationStorageManager {
 	}
 
 	/**
-	 * Updates the system model stored with the specified tag. If the system model breaks the stored
-	 * annotation, the annotation is tried to be fixed if possible.
+	 * Updates the application model stored with the specified tag. If the application model breaks
+	 * the stored annotation, the annotation is tried to be fixed if possible.
 	 *
 	 * @param tag
 	 * @param annotation
-	 * @param systemChangeReport
-	 *            Report holding the system changes.
+	 * @param applicationChangeReport
+	 *            Report holding the application changes.
 	 * @return A report holding information about the changes and if the current state is broken.
 	 * @throws IOException
 	 */
-	public AnnotationValidityReport updateSystemModel(String tag, Application system, AnnotationValidityReport systemChangeReport) throws IOException {
-		if ((systemChangeReport.getApplicationChanges() == null) || systemChangeReport.getApplicationChanges().isEmpty()) {
+	public AnnotationValidityReport updateApplication(String tag, Application application, AnnotationValidityReport applicationChangeReport) throws IOException {
+		if ((applicationChangeReport.getApplicationChanges() == null) || applicationChangeReport.getApplicationChanges().isEmpty()) {
 			return AnnotationValidityReport.empty();
 		}
 
 		storage.unmarkAsBroken(tag);
 
-		Application oldSystemModel = storage.readSystemModel(tag);
+		Application oldSystemModel = storage.readApplication(tag);
 		ApplicationAnnotation annotation = storage.readAnnotation(tag);
 
-		storage.saveOrUpdate(tag, system);
+		storage.saveOrUpdate(tag, application);
 
-		AnnotationValidityReport report = checkEverything(system, annotation, systemChangeReport);
+		AnnotationValidityReport report = checkEverything(application, annotation, applicationChangeReport);
 
 		if (report.isBreaking()) {
 			AnnotationFixer fixer = new AnnotationFixer();
 			ApplicationAnnotation fixedAnnotation = fixer.createFixedAnnotation(annotation, report);
 
-			AnnotationValidityReport newReport = checkEverything(system, fixedAnnotation, systemChangeReport);
+			AnnotationValidityReport newReport = checkEverything(application, fixedAnnotation, applicationChangeReport);
 			newReport.setViolationsBeforeFix(report.getViolations());
 			report = newReport;
 
@@ -118,9 +118,9 @@ public class AnnotationStorageManager {
 		return report;
 	}
 
-	private AnnotationValidityReport checkEverything(Application newSystemModel, ApplicationAnnotation annotation, AnnotationValidityReport systemChangeReport) {
-		AnnotationValidityChecker checker = new AnnotationValidityChecker(newSystemModel);
-		checker.registerSystemChanges(systemChangeReport);
+	private AnnotationValidityReport checkEverything(Application newApplicationModel, ApplicationAnnotation annotation, AnnotationValidityReport applicationChangeReport) {
+		AnnotationValidityChecker checker = new AnnotationValidityChecker(newApplicationModel);
+		checker.registerApplicationChanges(applicationChangeReport);
 
 		if (annotation != null) {
 			checker.checkAnnotation(annotation);
@@ -131,10 +131,10 @@ public class AnnotationStorageManager {
 
 	/**
 	 * Updates the annotation stored with the specified tag. If the annotation is invalid with
-	 * respect to the system model, it is rejected. It does <b>not</b> try to fix it. If you want to
-	 * store an annotation that covers system parts that are not part of the current system model,
-	 * please update the system model first.<br>
-	 * Assumes the corresponding system model to be present.
+	 * respect to the application model, it is rejected. It does <b>not</b> try to fix it. If you
+	 * want to store an annotation that covers application parts that are not part of the current
+	 * application model, please update the application model first.<br>
+	 * Assumes the corresponding application model to be present.
 	 *
 	 * @param tag
 	 * @param annotation
@@ -142,10 +142,10 @@ public class AnnotationStorageManager {
 	 * @throws IOException
 	 */
 	public AnnotationValidityReport updateAnnotation(String tag, ApplicationAnnotation annotation) throws IOException {
-		Application systemModel = storage.readSystemModel(tag);
+		Application systemModel = storage.readApplication(tag);
 
 		if (systemModel == null) {
-			throw new IllegalStateException("There is no system model with tag " + tag);
+			throw new IllegalStateException("There is no application model with tag " + tag);
 		}
 
 		AnnotationValidityChecker checker = new AnnotationValidityChecker(systemModel);
@@ -175,20 +175,20 @@ public class AnnotationStorageManager {
 	}
 
 	/**
-	 * Creates or updates a system model and an annotation with the specified tag and creates a
+	 * Creates or updates a application model and an annotation with the specified tag and creates a
 	 * validity report. Existing annotations are not overwritten.
 	 *
 	 * @param tag
-	 * @param system
+	 * @param application
 	 * @param annotation
-	 * @param systemChangeReport
-	 *            Report holding the system changes.
+	 * @param applicationChangeReport
+	 *            Report holding the application changes.
 	 * @return
 	 * @throws IOException
 	 */
-	public AnnotationValidityReport createOrUpdate(String tag, Application system, ApplicationAnnotation annotation, AnnotationValidityReport systemChangeReport) throws IOException {
+	public AnnotationValidityReport createOrUpdate(String tag, Application application, ApplicationAnnotation annotation, AnnotationValidityReport applicationChangeReport) throws IOException {
 		storage.saveIfNotPresent(tag, annotation);
-		return updateSystemModel(tag, system, systemChangeReport);
+		return updateApplication(tag, application, applicationChangeReport);
 	}
 
 	/**
@@ -240,12 +240,12 @@ public class AnnotationStorageManager {
 
 	private void deleteBaseAndLog(String tag) {
 		boolean deleted = storage.removeAnnotationIfPresent(tag, SUFFIX_BASE);
-		deleted &= storage.removeSystemIfPresent(tag, SUFFIX_BASE);
+		deleted &= storage.removeApplicationIfPresent(tag, SUFFIX_BASE);
 
 		if (deleted) {
-			LOGGER.info("Deleted base system model and annotation with tag {}.", tag);
+			LOGGER.info("Deleted base application model and annotation with tag {}.", tag);
 		} else {
-			LOGGER.debug("Did not delete base system model and annotation with tag {}. Potentially, there was no base.", tag);
+			LOGGER.debug("Did not delete base application model and annotation with tag {}. Potentially, there was no base.", tag);
 		}
 	}
 

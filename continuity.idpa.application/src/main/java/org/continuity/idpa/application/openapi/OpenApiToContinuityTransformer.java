@@ -8,11 +8,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.continuity.commons.utils.StringUtils;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.idpa.application.HttpParameter;
 import org.continuity.idpa.application.HttpParameterType;
-import org.continuity.idpa.application.Endpoint;
-import org.continuity.idpa.application.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +38,10 @@ public class OpenApiToContinuityTransformer {
 	 *
 	 * @param swagger
 	 *            The swagger model to be transformed.
-	 * @return The generated system model.
+	 * @return The generated application model.
 	 */
 	public Application transform(Swagger swagger) {
-		LOGGER.info("Transforming the swagger model {} to a system model.", swagger.getInfo().getTitle());
+		LOGGER.info("Transforming the swagger model {} to a application model.", swagger.getInfo().getTitle());
 
 		Application system = new Application();
 

@@ -1,7 +1,7 @@
 package org.continuity.idpa.application.config;
 
-import org.continuity.idpa.application.repository.SystemModelRepository;
-import org.continuity.idpa.application.repository.SystemModelRepositoryManager;
+import org.continuity.idpa.application.repository.ApplicationModelRepository;
+import org.continuity.idpa.application.repository.ApplicationModelRepositoryManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,13 +14,13 @@ import org.springframework.context.annotation.Configuration;
 public class RepositoryConfig {
 
 	@Bean
-	SystemModelRepository systemModelRepository(@Value("${storage.path:storage}") String storagePath) {
-		return new SystemModelRepository(storagePath);
+	ApplicationModelRepository systemModelRepository(@Value("${storage.path:storage}") String storagePath) {
+		return new ApplicationModelRepository(storagePath);
 	}
 
 	@Bean
-	SystemModelRepositoryManager systemModelRepositoryManager(SystemModelRepository repositoy) {
-		return new SystemModelRepositoryManager(repositoy);
+	ApplicationModelRepositoryManager systemModelRepositoryManager(ApplicationModelRepository repositoy) {
+		return new ApplicationModelRepositoryManager(repositoy);
 	}
 
 }

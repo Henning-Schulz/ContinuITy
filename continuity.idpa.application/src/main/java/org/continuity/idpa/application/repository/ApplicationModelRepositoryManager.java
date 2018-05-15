@@ -10,10 +10,10 @@ import org.continuity.commons.utils.DataHolder;
 import org.continuity.idpa.application.Application;
 import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.Parameter;
-import org.continuity.idpa.application.changes.SystemChangeDetector;
-import org.continuity.idpa.application.entities.SystemChange;
+import org.continuity.idpa.application.changes.ApplicationChangeDetector;
+import org.continuity.idpa.application.entities.ApplicationChange;
 import org.continuity.idpa.application.entities.ApplicationChangeReport;
-import org.continuity.idpa.application.entities.SystemChangeType;
+import org.continuity.idpa.application.entities.ApplicationChangeType;
 import org.continuity.idpa.legacy.IdpaFromOldAnnotationConverter;
 import org.continuity.idpa.visitor.FindById;
 import org.continuity.idpa.visitor.IdpaByClassSearcher;
@@ -21,90 +21,90 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manages the {@link SystemModelRepository}.
+ * Manages the {@link ApplicationModelRepository}.
  *
  * @author Henning Schulz
  *
  */
-public class SystemModelRepositoryManager {
+public class ApplicationModelRepositoryManager {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SystemModelRepositoryManager.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationModelRepositoryManager.class);
 
-	private final SystemModelRepository repository;
+	private final ApplicationModelRepository repository;
 
-	public SystemModelRepositoryManager(SystemModelRepository repository) {
+	public ApplicationModelRepositoryManager(ApplicationModelRepository repository) {
 		this.repository = repository;
 	}
 
 	/**
-	 * Saves the passed system model if something changed.
+	 * Saves the passed application model if something changed.
 	 *
 	 * @param tag
 	 *            The tag of the model.
-	 * @param system
-	 *            The system model to be stored.
-	 * @return A report containing the changes of the system model since the version before.
+	 * @param application
+	 *            The application model to be stored.
+	 * @return A report containing the changes of the application model since the version before.
 	 */
-	public ApplicationChangeReport saveOrUpdate(String tag, Application system) {
-		return saveOrUpdate(tag, system, EnumSet.noneOf(SystemChangeType.class));
+	public ApplicationChangeReport saveOrUpdate(String tag, Application application) {
+		return saveOrUpdate(tag, application, EnumSet.noneOf(ApplicationChangeType.class));
 	}
 
 	/**
-	 * Saves the passed system model if something changed - ignoring a set of change types.
+	 * Saves the passed application model if something changed - ignoring a set of change types.
 	 *
 	 * @param tag
 	 *            The tag of the model.
-	 * @param system
-	 *            The system model to be stored.
+	 * @param application
+	 *            The application model to be stored.
 	 * @param ignoredChanges
 	 *            Change types to be ignored.
-	 * @return A report containing the changes of the system model since the latest version before.
-	 *         If the model is older than the latest one, an empty report will be returned.
+	 * @return A report containing the changes of the application model since the latest version
+	 *         before. If the model is older than the latest one, an empty report will be returned.
 	 */
-	public ApplicationChangeReport saveOrUpdate(String tag, Application system, EnumSet<SystemChangeType> ignoredChanges) {
-		SystemChangeDetector detector = new SystemChangeDetector(system, ignoredChanges);
-		ApplicationChangeReport report = ApplicationChangeReport.empty(system.getTimestamp());
+	public ApplicationChangeReport saveOrUpdate(String tag, Application application, EnumSet<ApplicationChangeType> ignoredChanges) {
+		ApplicationChangeDetector detector = new ApplicationChangeDetector(application, ignoredChanges);
+		ApplicationChangeReport report = ApplicationChangeReport.empty(application.getTimestamp());
 
-		Application before = repository.readLatestBefore(tag, system.getTimestamp());
+		Application before = repository.readLatestBefore(tag, application.getTimestamp());
 
 		if (before != null) {
 			detector.compareTo(before);
 			report = detector.getReport();
 		} else {
-			report = ApplicationChangeReport.allOf(system);
+			report = ApplicationChangeReport.allOf(application);
 		}
 
 		if (report.changed()) {
-			Application oldestAfter = repository.readOldestAfter(tag, system.getTimestamp());
+			Application oldestAfter = repository.readOldestAfter(tag, application.getTimestamp());
 
 			boolean changed = false;
 
 			if (oldestAfter == null) {
 				changed = true;
 			} else {
-				detector = new SystemChangeDetector(system, ignoredChanges);
+				detector = new ApplicationChangeDetector(application, ignoredChanges);
 				detector.compareTo(oldestAfter);
 				changed = detector.getReport().changed();
 			}
 
 			if (changed) {
 				if (!ignoredChanges.isEmpty()) {
-					system = mergeIgnoredChanges(before, system, report);
+					application = mergeIgnoredChanges(before, application, report);
 				}
 
 				try {
-					repository.save(tag, system);
-					LOGGER.info("Stored a new system model with tag {} and date {}.", tag, system.getTimestamp());
+					repository.save(tag, application);
+					LOGGER.info("Stored a new application model with tag {} and date {}.", tag, application.getTimestamp());
 				} catch (IOException e) {
-					LOGGER.error("Could not save the system model with tag {} and date {}!", tag, system.getTimestamp());
+					LOGGER.error("Could not save the application model with tag {} and date {}!", tag, application.getTimestamp());
 					LOGGER.error("Exception: ", e);
 				}
 			} else {
 				try {
-					repository.updateSystemChange(tag, oldestAfter.getTimestamp(), system.getTimestamp());
-					LOGGER.info("Updated the system change of tag {} from {} to {}.", tag, oldestAfter.getTimestamp(), system.getTimestamp());
+					repository.updateApplicationChange(tag, oldestAfter.getTimestamp(), application.getTimestamp());
+					LOGGER.info("Updated the application change of tag {} from {} to {}.", tag, oldestAfter.getTimestamp(), application.getTimestamp());
 				} catch (IOException e) {
-					LOGGER.error("Could not update the system change of tag {} from {} to {}", tag, oldestAfter.getTimestamp(), system.getTimestamp());
+					LOGGER.error("Could not update the application change of tag {} from {} to {}", tag, oldestAfter.getTimestamp(), application.getTimestamp());
 					LOGGER.error("Exception: ", e);
 				}
 			}
@@ -114,7 +114,7 @@ public class SystemModelRepositoryManager {
 	}
 
 	private Application mergeIgnoredChanges(Application oldModel, Application newModel, ApplicationChangeReport report) {
-		for (SystemChange change : report.getIgnoredApplicationChanges()) {
+		for (ApplicationChange change : report.getIgnoredApplicationChanges()) {
 			switch (change.getType()) {
 			case ENDPOINT_ADDED:
 				newModel.getEndpoints().removeIf(interf -> interf.getId().equals(change.getChangedElement().getId()));
@@ -124,7 +124,7 @@ public class SystemModelRepositoryManager {
 				Endpoint<?> newInterf = FindById.find(change.getChangedElement().getId(), Endpoint.GENERIC_TYPE).in(newModel).getFound();
 
 				if ((oldInterf == null) || (newInterf == null)) {
-					LOGGER.error("There is a change {}, but I could not find the interface in both system versions! Ignoring the change.", change);
+					LOGGER.error("There is a change {}, but I could not find the interface in both application versions! Ignoring the change.", change);
 				} else {
 					newInterf.clonePropertyFrom(change.getChangedProperty(), oldInterf);
 				}
@@ -170,11 +170,11 @@ public class SystemModelRepositoryManager {
 	}
 
 	/**
-	 * Reads the current system model.
+	 * Reads the current application model.
 	 *
 	 * @param tag
-	 *            The tag of the system model.
-	 * @return The current system model with the tag.
+	 *            The tag of the application model.
+	 * @return The current application model with the tag.
 	 * @throws IOException
 	 *             If an error occurs during reading.
 	 */
@@ -186,7 +186,7 @@ public class SystemModelRepositoryManager {
 	 * Retrieves the delta (that is, the list of changes) since the specified date.
 	 *
 	 * @param tag
-	 *            The tag of the system models.
+	 *            The tag of the application models.
 	 * @param date
 	 *            The date since when the changes are to be determined.
 	 * @return A report holding the changes.
@@ -204,7 +204,7 @@ public class SystemModelRepositoryManager {
 			latestBefore = new Application();
 		}
 
-		SystemChangeDetector checker = new SystemChangeDetector(latest);
+		ApplicationChangeDetector checker = new ApplicationChangeDetector(latest);
 		checker.compareTo(latestBefore);
 
 		return checker.getReport();

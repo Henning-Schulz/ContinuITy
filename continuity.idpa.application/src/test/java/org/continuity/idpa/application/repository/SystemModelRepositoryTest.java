@@ -43,7 +43,7 @@ public class SystemModelRepositoryTest {
 
 	private IdpaYamlSerializer<Application> serializerMock;
 
-	private SystemModelRepository repository;
+	private ApplicationModelRepository repository;
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -70,7 +70,7 @@ public class SystemModelRepositoryTest {
 
 		Mockito.when(fileMock.list()).thenReturn(new String[] { toFileName(FIRST.getTimestamp()), toFileName(SECOND.getTimestamp()), toFileName(THIRD.getTimestamp()), "foo" });
 
-		repository = new SystemModelRepository(pathMock, serializerMock);
+		repository = new ApplicationModelRepository(pathMock, serializerMock);
 	}
 
 	@Test
