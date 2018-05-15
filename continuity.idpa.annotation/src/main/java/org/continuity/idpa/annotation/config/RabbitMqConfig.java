@@ -1,6 +1,6 @@
 package org.continuity.idpa.annotation.config;
 
-import org.continuity.commons.amqp.DeadLetterSpecification;
+import org.continuity.api.amqp.AmqpApi;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -24,29 +24,17 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMqConfig {
 
-	public static final String MODEL_CREATED_QUEUE_NAME = "continuity.system.annotation.workloadmodel.created";
+	public static final String SERVICE_NAME = "idpaannotation";
 
-	public static final String MODEL_CREATED_EXCHANGE_NAME = "continuity.workloadmodel.created";
+	public static final String WORKLOAD_MODEL_CREATED_QUEUE_NAME = "continuity.idpaannotation.workload.model.created";
 
-	/**
-	 * routing keys: [workload-type].[workload-link], e.g., wessbas.wessbas/model/foo-1
-	 */
-	public static final String MODEL_CREATED_ROUTING_KEY = "#";
+	public static final String WORKLOAD_MODEL_CREATED_ROUTING_KEY = "#";
 
-	public static final String CLIENT_MESSAGE_EXCHANGE_NAME = "continuity.system.annotation.message";
+	public static final String IDPA_APPLICATION_CHANGED_QUEUE_NAME = "continuity.idpaannotation.idpaapplication.application.changed";
 
-	public static final String SYSTEM_MODEL_CHANGED_QUEUE_NAME = "continuity.system.annotation.system.model.changed";
+	public static final String IDPA_APPLICATION_CHANGED_ROUTING_KEY = AmqpApi.IdpaApplication.APPLICATION_CHANGED.formatRoutingKey().of("*");
 
-	public static final String SYSTEM_MODEL_CHANGED_EXCHANGE_NAME = "continuity.system.model.changed";
-
-	public static final String DEAD_LETTER_QUEUE_NAME = "continuity.system.annotation.dead.letter";
-
-	public static final String DEAD_LETTER_ROUTING_KEY = "system-annotation";
-
-	/**
-	 * Routing key is the tag.
-	 */
-	public static final String SYSTEM_MODEL_CHANGED_ROUTING_KEY = "*";
+	public static final String DEAD_LETTER_QUEUE_NAME = AmqpApi.DEAD_LETTER_EXCHANGE.deriveQueueName(SERVICE_NAME);
 
 	@Bean
 	MessagePostProcessor typeRemovingProcessor() {
@@ -57,42 +45,40 @@ public class RabbitMqConfig {
 	}
 
 	@Bean
-	Queue behaviorExtractedQueue() {
-		return QueueBuilder.nonDurable(MODEL_CREATED_QUEUE_NAME).withArgument(DeadLetterSpecification.EXCHANGE_KEY, DeadLetterSpecification.EXCHANGE_NAME)
-				.withArgument(DeadLetterSpecification.ROUTING_KEY_KEY, DEAD_LETTER_ROUTING_KEY).build();
+	TopicExchange messageAvailableExchange() {
+		return AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.create();
 	}
 
 	@Bean
-	TopicExchange behaviorExtractedExchange() {
-		// Not declaring auto delete, since queues are bound dynamically so that the exchange might
-		// have no queue for a while
-		return new TopicExchange(MODEL_CREATED_EXCHANGE_NAME, false, false);
+	TopicExchange workloadModelCreatedExchange() {
+		return AmqpApi.Workload.MODEL_CREATED.create();
 	}
 
 	@Bean
-	Binding behaviorExtractedBinding() {
-		return BindingBuilder.bind(behaviorExtractedQueue()).to(behaviorExtractedExchange()).with(MODEL_CREATED_ROUTING_KEY);
+	Queue workloadModelCreatedQueue() {
+		return QueueBuilder.nonDurable(WORKLOAD_MODEL_CREATED_QUEUE_NAME).withArgument(AmqpApi.DEAD_LETTER_EXCHANGE_KEY, AmqpApi.DEAD_LETTER_EXCHANGE.name())
+				.withArgument(AmqpApi.DEAD_LETTER_ROUTING_KEY_KEY, SERVICE_NAME).build();
 	}
 
 	@Bean
-	TopicExchange clientMessageExchange() {
-		return new TopicExchange(CLIENT_MESSAGE_EXCHANGE_NAME, false, true);
+	Binding workloadModelCreatedBinding() {
+		return BindingBuilder.bind(workloadModelCreatedQueue()).to(workloadModelCreatedExchange()).with(WORKLOAD_MODEL_CREATED_ROUTING_KEY);
 	}
 
 	@Bean
-	Queue systemModelCreatedQueue() {
-		return QueueBuilder.nonDurable(SYSTEM_MODEL_CHANGED_QUEUE_NAME).withArgument(DeadLetterSpecification.EXCHANGE_KEY, DeadLetterSpecification.EXCHANGE_NAME)
-				.withArgument(DeadLetterSpecification.ROUTING_KEY_KEY, DEAD_LETTER_ROUTING_KEY).build();
+	TopicExchange idpaApplicationChangedExchange() {
+		return AmqpApi.IdpaApplication.APPLICATION_CHANGED.create();
 	}
 
 	@Bean
-	TopicExchange systemModelCreatedExchange() {
-		return new TopicExchange(SYSTEM_MODEL_CHANGED_EXCHANGE_NAME, false, true);
+	Queue idpaApplicationChangedQueue() {
+		return QueueBuilder.nonDurable(IDPA_APPLICATION_CHANGED_QUEUE_NAME).withArgument(AmqpApi.DEAD_LETTER_EXCHANGE_KEY, AmqpApi.DEAD_LETTER_EXCHANGE.name())
+				.withArgument(AmqpApi.DEAD_LETTER_ROUTING_KEY_KEY, SERVICE_NAME).build();
 	}
 
 	@Bean
-	Binding systemModelCreatedBinding() {
-		return BindingBuilder.bind(systemModelCreatedQueue()).to(systemModelCreatedExchange()).with(SYSTEM_MODEL_CHANGED_ROUTING_KEY);
+	Binding idpaApplicationChangedBinding() {
+		return BindingBuilder.bind(idpaApplicationChangedQueue()).to(idpaApplicationChangedExchange()).with(IDPA_APPLICATION_CHANGED_ROUTING_KEY);
 	}
 
 	@Bean
@@ -122,7 +108,7 @@ public class RabbitMqConfig {
 
 	@Bean
 	TopicExchange deadLetterExchange() {
-		return new TopicExchange(DeadLetterSpecification.EXCHANGE_NAME, false, true);
+		return AmqpApi.DEAD_LETTER_EXCHANGE.create();
 	}
 
 	@Bean
@@ -132,7 +118,7 @@ public class RabbitMqConfig {
 
 	@Bean
 	Binding deadLetterBinding() {
-		return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange()).with(DEAD_LETTER_ROUTING_KEY);
+		return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange()).with(SERVICE_NAME);
 	}
 
 }

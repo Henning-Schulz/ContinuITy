@@ -5,9 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 
+import org.continuity.api.amqp.AmqpApi;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.annotation.amqp.AnnotationAmpqHandler;
-import org.continuity.idpa.annotation.config.RabbitMqConfig;
 import org.continuity.idpa.annotation.entities.AnnotationValidityReport;
 import org.continuity.idpa.annotation.entities.AnnotationViolation;
 import org.continuity.idpa.annotation.entities.AnnotationViolationType;
@@ -15,7 +15,6 @@ import org.continuity.idpa.annotation.entities.ModelElementReference;
 import org.continuity.idpa.annotation.entities.SystemAnnotationLink;
 import org.continuity.idpa.annotation.storage.AnnotationStorage;
 import org.continuity.idpa.annotation.storage.AnnotationStorageManager;
-import org.continuity.idpa.annotation.validation.AnnotationValidationReportBuilder;
 import org.continuity.idpa.application.Application;
 import org.junit.Assert;
 import org.junit.Before;
@@ -131,7 +130,7 @@ public class AnnotationAmqpValidityCheckTest {
 		callAnnotationCreated(AnnotationValidityTestInstance.FIRST);
 		callSystemModelCreated(AnnotationValidityTestInstance.FIRST);
 		ArgumentCaptor<AnnotationValidityReport> reportCaptor = ArgumentCaptor.forClass(AnnotationValidityReport.class);
-		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME), ArgumentMatchers.eq("report"), reportCaptor.capture());
+		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.name()), ArgumentMatchers.eq("report"), reportCaptor.capture());
 		AnnotationValidityReport report = reportCaptor.getValue();
 		Assert.assertFalse(report.isOk());
 		Assert.assertFalse(report.isBreaking());
@@ -141,7 +140,7 @@ public class AnnotationAmqpValidityCheckTest {
 
 		callSystemModelCreated(AnnotationValidityTestInstance.SECOND_SYSTEM);
 		reportCaptor = ArgumentCaptor.forClass(AnnotationValidityReport.class);
-		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME), ArgumentMatchers.eq("report"), reportCaptor.capture());
+		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.name()), ArgumentMatchers.eq("report"), reportCaptor.capture());
 		report = reportCaptor.getValue();
 		Assert.assertFalse(report.isOk());
 		Assert.assertFalse(report.isBreaking());
@@ -149,7 +148,7 @@ public class AnnotationAmqpValidityCheckTest {
 		Mockito.reset(amqpMock);
 
 		callSystemModelCreated(AnnotationValidityTestInstance.THIRD_SYSTEM);
-		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME), ArgumentMatchers.eq("report"), reportCaptor.capture());
+		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.name()), ArgumentMatchers.eq("report"), reportCaptor.capture());
 		report = reportCaptor.getValue();
 		Assert.assertFalse(report.isOk());
 		Assert.assertFalse(report.isBreaking());
@@ -160,7 +159,7 @@ public class AnnotationAmqpValidityCheckTest {
 
 		firstMode = THIRD_BEFORE_FIRST;
 		callSystemModelCreated(AnnotationValidityTestInstance.FIRST);
-		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME), ArgumentMatchers.eq("report"), reportCaptor.capture());
+		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.name()), ArgumentMatchers.eq("report"), reportCaptor.capture());
 		report = reportCaptor.getValue();
 		Assert.assertFalse(report.isOk());
 		Assert.assertFalse(report.isBreaking());
@@ -184,7 +183,7 @@ public class AnnotationAmqpValidityCheckTest {
 		callAnnotationCreated(AnnotationValidityTestInstance.ULTIMATE_ANNOTATION);
 		callSystemModelCreated(AnnotationValidityTestInstance.ULTIMATE_ANNOTATION);
 		ArgumentCaptor<AnnotationValidityReport> reportCaptor = ArgumentCaptor.forClass(AnnotationValidityReport.class);
-		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME), ArgumentMatchers.eq("report"), reportCaptor.capture());
+		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.name()), ArgumentMatchers.eq("report"), reportCaptor.capture());
 		AnnotationValidityReport report = reportCaptor.getValue();
 		Assert.assertFalse(report.isOk());
 		Assert.assertFalse(report.isBreaking());
@@ -201,7 +200,7 @@ public class AnnotationAmqpValidityCheckTest {
 		callAnnotationCreated(AnnotationValidityTestInstance.ULTIMATE_ANNOTATION);
 		callSystemModelCreated(AnnotationValidityTestInstance.THIRD_SYSTEM);
 		reportCaptor = ArgumentCaptor.forClass(AnnotationValidityReport.class);
-		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME), ArgumentMatchers.eq("report"), reportCaptor.capture());
+		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.name()), ArgumentMatchers.eq("report"), reportCaptor.capture());
 		report = reportCaptor.getValue();
 		Assert.assertFalse(report.isOk());
 		Assert.assertTrue(report.isBreaking());
@@ -213,7 +212,7 @@ public class AnnotationAmqpValidityCheckTest {
 		firstMode = THIRD_BEFORE_FIRST;
 		callAnnotationCreated(AnnotationValidityTestInstance.ULTIMATE_ANNOTATION);
 		callSystemModelCreated(AnnotationValidityTestInstance.FIRST);
-		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME), ArgumentMatchers.eq("report"), reportCaptor.capture());
+		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.name()), ArgumentMatchers.eq("report"), reportCaptor.capture());
 		report = reportCaptor.getValue();
 		Assert.assertFalse(report.isOk());
 		Assert.assertFalse(report.isBreaking());
@@ -238,7 +237,7 @@ public class AnnotationAmqpValidityCheckTest {
 		firstMode = NOTHING_BEFORE_FIRST;
 		callSystemModelCreated(AnnotationValidityTestInstance.FIRST);
 		ArgumentCaptor<AnnotationValidityReport> reportCaptor = ArgumentCaptor.forClass(AnnotationValidityReport.class);
-		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME), ArgumentMatchers.eq("report"), reportCaptor.capture());
+		Mockito.verify(amqpMock).convertAndSend(ArgumentMatchers.eq(AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.name()), ArgumentMatchers.eq("report"), reportCaptor.capture());
 		AnnotationValidityReport report = reportCaptor.getValue();
 		Assert.assertFalse(report.isOk());
 		Assert.assertFalse(report.isBreaking());

@@ -8,9 +8,9 @@ import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.Paths.WAIT;
 import java.io.IOException;
 import java.util.Collections;
 
+import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.rest.RestApi;
 import org.continuity.api.rest.RestApi.Generic;
-import org.continuity.frontend.config.RabbitMqConfig;
 import org.continuity.frontend.entities.ModelCreatedReport;
 import org.continuity.frontend.entities.WorkloadModelConfig;
 import org.continuity.frontend.entities.WorkloadModelInput;
@@ -47,8 +47,6 @@ import com.rabbitmq.client.Channel;
 public class WorkloadModelController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorkloadModelController.class);
-
-	private static final String RESPONSE_QUEUE_PREFIX = "continuity.frontend.workloadmodel.created.";
 
 	@Autowired
 	private AmqpTemplate amqpTemplate;
@@ -87,7 +85,7 @@ public class WorkloadModelController {
 				declareResponseQueue(linkResponse.getBody());
 
 				WorkloadModelInput input = new WorkloadModelInput(config.getMonitoringDataLink(), config.getTimestamp(), linkResponse.getBody());
-				amqpTemplate.convertAndSend(RabbitMqConfig.MONITORING_DATA_AVAILABLE_EXCHANGE_NAME, type, input);
+				amqpTemplate.convertAndSend(AmqpApi.Frontend.DATA_AVAILABLE.name(), AmqpApi.Frontend.DATA_AVAILABLE.formatRoutingKey().of(type), input);
 
 				report = new ModelCreatedReport("Creating a " + type + " model.", linkResponse.getBody());
 				status = HttpStatus.ACCEPTED;
@@ -102,9 +100,9 @@ public class WorkloadModelController {
 			Connection connection = connectionFactory.createConnection();
 			Channel channel = connection.createChannel(false);
 
-			String queueName = RESPONSE_QUEUE_PREFIX + workloadLink;
+			String queueName = AmqpApi.Workload.MODEL_CREATED.deriveQueueName(workloadLink);
 			channel.queueDeclare(queueName, false, false, false, Collections.emptyMap());
-			channel.queueBind(queueName, RabbitMqConfig.WORKLOAD_MODEL_CREATED_EXCHANGE_NAME, "*." + workloadLink);
+			channel.queueBind(queueName, AmqpApi.Workload.MODEL_CREATED.name(), AmqpApi.Workload.MODEL_CREATED.formatRoutingKey().of("*", workloadLink));
 
 			LOGGER.info("Declared a response queue for {}.", workloadLink);
 		} catch (IOException e) {
@@ -118,7 +116,7 @@ public class WorkloadModelController {
 			Connection connection = connectionFactory.createConnection();
 			Channel channel = connection.createChannel(false);
 
-			String queueName = RESPONSE_QUEUE_PREFIX + workloadLink;
+			String queueName = AmqpApi.Workload.MODEL_CREATED.deriveQueueName(workloadLink);
 			channel.queueDelete(queueName);
 
 			LOGGER.info("Deleted the response queue for {}.", workloadLink);
@@ -144,7 +142,7 @@ public class WorkloadModelController {
 
 		JsonNode response;
 		try {
-			response = amqpTemplate.receiveAndConvert(RESPONSE_QUEUE_PREFIX + link, timeout, ParameterizedTypeReference.forType(JsonNode.class));
+			response = amqpTemplate.receiveAndConvert(AmqpApi.Workload.MODEL_CREATED.deriveQueueName(link), timeout, ParameterizedTypeReference.forType(JsonNode.class));
 		} catch (AmqpIOException e) {
 			LOGGER.error("Cannot wait for not existing response queue of model {}", link);
 

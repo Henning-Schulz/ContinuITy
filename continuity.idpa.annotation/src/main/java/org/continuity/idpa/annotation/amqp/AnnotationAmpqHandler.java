@@ -2,6 +2,7 @@ package org.continuity.idpa.annotation.amqp;
 
 import java.io.IOException;
 
+import org.continuity.api.amqp.AmqpApi;
 import org.continuity.commons.utils.WebUtils;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.annotation.config.RabbitMqConfig;
@@ -41,7 +42,7 @@ public class AnnotationAmpqHandler {
 		this.amqpTemplate = amqpTemplate;
 	}
 
-	@RabbitListener(queues = RabbitMqConfig.MODEL_CREATED_QUEUE_NAME)
+	@RabbitListener(queues = RabbitMqConfig.WORKLOAD_MODEL_CREATED_QUEUE_NAME)
 	public void onAnnotationModelCreated(SystemAnnotationLink link) {
 		LOGGER.info("Received system annotation link: {}", link);
 
@@ -62,7 +63,7 @@ public class AnnotationAmpqHandler {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMqConfig.SYSTEM_MODEL_CHANGED_QUEUE_NAME)
+	@RabbitListener(queues = RabbitMqConfig.IDPA_APPLICATION_CHANGED_QUEUE_NAME)
 	public void onSystemModelCreated(SystemAnnotationLink link) {
 		LOGGER.info("Received system annotation link: {}", link);
 
@@ -93,7 +94,7 @@ public class AnnotationAmpqHandler {
 		}
 
 		if (!report.isOk()) {
-			amqpTemplate.convertAndSend(RabbitMqConfig.CLIENT_MESSAGE_EXCHANGE_NAME, "report", report);
+			amqpTemplate.convertAndSend(AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.name(), AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.formatRoutingKey().of("report"), report);
 		}
 	}
 

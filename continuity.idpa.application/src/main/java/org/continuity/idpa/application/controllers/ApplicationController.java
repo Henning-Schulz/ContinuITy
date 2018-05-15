@@ -12,9 +12,9 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.EnumSet;
 
+import org.continuity.api.amqp.AmqpApi;
 import org.continuity.commons.format.CommonFormats;
 import org.continuity.idpa.application.Application;
-import org.continuity.idpa.application.config.RabbitMqConfig;
 import org.continuity.idpa.application.entities.ApplicationChangeReport;
 import org.continuity.idpa.application.entities.ApplicationChangeType;
 import org.continuity.idpa.application.entities.SystemModelLink;
@@ -138,9 +138,10 @@ public class ApplicationController {
 
 		if (report.changed()) {
 			try {
-				amqpTemplate.convertAndSend(RabbitMqConfig.SYSTEM_MODEL_CHANGED_EXCHANGE_NAME, tag, new SystemModelLink(applicationName, tag, report.getBeforeChange()));
+				amqpTemplate.convertAndSend(AmqpApi.IdpaApplication.APPLICATION_CHANGED.name(), AmqpApi.IdpaApplication.APPLICATION_CHANGED.formatRoutingKey().of(tag),
+						new SystemModelLink(applicationName, tag, report.getBeforeChange()));
 			} catch (AmqpException e) {
-				LOGGER.error("Could not send the system model with tag {} to the {} exchange!", tag, RabbitMqConfig.SYSTEM_MODEL_CHANGED_EXCHANGE_NAME);
+				LOGGER.error("Could not send the system model with tag {} to the {} exchange!", tag, AmqpApi.IdpaApplication.APPLICATION_CHANGED.name());
 				LOGGER.error("Exception:", e);
 			}
 		}

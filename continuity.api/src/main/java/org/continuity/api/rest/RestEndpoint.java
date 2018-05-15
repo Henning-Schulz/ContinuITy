@@ -45,7 +45,7 @@ public class RestEndpoint {
 	 *            The request method.
 	 * @return The new RestEndpoint instance.
 	 */
-	public static RestEndpoint of(String serviceName, String root, String path, RequestMethod method) {
+	protected static RestEndpoint of(String serviceName, String root, String path, RequestMethod method) {
 		String[] pathElements = path.split("\\/");
 		List<StringOrPar> elements = new ArrayList<>();
 

@@ -188,7 +188,7 @@ public class IdpaController {
 	 */
 	@RequestMapping(path = REPORT, method = RequestMethod.GET)
 	public ResponseEntity<?> getAnnotationReport(@RequestParam(value = "timeout", required = true) long timeout) {
-		Map<?, ?> report = amqpTemplate.receiveAndConvert(RabbitMqConfig.WORKLADO_ANNOTATION_MESSAGE_QUEUE_NAME, timeout, ParameterizedTypeReference.forType(Map.class));
+		Map<?, ?> report = amqpTemplate.receiveAndConvert(RabbitMqConfig.IDPA_ANNOTATION_MESSAGE_AVAILABLE_QUEUE_NAME, timeout, ParameterizedTypeReference.forType(Map.class));
 
 		if (report != null) {
 			return ResponseEntity.ok(report);

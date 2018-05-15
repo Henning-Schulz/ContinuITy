@@ -2,6 +2,7 @@ package org.continuity.idpa.application.amqp;
 
 import java.util.EnumSet;
 
+import org.continuity.api.amqp.AmqpApi;
 import org.continuity.commons.utils.WebUtils;
 import org.continuity.idpa.application.Application;
 import org.continuity.idpa.application.config.RabbitMqConfig;
@@ -56,7 +57,7 @@ public class UpdateSystemModelAmqpHandler {
 	 * @param link
 	 *            Containing all links around the created workload model.
 	 */
-	@RabbitListener(queues = RabbitMqConfig.MODEL_CREATED_QUEUE_NAME)
+	@RabbitListener(queues = RabbitMqConfig.WORKLOAD_MODEL_CREATED_QUEUE_NAME)
 	public void onModelCreated(WorkloadModelLink link) {
 		LOGGER.info("Received workload model link: {}", link);
 
@@ -83,9 +84,10 @@ public class UpdateSystemModelAmqpHandler {
 
 		if (report.changed()) {
 			try {
-				amqpTemplate.convertAndSend(RabbitMqConfig.SYSTEM_MODEL_CHANGED_EXCHANGE_NAME, link.getTag(), new SystemModelLink(applicationName, link.getTag(), report.getBeforeChange()));
+				amqpTemplate.convertAndSend(AmqpApi.IdpaApplication.APPLICATION_CHANGED.name(), AmqpApi.IdpaApplication.APPLICATION_CHANGED.formatRoutingKey().of(link.getTag()),
+						new SystemModelLink(applicationName, link.getTag(), report.getBeforeChange()));
 			} catch (AmqpException e) {
-				LOGGER.error("Could not send the system model with tag {} to the {} exchange!", link.getTag(), RabbitMqConfig.SYSTEM_MODEL_CHANGED_EXCHANGE_NAME);
+				LOGGER.error("Could not send the system model with tag {} to the {} exchange!", link.getTag(), AmqpApi.IdpaApplication.APPLICATION_CHANGED.name());
 				LOGGER.error("Exception:", e);
 			}
 		} else {

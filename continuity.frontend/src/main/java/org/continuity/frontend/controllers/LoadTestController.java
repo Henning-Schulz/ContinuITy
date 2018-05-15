@@ -6,6 +6,7 @@ import static org.continuity.api.rest.RestApi.Frontend.Loadtest.Paths.CREATE_AND
 import static org.continuity.api.rest.RestApi.Frontend.Loadtest.Paths.EXECUTE;
 import static org.continuity.api.rest.RestApi.Frontend.Loadtest.Paths.REPORT_PATH;
 
+import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.rest.RestApi.Generic;
 import org.continuity.frontend.config.RabbitMqConfig;
 import org.continuity.frontend.entities.LoadTestSpecification;
@@ -70,7 +71,8 @@ public class LoadTestController {
 		} else {
 			String workloadType = extractWorkloadType(specification.getWorkloadModelLink());
 
-			amqpTemplate.convertAndSend(RabbitMqConfig.CREATE_AND_EXECUTE_LOAD_TEST_EXCHANGE_NAME, workloadType + "." + testType, specification);
+			amqpTemplate.convertAndSend(AmqpApi.Frontend.LOADTESTCREATIONANDEXECUTION_REQUIRED.name(),
+					AmqpApi.Frontend.LOADTESTCREATIONANDEXECUTION_REQUIRED.formatRoutingKey().of(workloadType, testType), specification);
 			message = "Creating a load test from" + workloadType + " workload model " + specification.getWorkloadModelLink();
 			status = HttpStatus.ACCEPTED;
 		}
@@ -96,7 +98,7 @@ public class LoadTestController {
 			message = "Load test is required.";
 			status = HttpStatus.BAD_REQUEST;
 		} else {
-			amqpTemplate.convertAndSend(RabbitMqConfig.EXECUTE_LOAD_TEST_EXCHANGE_NAME, testType, testPlan);
+			amqpTemplate.convertAndSend(AmqpApi.Frontend.LOADTESTEXECUTION_REQUIRED.name(), AmqpApi.Frontend.LOADTESTEXECUTION_REQUIRED.formatRoutingKey().of(testType), testPlan);
 			message = "Executing a " + testType + " load test";
 			status = HttpStatus.ACCEPTED;
 		}
@@ -138,7 +140,7 @@ public class LoadTestController {
 	 */
 	@RequestMapping(value = REPORT_PATH, method = RequestMethod.GET)
 	public ResponseEntity<String> getReportOfLoadtest(@RequestParam(value = "timeout", required = true) long timeout) {
-		return new ResponseEntity<String>(amqpTemplate.receiveAndConvert(RabbitMqConfig.PROVIDE_REPORT_QUEUE_NAME, timeout, new ParameterizedTypeReference<String>() {
+		return new ResponseEntity<String>(amqpTemplate.receiveAndConvert(RabbitMqConfig.LOAD_TEST_REPORT_AVAILABLE_QUEUE_NAME, timeout, new ParameterizedTypeReference<String>() {
 		}), HttpStatus.OK);
 
 	}
