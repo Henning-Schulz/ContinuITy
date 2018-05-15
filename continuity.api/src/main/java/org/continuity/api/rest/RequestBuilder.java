@@ -1,5 +1,11 @@
 package org.continuity.api.rest;
 
+/**
+ * A builder for REST requests.
+ *
+ * @author Henning Schulz
+ *
+ */
 public class RequestBuilder {
 
 	private String host;
@@ -9,15 +15,39 @@ public class RequestBuilder {
 	private final StringBuilder queryString = new StringBuilder();
 	private boolean queryStringEmpty = true;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param host
+	 *            The host of the request.
+	 * @param path
+	 *            The path of the request.
+	 */
 	public RequestBuilder(String host, String path) {
 		this.host = host;
 		this.path = path;
 	}
 
+	/**
+	 * Gets the currently represented request.
+	 *
+	 * @return The request as string.
+	 */
 	public String get() {
 		return "http://" + host + path + queryString;
 	}
 
+	/**
+	 * Adds a query to the request, e.g., <code>?foo=bar</code> in <code>/my/path?foo=bar</code>.
+	 * Only adds one <code>parameter=value</code> pair. Further pairs can be added by subsequent
+	 * calls.
+	 *
+	 * @param param
+	 *            The parameter name.
+	 * @param value
+	 *            The value of the parameter.
+	 * @return The builder for further request modifications.
+	 */
 	public RequestBuilder withQuery(String param, String value) {
 		if (queryStringEmpty) {
 			queryString.append("?");
@@ -33,6 +63,13 @@ public class RequestBuilder {
 		return this;
 	}
 
+	/**
+	 * Replaces the stored host name.
+	 *
+	 * @param host
+	 *            The new host name.
+	 * @return The builder for further request modifications.
+	 */
 	public RequestBuilder withHost(String host) {
 		this.host = host;
 		return this;

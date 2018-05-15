@@ -3,13 +3,28 @@ package org.continuity.api.rest;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.continuity.api.rest.RestApi.JMeter.TestPlan;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+/**
+ * Holds the REST API of all ContinuITy services. This does not conform the principle of
+ * microservices, but allows us as a small number of developers to handle multiple microservice-like
+ * services.
+ *
+ * @author Henning Schulz
+ *
+ */
 public class RestApi {
 
 	private RestApi() {
 	}
 
+	/**
+	 * REST API of the frontend service.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
 	public static class Frontend {
 
 		public static final String SERVICE_NAME = "frontend";
@@ -17,6 +32,12 @@ public class RestApi {
 		private Frontend() {
 		}
 
+		/**
+		 * IDPA API of the frontend service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
 		public static class Idpa {
 
 			public static final String ROOT = "/annotation";
@@ -54,6 +75,12 @@ public class RestApi {
 
 		}
 
+		/**
+		 * Loadtest API of the frontend service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
 		public static class Loadtest {
 
 			public static final String ROOT = "/loadtest";
@@ -83,6 +110,12 @@ public class RestApi {
 
 		}
 
+		/**
+		 * Workload model API of the frontend service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
 		public static class WorkloadModel {
 
 			public static final String ROOT = "/workloadmodel";
@@ -110,6 +143,12 @@ public class RestApi {
 
 	}
 
+	/**
+	 * REST API of the IDPA annotation service.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
 	public static class IdpaAnnotation {
 
 		public static final String SERVICE_NAME = "idpa-annotation";
@@ -117,6 +156,12 @@ public class RestApi {
 		private IdpaAnnotation() {
 		}
 
+		/**
+		 * Annotation API of the IDPA annotation service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
 		public static class Annotation {
 
 			public static final String ROOT = "/ann";
@@ -141,6 +186,12 @@ public class RestApi {
 			}
 		}
 
+		/**
+		 * Dummy API of the IDPA annotation service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
 		public static class Dummy {
 
 			public static final String ROOT = "/dummy/dvdstore";
@@ -164,6 +215,12 @@ public class RestApi {
 
 	}
 
+	/**
+	 * REST API of the IDPA application service.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
 	public static class IdpaApplication {
 
 		public static final String SERVICE_NAME = "idpa-application";
@@ -171,6 +228,12 @@ public class RestApi {
 		private IdpaApplication() {
 		}
 
+		/**
+		 * Application API of the IDPA application service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
 		public static class Application {
 
 			public static final String ROOT = "/system";
@@ -195,6 +258,12 @@ public class RestApi {
 			}
 		}
 
+		/**
+		 * OpenAPI API of the IDPA application service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
 		public static class OpenApi {
 
 			public static final String ROOT = "/openapi";
@@ -218,6 +287,12 @@ public class RestApi {
 
 	}
 
+	/**
+	 * REST API of the JMeter service.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
 	public static class JMeter {
 
 		public static final String SERVICE_NAME = "jmeter";
@@ -225,6 +300,12 @@ public class RestApi {
 		private JMeter() {
 		}
 
+		/**
+		 * Test plan API of the JMeter service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
 		public static class TestPlan {
 
 			public static final String ROOT = "/loadtest";
@@ -245,6 +326,12 @@ public class RestApi {
 
 	}
 
+	/**
+	 * REST API of the Session Logs service.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
 	public static class SessionLogs {
 
 		public static final String SERVICE_NAME = "session-logs";
@@ -266,6 +353,12 @@ public class RestApi {
 
 	}
 
+	/**
+	 * REST API of the WESSBAS service.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
 	public static class Wessbas {
 
 		public static final String SERVICE_NAME = "wessbas";
@@ -273,6 +366,12 @@ public class RestApi {
 		private Wessbas() {
 		}
 
+		/**
+		 * JMeter API of the WESSBAS service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
 		public static class JMeter {
 
 			public static final String ROOT = "/loadtest/jmeter";
@@ -292,6 +391,12 @@ public class RestApi {
 
 		}
 
+		/**
+		 * Workload model API of the WESSBAS service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
 		public static class Model {
 
 			public static final String ROOT = "/model";
@@ -328,6 +433,14 @@ public class RestApi {
 
 	}
 
+	/**
+	 * Generic, abstract REST endpoints. The implementing endpoints can be retrieved via the
+	 * {@link Map#get(Object)} method, e.g., the JMeter {@link TestPlan#CREATE_AND_GET} via
+	 * {@link Generic#GET_AND_CREATE_LOAD_TEST}<code>.get("jmeter")</code>.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
 	public static class Generic {
 
 		public static final Map<String, RestEndpoint> GET_AND_CREATE_LOAD_TEST = new HashMap<>();
