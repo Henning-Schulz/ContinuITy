@@ -8,17 +8,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class SystemAnnotationLink {
 
-	@JsonProperty("system-model-link")
-	private String systemModelLink;
+	@JsonProperty("application-link")
+	private String applicationLink;
 
 	@JsonProperty("delta-link")
 	private String deltaLink;
 
 	@JsonProperty(value = "initial-annotation-link", required = false)
 	private String annotationLink;
-
-	@JsonProperty(value = "custom-annotation-link", required = false)
-	private String customAnnotationLink;
 
 	private String tag;
 
@@ -29,27 +26,27 @@ public class SystemAnnotationLink {
 	}
 
 	/**
-	 * Gets {@link #systemModelLink}.
+	 * Gets {@link #applicationLink}.
 	 *
-	 * @return {@link #systemModelLink}
+	 * @return {@link #applicationLink}
 	 */
-	public String getSystemModelLink() {
-		return this.systemModelLink;
+	public String getApplicationLink() {
+		return this.applicationLink;
 	}
 
 	/**
-	 * Sets {@link #systemModelLink}.
+	 * Sets {@link #applicationLink}.
 	 *
-	 * @param systemModelLink
-	 *            New value for {@link #systemModelLink}
+	 * @param applicationLink
+	 *            New value for {@link #applicationLink}
 	 */
-	public void setSystemModelLink(String systemModelLink) {
-		this.systemModelLink = systemModelLink;
+	public void setApplicationLink(String applicationLink) {
+		this.applicationLink = applicationLink;
 	}
 
 	/**
 	 * Gets {@link #deltaLink}.
-	 * 
+	 *
 	 * @return {@link #deltaLink}
 	 */
 	public String getDeltaLink() {
@@ -58,7 +55,7 @@ public class SystemAnnotationLink {
 
 	/**
 	 * Sets {@link #deltaLink}.
-	 * 
+	 *
 	 * @param deltaLink
 	 *            New value for {@link #deltaLink}
 	 */
@@ -86,25 +83,6 @@ public class SystemAnnotationLink {
 	}
 
 	/**
-	 * Gets {@link #customAnnotationLink}.
-	 *
-	 * @return {@link #customAnnotationLink}
-	 */
-	public String getCustomAnnotationLink() {
-		return this.customAnnotationLink;
-	}
-
-	/**
-	 * Sets {@link #customAnnotationLink}.
-	 *
-	 * @param extendedAnnotationLink
-	 *            New value for {@link #customAnnotationLink}
-	 */
-	public void setCustomAnnotationLink(String customAnnotationLink) {
-		this.customAnnotationLink = customAnnotationLink;
-	}
-
-	/**
 	 * Gets {@link #tag}.
 	 *
 	 * @return {@link #tag}
@@ -128,7 +106,7 @@ public class SystemAnnotationLink {
 	 */
 	@Override
 	public String toString() {
-		return "{  system-model-link: " + systemModelLink + " }";
+		return "{  system-model-link: " + applicationLink + " }";
 	}
 
 }

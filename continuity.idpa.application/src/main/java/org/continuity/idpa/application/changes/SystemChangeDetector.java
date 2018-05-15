@@ -10,7 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.continuity.idpa.application.Parameter;
 import org.continuity.idpa.application.entities.ModelElementReference;
 import org.continuity.idpa.application.entities.SystemChange;
-import org.continuity.idpa.application.entities.SystemChangeReport;
+import org.continuity.idpa.application.entities.ApplicationChangeReport;
 import org.continuity.idpa.application.entities.SystemChangeType;
 import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.Application;
@@ -75,13 +75,13 @@ public class SystemChangeDetector {
 		ModelElementReference ref = new ModelElementReference(newInterf);
 
 		if (interfHolder.element == null) {
-			reportBuilder.addChange(new SystemChange(SystemChangeType.INTERFACE_ADDED, ref));
+			reportBuilder.addChange(new SystemChange(SystemChangeType.ENDPOINT_ADDED, ref));
 		} else {
 			Endpoint<?> oldInterf = interfHolder.element;
 
 			for (String changedProperty : oldInterf.getDifferingProperties(newInterf)) {
 				if (!"parameters".equals(changedProperty)) {
-					reportBuilder.addChange(new SystemChange(SystemChangeType.INTERFACE_CHANGED, ref, changedProperty));
+					reportBuilder.addChange(new SystemChange(SystemChangeType.ENDPOINT_CHANGED, ref, changedProperty));
 				}
 			}
 
@@ -96,7 +96,7 @@ public class SystemChangeDetector {
 	private boolean reportRemovedInterface(Endpoint<?> oldInterf, Set<ModelElementReference> visited) {
 		ModelElementReference ref = new ModelElementReference(oldInterf);
 		if (!visited.contains(ref)) {
-			reportBuilder.addChange(new SystemChange(SystemChangeType.INTERFACE_REMOVED, ref));
+			reportBuilder.addChange(new SystemChange(SystemChangeType.ENDPOINT_REMOVED, ref));
 		}
 
 		return true;
@@ -134,7 +134,7 @@ public class SystemChangeDetector {
 	 *
 	 * @return The report.
 	 */
-	public SystemChangeReport getReport() {
+	public ApplicationChangeReport getReport() {
 		return reportBuilder.buildReport();
 	}
 

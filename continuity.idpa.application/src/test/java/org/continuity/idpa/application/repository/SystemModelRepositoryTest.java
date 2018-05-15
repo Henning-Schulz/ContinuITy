@@ -1,4 +1,4 @@
-package org.continuity.system.model.repository;
+package org.continuity.idpa.application.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,9 +11,8 @@ import java.util.Date;
 
 import org.continuity.commons.format.CommonFormats;
 import org.continuity.idpa.application.Application;
-import org.continuity.idpa.application.repository.SystemModelRepository;
+import org.continuity.idpa.application.SystemModelTestInstance;
 import org.continuity.idpa.yaml.IdpaYamlSerializer;
-import org.continuity.system.model.SystemModelTestInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -145,7 +144,7 @@ public class SystemModelRepositoryTest {
 	}
 
 	private String toFileName(Date date) {
-		return "system." + DATE_FORMAT.format(date) + ".yml";
+		return "application." + DATE_FORMAT.format(date) + ".yml";
 	}
 
 }

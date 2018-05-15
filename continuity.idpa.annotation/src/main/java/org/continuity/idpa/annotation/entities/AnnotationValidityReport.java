@@ -22,8 +22,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AnnotationValidityReport {
 
-	@JsonProperty("system-changes")
-	private Set<AnnotationViolation> systemChanges;
+	@JsonProperty("application-changes")
+	private Set<AnnotationViolation> applicationChanges;
 
 	@JsonDeserialize(keyUsing = RefKeyDeserializer.class)
 	private Map<ModelElementReference, Set<AnnotationViolation>> violations;
@@ -33,8 +33,8 @@ public class AnnotationValidityReport {
 	@JsonDeserialize(keyUsing = RefKeyDeserializer.class)
 	private Map<ModelElementReference, Set<AnnotationViolation>> violationsBeforeFix;
 
-	public AnnotationValidityReport(Set<AnnotationViolation> systemChanges, Map<ModelElementReference, Set<AnnotationViolation>> violations) {
-		this.systemChanges = systemChanges;
+	public AnnotationValidityReport(Set<AnnotationViolation> applicationChanges, Map<ModelElementReference, Set<AnnotationViolation>> violations) {
+		this.applicationChanges = applicationChanges;
 		this.violations = violations;
 	}
 
@@ -45,22 +45,22 @@ public class AnnotationValidityReport {
 	}
 
 	/**
-	 * Gets {@link #systemChanges}.
+	 * Gets {@link #applicationChanges}.
 	 *
-	 * @return {@link #systemChanges}
+	 * @return {@link #applicationChanges}
 	 */
-	public Set<AnnotationViolation> getSystemChanges() {
-		return this.systemChanges;
+	public Set<AnnotationViolation> getApplicationChanges() {
+		return this.applicationChanges;
 	}
 
 	/**
-	 * Sets {@link #systemChanges}.
+	 * Sets {@link #applicationChanges}.
 	 *
-	 * @param systemChanges
-	 *            New value for {@link #systemChanges}
+	 * @param applicationChanges
+	 *            New value for {@link #applicationChanges}
 	 */
-	public void setSystemChanges(Set<AnnotationViolation> systemChanges) {
-		this.systemChanges = systemChanges;
+	public void setApplicationChanges(Set<AnnotationViolation> applicationChanges) {
+		this.applicationChanges = applicationChanges;
 	}
 
 	/**
@@ -103,13 +103,13 @@ public class AnnotationValidityReport {
 
 	@JsonIgnore
 	public boolean isOk() {
-		return systemChanges.isEmpty() && violations.isEmpty();
+		return applicationChanges.isEmpty() && violations.isEmpty();
 	}
 
 	@JsonIgnore
 	public boolean isBreaking() {
 		boolean breaking = violations.values().stream().flatMap(Set::stream).reduce(false, (b, v) -> b || v.isBreaking(), Boolean::logicalOr);
-		return breaking || systemChanges.stream().reduce(false, (b, v) -> b || v.isBreaking(), Boolean::logicalOr);
+		return breaking || applicationChanges.stream().reduce(false, (b, v) -> b || v.isBreaking(), Boolean::logicalOr);
 	}
 
 	/**

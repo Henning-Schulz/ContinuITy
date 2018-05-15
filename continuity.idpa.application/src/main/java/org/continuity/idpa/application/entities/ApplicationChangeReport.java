@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.continuity.commons.format.CommonFormats;
-import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.Application;
+import org.continuity.idpa.application.Endpoint;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Henning Schulz
  *
  */
-public class SystemChangeReport {
+public class ApplicationChangeReport {
 
 	@JsonInclude(Include.NON_NULL)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = CommonFormats.DATE_FORMAT_PATTERN)
@@ -31,13 +31,13 @@ public class SystemChangeReport {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = CommonFormats.DATE_FORMAT_PATTERN)
 	private Date afterChange;
 
-	@JsonProperty("system-changes")
+	@JsonProperty("application-changes")
 	@JsonInclude(Include.NON_EMPTY)
-	private Set<SystemChange> systemChanges;
+	private Set<SystemChange> applicationChanges;
 
-	@JsonProperty("ignored-system-changes")
+	@JsonProperty("ignored-application-changes")
 	@JsonInclude(Include.NON_EMPTY)
-	private Set<SystemChange> ignoredSystemChanges;
+	private Set<SystemChange> ignoredApplicationChanges;
 
 	/**
 	 * Sets the beforeChange date to 0.
@@ -45,17 +45,17 @@ public class SystemChangeReport {
 	 * @param changes
 	 * @param afterChange
 	 */
-	public SystemChangeReport(Set<SystemChange> changes, Date afterChange) {
+	public ApplicationChangeReport(Set<SystemChange> changes, Date afterChange) {
 		this(changes, Collections.emptySet(), new Date(0), afterChange);
 	}
 
-	public SystemChangeReport(Set<SystemChange> changes, Date beforeChange, Date afterChange) {
+	public ApplicationChangeReport(Set<SystemChange> changes, Date beforeChange, Date afterChange) {
 		this(changes, Collections.emptySet(), beforeChange, afterChange);
 	}
 
-	public SystemChangeReport(Set<SystemChange> changes, Set<SystemChange> ignoredChanges, Date beforeChange, Date afterChange) {
-		this.systemChanges = changes;
-		this.ignoredSystemChanges = ignoredChanges;
+	public ApplicationChangeReport(Set<SystemChange> changes, Set<SystemChange> ignoredChanges, Date beforeChange, Date afterChange) {
+		this.applicationChanges = changes;
+		this.ignoredApplicationChanges = ignoredChanges;
 		this.beforeChange = beforeChange;
 		this.afterChange = afterChange;
 	}
@@ -63,7 +63,7 @@ public class SystemChangeReport {
 	/**
 	 * Default constructor.
 	 */
-	public SystemChangeReport() {
+	public ApplicationChangeReport() {
 	}
 
 	/**
@@ -71,65 +71,65 @@ public class SystemChangeReport {
 	 *
 	 * @return An empty report.
 	 */
-	public static SystemChangeReport empty(Date afterChange) {
-		return new SystemChangeReport(Collections.emptySet(), afterChange);
+	public static ApplicationChangeReport empty(Date afterChange) {
+		return new ApplicationChangeReport(Collections.emptySet(), afterChange);
 	}
 
 	/**
 	 * Creates a report holding all interfaces of a system model as changes of type
-	 * {@link SystemChangeType#INTERFACE_ADDED}.
+	 * {@link SystemChangeType#ENDPOINT_ADDED}.
 	 *
-	 * @param system
+	 * @param application
 	 *            The system whose interfaces should be added.
 	 * @return A report holding all interfaces to be added.
 	 */
-	public static SystemChangeReport allOf(Application system) {
+	public static ApplicationChangeReport allOf(Application application) {
 		Set<SystemChange> changes = new HashSet<>();
 
-		for (Endpoint<?> interf : system.getEndpoints()) {
-			changes.add(new SystemChange(SystemChangeType.INTERFACE_ADDED, new ModelElementReference(interf)));
+		for (Endpoint<?> interf : application.getEndpoints()) {
+			changes.add(new SystemChange(SystemChangeType.ENDPOINT_ADDED, new ModelElementReference(interf)));
 		}
 
-		return new SystemChangeReport(changes, system.getTimestamp());
+		return new ApplicationChangeReport(changes, application.getTimestamp());
 	}
 
 
 	/**
-	 * Gets {@link #systemChanges}.
+	 * Gets {@link #applicationChanges}.
 	 *
-	 * @return {@link #systemChanges}
+	 * @return {@link #applicationChanges}
 	 */
-	public Set<SystemChange> getSystemChanges() {
-		return this.systemChanges;
+	public Set<SystemChange> getApplicationChanges() {
+		return this.applicationChanges;
 	}
 
 	/**
-	 * Sets {@link #systemChanges}.
+	 * Sets {@link #applicationChanges}.
 	 *
-	 * @param systemChanges
-	 *            New value for {@link #systemChanges}
+	 * @param applicationChanges
+	 *            New value for {@link #applicationChanges}
 	 */
-	public void setSystemChanges(Set<SystemChange> systemChanges) {
-		this.systemChanges = systemChanges;
+	public void setApplicationChanges(Set<SystemChange> applicationChanges) {
+		this.applicationChanges = applicationChanges;
 	}
 
 	/**
-	 * Gets {@link #ignoredSystemChanges}.
+	 * Gets {@link #ignoredApplicationChanges}.
 	 *
-	 * @return {@link #ignoredSystemChanges}
+	 * @return {@link #ignoredApplicationChanges}
 	 */
-	public Set<SystemChange> getIgnoredSystemChanges() {
-		return this.ignoredSystemChanges;
+	public Set<SystemChange> getIgnoredApplicationChanges() {
+		return this.ignoredApplicationChanges;
 	}
 
 	/**
-	 * Sets {@link #ignoredSystemChanges}.
+	 * Sets {@link #ignoredApplicationChanges}.
 	 *
 	 * @param ignoredSystemChanges
-	 *            New value for {@link #ignoredSystemChanges}
+	 *            New value for {@link #ignoredApplicationChanges}
 	 */
-	public void setIgnoredSystemChanges(Set<SystemChange> ignoredSystemChanges) {
-		this.ignoredSystemChanges = ignoredSystemChanges;
+	public void setIgnoredApplicationChanges(Set<SystemChange> ignoredSystemChanges) {
+		this.ignoredApplicationChanges = ignoredSystemChanges;
 	}
 
 	/**
@@ -172,11 +172,11 @@ public class SystemChangeReport {
 
 	@JsonIgnore
 	public boolean changed() {
-		return !systemChanges.isEmpty();
+		return !applicationChanges.isEmpty();
 	}
 
 	public Stream<SystemChange> stream() {
-		return systemChanges.stream();
+		return applicationChanges.stream();
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package org.continuity.system.annotation.validation;
+package org.continuity.idpa.annotation.validation;
 
 import org.continuity.idpa.WeakReference;
 import org.continuity.idpa.annotation.ApplicationAnnotation;

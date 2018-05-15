@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.continuity.idpa.application.entities.SystemChange;
-import org.continuity.idpa.application.entities.SystemChangeReport;
+import org.continuity.idpa.application.entities.ApplicationChangeReport;
 import org.continuity.idpa.application.entities.SystemChangeType;
 
 /**
@@ -56,8 +56,8 @@ public class SystemChangeReportBuilder {
 		this.beforeChange = beforeChange;
 	}
 
-	public SystemChangeReport buildReport() {
-		return new SystemChangeReport(changes, ignoredChanges, beforeChange, afterChange);
+	public ApplicationChangeReport buildReport() {
+		return new ApplicationChangeReport(changes, ignoredChanges, beforeChange, afterChange);
 	}
 
 }

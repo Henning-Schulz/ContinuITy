@@ -12,7 +12,7 @@ import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.Parameter;
 import org.continuity.idpa.application.changes.SystemChangeDetector;
 import org.continuity.idpa.application.entities.SystemChange;
-import org.continuity.idpa.application.entities.SystemChangeReport;
+import org.continuity.idpa.application.entities.ApplicationChangeReport;
 import org.continuity.idpa.application.entities.SystemChangeType;
 import org.continuity.idpa.legacy.IdpaFromOldAnnotationConverter;
 import org.continuity.idpa.visitor.FindById;
@@ -45,7 +45,7 @@ public class SystemModelRepositoryManager {
 	 *            The system model to be stored.
 	 * @return A report containing the changes of the system model since the version before.
 	 */
-	public SystemChangeReport saveOrUpdate(String tag, Application system) {
+	public ApplicationChangeReport saveOrUpdate(String tag, Application system) {
 		return saveOrUpdate(tag, system, EnumSet.noneOf(SystemChangeType.class));
 	}
 
@@ -61,9 +61,9 @@ public class SystemModelRepositoryManager {
 	 * @return A report containing the changes of the system model since the latest version before.
 	 *         If the model is older than the latest one, an empty report will be returned.
 	 */
-	public SystemChangeReport saveOrUpdate(String tag, Application system, EnumSet<SystemChangeType> ignoredChanges) {
+	public ApplicationChangeReport saveOrUpdate(String tag, Application system, EnumSet<SystemChangeType> ignoredChanges) {
 		SystemChangeDetector detector = new SystemChangeDetector(system, ignoredChanges);
-		SystemChangeReport report = SystemChangeReport.empty(system.getTimestamp());
+		ApplicationChangeReport report = ApplicationChangeReport.empty(system.getTimestamp());
 
 		Application before = repository.readLatestBefore(tag, system.getTimestamp());
 
@@ -71,7 +71,7 @@ public class SystemModelRepositoryManager {
 			detector.compareTo(before);
 			report = detector.getReport();
 		} else {
-			report = SystemChangeReport.allOf(system);
+			report = ApplicationChangeReport.allOf(system);
 		}
 
 		if (report.changed()) {
@@ -113,13 +113,13 @@ public class SystemModelRepositoryManager {
 		return report;
 	}
 
-	private Application mergeIgnoredChanges(Application oldModel, Application newModel, SystemChangeReport report) {
-		for (SystemChange change : report.getIgnoredSystemChanges()) {
+	private Application mergeIgnoredChanges(Application oldModel, Application newModel, ApplicationChangeReport report) {
+		for (SystemChange change : report.getIgnoredApplicationChanges()) {
 			switch (change.getType()) {
-			case INTERFACE_ADDED:
+			case ENDPOINT_ADDED:
 				newModel.getEndpoints().removeIf(interf -> interf.getId().equals(change.getChangedElement().getId()));
 				break;
-			case INTERFACE_CHANGED:
+			case ENDPOINT_CHANGED:
 				Endpoint<?> oldInterf = FindById.find(change.getChangedElement().getId(), Endpoint.GENERIC_TYPE).in(oldModel).getFound();
 				Endpoint<?> newInterf = FindById.find(change.getChangedElement().getId(), Endpoint.GENERIC_TYPE).in(newModel).getFound();
 
@@ -129,7 +129,7 @@ public class SystemModelRepositoryManager {
 					newInterf.clonePropertyFrom(change.getChangedProperty(), oldInterf);
 				}
 				break;
-			case INTERFACE_REMOVED:
+			case ENDPOINT_REMOVED:
 				newModel.addEndpoint(oldModel.getEndpoints().stream().filter(interf -> interf.getId().equals(change.getChangedElement().getId())).findFirst().get());
 				break;
 			case PARAMETER_CHANGED:
@@ -191,11 +191,11 @@ public class SystemModelRepositoryManager {
 	 *            The date since when the changes are to be determined.
 	 * @return A report holding the changes.
 	 */
-	public SystemChangeReport getDeltaSince(String tag, Date date) {
+	public ApplicationChangeReport getDeltaSince(String tag, Date date) {
 		Application latest = repository.readLatest(tag);
 
 		if (latest == null) {
-			return SystemChangeReport.empty(date);
+			return ApplicationChangeReport.empty(date);
 		}
 
 		Application latestBefore = repository.readLatestBefore(tag, date);

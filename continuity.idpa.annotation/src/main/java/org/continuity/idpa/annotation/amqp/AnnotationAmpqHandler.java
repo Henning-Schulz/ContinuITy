@@ -68,7 +68,7 @@ public class AnnotationAmpqHandler {
 
 		ResponseEntity<Application> systemResponse;
 		try {
-			systemResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getSystemModelLink()), Application.class);
+			systemResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getApplicationLink()), Application.class);
 		} catch (RestClientResponseException e) {
 			LOGGER.error("Received error response! Ignoring the new system model.", e);
 			return;

@@ -5,7 +5,7 @@ import java.util.EnumSet;
 import org.continuity.commons.utils.WebUtils;
 import org.continuity.idpa.application.Application;
 import org.continuity.idpa.application.config.RabbitMqConfig;
-import org.continuity.idpa.application.entities.SystemChangeReport;
+import org.continuity.idpa.application.entities.ApplicationChangeReport;
 import org.continuity.idpa.application.entities.SystemChangeType;
 import org.continuity.idpa.application.entities.SystemModelLink;
 import org.continuity.idpa.application.entities.WorkloadModelLink;
@@ -60,16 +60,16 @@ public class UpdateSystemModelAmqpHandler {
 	public void onModelCreated(WorkloadModelLink link) {
 		LOGGER.info("Received workload model link: {}", link);
 
-		if ("INVALID".equals(link.getSystemModelLink())) {
+		if ("INVALID".equals(link.getApplicationLink())) {
 			LOGGER.error("Received invalid system model link: {}", link);
 			return;
 		}
 
 		ResponseEntity<Application> systemResponse;
 		try {
-			systemResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getSystemModelLink()), Application.class);
+			systemResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getApplicationLink()), Application.class);
 		} catch (HttpStatusCodeException e) {
-			LOGGER.error("Could not retrieve the system model from {}. Got response code {}!", link.getSystemModelLink(), e.getStatusCode());
+			LOGGER.error("Could not retrieve the system model from {}. Got response code {}!", link.getApplicationLink(), e.getStatusCode());
 			LOGGER.error("Exception:", e);
 			return;
 		}
@@ -78,8 +78,8 @@ public class UpdateSystemModelAmqpHandler {
 
 		// A workload model may only contain parts of all available interfaces, possible parameters
 		// and possible properties (e.g., headers).
-		SystemChangeReport report = repositoryManager.saveOrUpdate(link.getTag(), systemModel,
-				EnumSet.of(SystemChangeType.INTERFACE_REMOVED, SystemChangeType.INTERFACE_CHANGED, SystemChangeType.PARAMETER_REMOVED));
+		ApplicationChangeReport report = repositoryManager.saveOrUpdate(link.getTag(), systemModel,
+				EnumSet.of(SystemChangeType.ENDPOINT_REMOVED, SystemChangeType.ENDPOINT_CHANGED, SystemChangeType.PARAMETER_REMOVED));
 
 		if (report.changed()) {
 			try {

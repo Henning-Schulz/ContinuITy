@@ -43,7 +43,7 @@ public class AnnotationValidityChecker {
 	}
 
 	public void registerSystemChanges(AnnotationValidityReport systemChangeReport) {
-		reportBuilder.addViolations(systemChangeReport.getSystemChanges());
+		reportBuilder.addViolations(systemChangeReport.getApplicationChanges());
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class AnnotationValidityChecker {
 			if (interf == null) {
 				ModelElementReference interfRef = new ModelElementReference(ann.getAnnotatedEndpoint());
 				ModelElementReference annRef = new ModelElementReference(ann);
-				reportBuilder.addViolation(annRef, new AnnotationViolation(AnnotationViolationType.ILLEAL_INTERFACE_REFERENCE, interfRef));
+				reportBuilder.addViolation(annRef, new AnnotationViolation(AnnotationViolationType.ILLEAL_ENDPOINT_REFERENCE, interfRef));
 			}
 
 			reportBuilder.resolveInterfaceAnnotation(ann);
@@ -107,7 +107,7 @@ public class AnnotationValidityChecker {
 			if (interf == null) {
 				ModelElementReference interfRef = new ModelElementReference(extraction.getFrom());
 				ModelElementReference annRef = new ModelElementReference(extraction);
-				reportBuilder.addViolation(annRef, new AnnotationViolation(AnnotationViolationType.ILLEAL_INTERFACE_REFERENCE, interfRef));
+				reportBuilder.addViolation(annRef, new AnnotationViolation(AnnotationViolationType.ILLEAL_ENDPOINT_REFERENCE, interfRef));
 			}
 		});
 

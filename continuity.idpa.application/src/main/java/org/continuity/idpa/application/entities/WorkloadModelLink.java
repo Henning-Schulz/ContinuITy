@@ -8,8 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class WorkloadModelLink {
 
-	@JsonProperty("system-model-link")
-	private String systemModelLink;
+	@JsonProperty("application-link")
+	private String applicationLink;
 
 	private String tag;
 
@@ -20,22 +20,22 @@ public class WorkloadModelLink {
 	}
 
 	/**
-	 * Gets {@link #systemModelLink}.
+	 * Gets {@link #applicationLink}.
 	 *
-	 * @return {@link #systemModelLink}
+	 * @return {@link #applicationLink}
 	 */
-	public String getSystemModelLink() {
-		return this.systemModelLink;
+	public String getApplicationLink() {
+		return this.applicationLink;
 	}
 
 	/**
-	 * Sets {@link #systemModelLink}.
+	 * Sets {@link #applicationLink}.
 	 *
-	 * @param systemModelLink
-	 *            New value for {@link #systemModelLink}
+	 * @param applicationLink
+	 *            New value for {@link #applicationLink}
 	 */
-	public void setSystemModelLink(String systemModelLink) {
-		this.systemModelLink = systemModelLink;
+	public void setApplicationLink(String applicationLink) {
+		this.applicationLink = applicationLink;
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class WorkloadModelLink {
 	 */
 	@Override
 	public String toString() {
-		return "{ tag: " + tag + ", system-model-link: " + systemModelLink + " }";
+		return "{ tag: " + tag + ", system-model-link: " + applicationLink + " }";
 	}
 
 }

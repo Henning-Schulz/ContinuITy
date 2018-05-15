@@ -42,8 +42,8 @@ public class AnnotationFixer {
 	private ApplicationAnnotation removeUnknownInterfaceReferences(ApplicationAnnotation brokenAnnotation, AnnotationValidityReport report) {
 		Set<String> removedInterfaces = new HashSet<>();
 
-		for (AnnotationViolation systemChange : report.getSystemChanges()) {
-			if (systemChange.getType() == AnnotationViolationType.INTERFACE_REMOVED) {
+		for (AnnotationViolation systemChange : report.getApplicationChanges()) {
+			if (systemChange.getType() == AnnotationViolationType.ENDPOINT_REMOVED) {
 				removedInterfaces.add(systemChange.getChangedElement().getId());
 			}
 		}

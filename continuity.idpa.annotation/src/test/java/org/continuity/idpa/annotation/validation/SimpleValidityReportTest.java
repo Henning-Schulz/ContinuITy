@@ -1,4 +1,4 @@
-package org.continuity.system.annotation.validation;
+package org.continuity.idpa.annotation.validation;
 
 import org.continuity.idpa.annotation.entities.AnnotationViolation;
 import org.continuity.idpa.annotation.entities.AnnotationViolationType;
@@ -23,11 +23,11 @@ public class SimpleValidityReportTest {
 		Assert.assertFalse(builder.buildReport().isOk());
 		Assert.assertFalse(builder.buildReport().isBreaking());
 
-		builder.addViolation(new AnnotationViolation(AnnotationViolationType.INTERFACE_CHANGED, new ModelElementReference("123", "42")));
+		builder.addViolation(new AnnotationViolation(AnnotationViolationType.ENDPOINT_CHANGED, new ModelElementReference("123", "42")));
 		Assert.assertFalse(builder.buildReport().isOk());
 		Assert.assertFalse(builder.buildReport().isBreaking());
 
-		builder.addViolation(new AnnotationViolation(AnnotationViolationType.ILLEAL_INTERFACE_REFERENCE, new ModelElementReference("xyz", "abc")));
+		builder.addViolation(new AnnotationViolation(AnnotationViolationType.ILLEAL_ENDPOINT_REFERENCE, new ModelElementReference("xyz", "abc")));
 		Assert.assertFalse(builder.buildReport().isOk());
 		Assert.assertTrue(builder.buildReport().isBreaking());
 	}

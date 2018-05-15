@@ -20,9 +20,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonDeserialize(using = SystemChangeType.JsonDeserializer.class)
 public enum SystemChangeType {
 
-	// System changed
-
-	INTERFACE_CHANGED("The interface has changed."), INTERFACE_REMOVED("The interface has been removed."), INTERFACE_ADDED("A new interface has been added."), PARAMETER_CHANGED(
+	ENDPOINT_CHANGED("The endpoint has changed."), ENDPOINT_REMOVED("The endpoint has been removed."), ENDPOINT_ADDED("A new endpoint has been added."), PARAMETER_CHANGED(
 			"The parameter has changed."), PARAMETER_REMOVED(
 			"The parameter has been removed."), PARAMETER_ADDED("A new parameter has been added.");
 

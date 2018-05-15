@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class SystemModelLink {
 
-	@JsonProperty("system-model-link")
+	@JsonProperty("application-link")
 	private String modelLink;
 
 	@JsonProperty("delta-link")

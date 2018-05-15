@@ -1,4 +1,4 @@
-package org.continuity.system.annotation.validation;
+package org.continuity.idpa.annotation.validation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,9 +37,9 @@ public class AnnotationValidityReportJsonTest {
 	public void setupReport() {
 		Map<ModelElementReference, Set<AnnotationViolation>> violations = new HashMap<>();
 		violations.put(new ModelElementReference("MyType", "MyId"),
-				Collections.singleton(new AnnotationViolation(AnnotationViolationType.INTERFACE_ADDED, new ModelElementReference("HttpInterface", "foo"))));
+				Collections.singleton(new AnnotationViolation(AnnotationViolationType.ENDPOINT_ADDED, new ModelElementReference("HttpEndpoint", "foo"))));
 
-		Set<AnnotationViolation> systemChanges = new HashSet<>(Arrays.asList(new AnnotationViolation(AnnotationViolationType.INTERFACE_REMOVED, new ModelElementReference("HttpInterface", "bar")),
+		Set<AnnotationViolation> systemChanges = new HashSet<>(Arrays.asList(new AnnotationViolation(AnnotationViolationType.ENDPOINT_REMOVED, new ModelElementReference("HttpEndpoint", "bar")),
 				new AnnotationViolation(AnnotationViolationType.PARAMETER_ADDED, new ModelElementReference("HttpParameter", "blub"))));
 
 		report = new AnnotationValidityReport(systemChanges, violations);
@@ -50,12 +50,12 @@ public class AnnotationValidityReportJsonTest {
 		ObjectMapper mapper = new ObjectMapper();
 
 		fooReference = mapper.createObjectNode();
-		fooReference.putObject("changed-element").put("type", "HttpInterface").put("id", "foo");
-		fooReference.put("breaking", false).put("message", AnnotationViolationType.INTERFACE_ADDED.getMessage());
+		fooReference.putObject("changed-element").put("type", "HttpEndpoint").put("id", "foo");
+		fooReference.put("breaking", false).put("message", AnnotationViolationType.ENDPOINT_ADDED.getMessage());
 
 		barReference = mapper.createObjectNode();
-		barReference.putObject("changed-element").put("type", "HttpInterface").put("id", "bar");
-		barReference.put("breaking", false).put("message", AnnotationViolationType.INTERFACE_REMOVED.getMessage());
+		barReference.putObject("changed-element").put("type", "HttpEndpoint").put("id", "bar");
+		barReference.put("breaking", false).put("message", AnnotationViolationType.ENDPOINT_REMOVED.getMessage());
 
 		blubReference = mapper.createObjectNode();
 		blubReference.putObject("changed-element").put("type", "HttpParameter").put("id", "blub");
@@ -67,7 +67,7 @@ public class AnnotationValidityReportJsonTest {
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode parsed = mapper.readTree(report.toString());
 		assertThat(parsed.path("violations").path(new ModelElementReference("MyType", "MyId").toString())).containsExactlyInAnyOrder(fooReference);
-		assertThat(parsed.path("system-changes")).containsExactlyInAnyOrder(barReference, blubReference);
+		assertThat(parsed.path("application-changes")).containsExactlyInAnyOrder(barReference, blubReference);
 	}
 
 }

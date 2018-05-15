@@ -80,7 +80,7 @@ public class AnnotationStorageManager {
 	 * @throws IOException
 	 */
 	public AnnotationValidityReport updateSystemModel(String tag, Application system, AnnotationValidityReport systemChangeReport) throws IOException {
-		if ((systemChangeReport.getSystemChanges() == null) || systemChangeReport.getSystemChanges().isEmpty()) {
+		if ((systemChangeReport.getApplicationChanges() == null) || systemChangeReport.getApplicationChanges().isEmpty()) {
 			return AnnotationValidityReport.empty();
 		}
 

@@ -15,7 +15,7 @@ import java.util.EnumSet;
 import org.continuity.commons.format.CommonFormats;
 import org.continuity.idpa.application.Application;
 import org.continuity.idpa.application.config.RabbitMqConfig;
-import org.continuity.idpa.application.entities.SystemChangeReport;
+import org.continuity.idpa.application.entities.ApplicationChangeReport;
 import org.continuity.idpa.application.entities.SystemChangeType;
 import org.continuity.idpa.application.entities.SystemModelLink;
 import org.continuity.idpa.application.repository.SystemModelRepositoryManager;
@@ -89,7 +89,7 @@ public class ApplicationController {
 	 * @return The delta report.
 	 */
 	@RequestMapping(path = GET_DELTA, method = RequestMethod.GET)
-	public ResponseEntity<SystemChangeReport> getDeltaSince(@PathVariable String tag, @RequestParam("since") String since) {
+	public ResponseEntity<ApplicationChangeReport> getDeltaSince(@PathVariable String tag, @RequestParam("since") String since) {
 		Date date;
 		try {
 			date = DATE_FORMAT.parse(since);
@@ -111,11 +111,11 @@ public class ApplicationController {
 	 * @param system
 	 *            The system model to be stored.
 	 * @param ignoreInterfaceChanged
-	 *            Ignore {@link SystemChangeType#INTERFACE_CHANGED}.
+	 *            Ignore {@link SystemChangeType#ENDPOINT_CHANGED}.
 	 * @param ignoreInterfaceRemoved
-	 *            Ignore {@link SystemChangeType#INTERFACE_REMOVED}.
+	 *            Ignore {@link SystemChangeType#ENDPOINT_REMOVED}.
 	 * @param ignoreInterfaceAdded
-	 *            Ignore {@link SystemChangeType#INTERFACE_ADDED}.
+	 *            Ignore {@link SystemChangeType#ENDPOINT_ADDED}.
 	 * @param ignoreParameterRemoved
 	 *            Ignore {@link SystemChangeType#PARAMETER_REMOVED}.
 	 * @param ignoreParameterAdded
@@ -134,7 +134,7 @@ public class ApplicationController {
 		EnumSet<SystemChangeType> ignoredChangeTypes = changeTypesFromBooleans(ignoreInterfaceChanged, ignoreInterfaceRemoved, ignoreInterfaceAdded, ignoreParameterChanged, ignoreParameterRemoved,
 				ignoreParameterAdded);
 
-		SystemChangeReport report = manager.saveOrUpdate(tag, system, ignoredChangeTypes);
+		ApplicationChangeReport report = manager.saveOrUpdate(tag, system, ignoredChangeTypes);
 
 		if (report.changed()) {
 			try {
@@ -187,15 +187,15 @@ public class ApplicationController {
 		EnumSet<SystemChangeType> set = EnumSet.noneOf(SystemChangeType.class);
 
 		if (ignoreInterfaceChanged) {
-			set.add(SystemChangeType.INTERFACE_CHANGED);
+			set.add(SystemChangeType.ENDPOINT_CHANGED);
 		}
 
 		if (ignoreInterfaceRemoved) {
-			set.add(SystemChangeType.INTERFACE_REMOVED);
+			set.add(SystemChangeType.ENDPOINT_REMOVED);
 		}
 
 		if (ignoreInterfaceAdded) {
-			set.add(SystemChangeType.INTERFACE_ADDED);
+			set.add(SystemChangeType.ENDPOINT_ADDED);
 		}
 
 		if (ignoreParameterChanged) {

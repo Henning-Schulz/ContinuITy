@@ -22,12 +22,12 @@ public enum AnnotationViolationType {
 
 	// System changed
 
-	INTERFACE_CHANGED("The interface has changed.", false), INTERFACE_REMOVED("The interface has been removed.", false), INTERFACE_ADDED("A new interface has been added.",
+	ENDPOINT_CHANGED("The endpoint has changed.", false), ENDPOINT_REMOVED("The endpoint has been removed.", false), ENDPOINT_ADDED("A new endpoint has been added.",
 			false), PARAMETER_CHANGED("The parameter has changed.", false), PARAMETER_REMOVED("The parameter has been removed.", false), PARAMETER_ADDED("A new parameter has been added.", false),
 
 	// Annotation changed
 
-	ILLEAL_INTERFACE_REFERENCE("The reference to the interface is not valid.", true), ILLEGAL_PARAMETER_REFERENCE("The reference to the parameter is not valid.", true),
+	ILLEAL_ENDPOINT_REFERENCE("The reference to the endpoint is not valid.", true), ILLEGAL_PARAMETER_REFERENCE("The reference to the parameter is not valid.", true),
 
 	// Annotation invalid
 
