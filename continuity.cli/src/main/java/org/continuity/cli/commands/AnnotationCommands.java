@@ -38,15 +38,15 @@ public class AnnotationCommands {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	@ShellMethod(key = { "download-annotation", "download-ann" }, value = "Downloads and opens the annotation with the specified tag.")
-	public String downloadAnnotation(String tag) throws JsonGenerationException, JsonMappingException, IOException {
+	@ShellMethod(key = { "download-idpa" }, value = "Downloads and opens the IDPA with the specified tag.")
+	public String downloadIdpa(String tag) throws JsonGenerationException, JsonMappingException, IOException {
 		String url = WebUtils.addProtocolIfMissing(propertiesProvider.get().getProperty(PropertiesProvider.KEY_URL));
 
-		ResponseEntity<Application> systemResponse = restTemplate.getForEntity(Idpa.GET_APPLICATION.requestUrl(tag).withHost(url).get(), Application.class);
+		ResponseEntity<Application> applicationResponse = restTemplate.getForEntity(Idpa.GET_APPLICATION.requestUrl(tag).withHost(url).get(), Application.class);
 		ResponseEntity<ApplicationAnnotation> annotationResponse = restTemplate.getForEntity(Idpa.GET_ANNOTATION.requestUrl(tag).withHost(url).get(), ApplicationAnnotation.class);
 
-		if (!systemResponse.getStatusCode().is2xxSuccessful()) {
-			return "Could not get system model: " + systemResponse;
+		if (!applicationResponse.getStatusCode().is2xxSuccessful()) {
+			return "Could not get application model: " + applicationResponse;
 		}
 
 		if (!annotationResponse.getStatusCode().is2xxSuccessful()) {
@@ -55,27 +55,27 @@ public class AnnotationCommands {
 
 		IdpaYamlSerializer<IdpaElement> serializer = new IdpaYamlSerializer<>(IdpaElement.class);
 		String workingDir = propertiesProvider.get().getProperty(PropertiesProvider.KEY_WORKING_DIR);
-		File systemFile = new File(workingDir + "/system-model-" + tag + ".yml");
+		File applicationFile = new File(workingDir + "/application-" + tag + ".yml");
 		File annotationFile = new File(workingDir + "/annotation-" + tag + ".yml");
-		serializer.writeToYaml(systemResponse.getBody(), systemFile);
+		serializer.writeToYaml(applicationResponse.getBody(), applicationFile);
 		serializer.writeToYaml(annotationResponse.getBody(), annotationFile);
 
-		Desktop.getDesktop().open(systemFile);
+		Desktop.getDesktop().open(applicationFile);
 		Desktop.getDesktop().open(annotationFile);
 
-		return "Downloaded and opened the system model and the annotation.";
+		return "Downloaded and opened the IDPA with tag " + tag + " from " + workingDir;
 	}
 
-	@ShellMethod(key = { "open-annotation", "open-ann" }, value = "Opens an already downloaded annotation with the specified tag.")
-	public String openAnnotation(String tag) throws IOException {
+	@ShellMethod(key = { "open-idpa" }, value = "Opens an already downloaded IDPA with the specified tag.")
+	public String openIdpa(String tag) throws IOException {
 		String workingDir = propertiesProvider.get().getProperty(PropertiesProvider.KEY_WORKING_DIR);
-		File systemFile = new File(workingDir + "/system-model-" + tag + ".yml");
+		File applicationFile = new File(workingDir + "/application-" + tag + ".yml");
 		File annotationFile = new File(workingDir + "/annotation-" + tag + ".yml");
 
-		Desktop.getDesktop().open(systemFile);
+		Desktop.getDesktop().open(applicationFile);
 		Desktop.getDesktop().open(annotationFile);
 
-		return "Opened the system model and the annotation with tag " + tag + " from " + workingDir;
+		return "Opened the IDPA with tag " + tag + " from " + workingDir;
 	}
 
 	@ShellMethod(key = { "upload-annotation", "upload-ann" }, value = "Uploads the annotation with the specified tag.")
@@ -99,16 +99,16 @@ public class AnnotationCommands {
 		}
 	}
 
-	@ShellMethod(key = { "upload-system", "upload-sys" }, value = "Handle with care! Uploads the system model with the specified tag. Can break the online stored annotation!")
-	public String uploadSystem(String tag) throws JsonParseException, JsonMappingException, IOException {
+	@ShellMethod(key = { "upload-application", "upload-app" }, value = "Handle with care! Uploads the application model with the specified tag. Can break the online stored annotation!")
+	public String uploadApplication(String tag) throws JsonParseException, JsonMappingException, IOException {
 		String workingDir = propertiesProvider.get().getProperty(PropertiesProvider.KEY_WORKING_DIR);
 		IdpaYamlSerializer<Application> serializer = new IdpaYamlSerializer<>(Application.class);
-		Application system = serializer.readFromYaml(workingDir + "/system-model-" + tag + ".yml");
+		Application application = serializer.readFromYaml(workingDir + "/application-" + tag + ".yml");
 
 		String url = WebUtils.addProtocolIfMissing(propertiesProvider.get().getProperty(PropertiesProvider.KEY_URL));
 		ResponseEntity<String> response;
 		try {
-			response = restTemplate.postForEntity(Idpa.GET_APPLICATION.requestUrl(tag).withHost(url).get(), system, String.class);
+			response = restTemplate.postForEntity(Idpa.GET_APPLICATION.requestUrl(tag).withHost(url).get(), application, String.class);
 		} catch (HttpStatusCodeException e) {
 			response = new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
 		}
@@ -116,14 +116,14 @@ public class AnnotationCommands {
 		if (!response.getStatusCode().is2xxSuccessful()) {
 			return "Error during upload: " + response;
 		} else {
-			return "Successfully uploaded the system with tag " + tag + ". Report is: " + response.getBody();
+			return "Successfully uploaded the application with tag " + tag + ". Report is: " + response.getBody();
 		}
 	}
 
-	@ShellMethod(key = { "init-annotation", "init-ann" }, value = "Initializes an annotation for the stored system model with the specified tag.")
+	@ShellMethod(key = { "init-annotation", "init-ann" }, value = "Initializes an annotation for the stored application model with the specified tag.")
 	public String initAnnotation(String tag) throws JsonParseException, JsonMappingException, IOException {
 		String workingDir = propertiesProvider.get().getProperty(PropertiesProvider.KEY_WORKING_DIR);
-		File systemFile = new File(workingDir + "/system-model-" + tag + ".yml");
+		File systemFile = new File(workingDir + "/application-" + tag + ".yml");
 		File annFile = new File(workingDir + "/annotation-" + tag + ".yml");
 
 		IdpaYamlSerializer<Application> systemSerializer = new IdpaYamlSerializer<>(Application.class);
