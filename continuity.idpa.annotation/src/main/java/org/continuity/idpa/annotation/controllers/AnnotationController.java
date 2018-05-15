@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.continuity.api.rest.RestApi;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.annotation.entities.AnnotationValidityReport;
 import org.continuity.idpa.annotation.storage.AnnotationStorageManager;
@@ -72,7 +73,7 @@ public class AnnotationController {
 		} else if (storageManager.isBroken(tag)) {
 			Map<String, String> message = new HashMap<>();
 			message.put("message", "The requested annotation is broken. Get the base via the redirect.");
-			message.put("redirect", applicationName + "/ann/" + tag + "/annotation/base");
+			message.put("redirect", applicationName + RestApi.IdpaAnnotation.Annotation.GET_BASE.path(tag));
 			return new ResponseEntity<>(message, HttpStatus.LOCKED);
 		}
 

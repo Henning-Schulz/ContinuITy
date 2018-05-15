@@ -40,7 +40,7 @@ public class WorkloadModelPack {
 	}
 
 	public WorkloadModelPack(String hostname, String id, String tag) {
-		this.workloadLink = Wessbas.Model.GET.path(id);
+		this.workloadLink = Wessbas.Model.GET_WORKLOAD.path(id);
 		this.applicationLink = Wessbas.Model.GET_APPLICATION.path(id);
 		this.initialAnnotationLink = Wessbas.Model.GET_ANNOTATION.path(id);
 		this.jmeterLink = Wessbas.JMeter.CREATE.path(id);

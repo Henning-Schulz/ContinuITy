@@ -2,6 +2,7 @@ package org.continuity.idpa.application.entities;
 
 import java.util.Date;
 
+import org.continuity.api.rest.RestApi;
 import org.continuity.commons.format.CommonFormats;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,8 +25,9 @@ public class SystemModelLink {
 	}
 
 	public SystemModelLink(String applicationName, String tag, Date beforeDate) {
-		this.modelLink = applicationName + "/system/" + tag;
-		this.deltaLink = this.modelLink + "/delta?since=" + CommonFormats.DATE_FORMAT.format(beforeDate);
+		this.modelLink = RestApi.IdpaApplication.Application.GET.requestUrl(tag).withHost(applicationName).withoutProtocol().get();
+		this.deltaLink = RestApi.IdpaApplication.Application.GET_DELTA.requestUrl(tag).withHost(applicationName).withQuery("since", CommonFormats.DATE_FORMAT.format(beforeDate)).withoutProtocol()
+				.get();
 		this.tag = tag;
 	}
 

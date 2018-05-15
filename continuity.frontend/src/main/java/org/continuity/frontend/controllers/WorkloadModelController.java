@@ -8,6 +8,7 @@ import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.Paths.WAIT;
 import java.io.IOException;
 import java.util.Collections;
 
+import org.continuity.api.rest.RestApi;
 import org.continuity.api.rest.RestApi.Generic;
 import org.continuity.frontend.config.RabbitMqConfig;
 import org.continuity.frontend.entities.ModelCreatedReport;
@@ -138,7 +139,7 @@ public class WorkloadModelController {
 	 */
 	@RequestMapping(path = WAIT, method = RequestMethod.GET)
 	public ResponseEntity<JsonNode> waitForModelCreated(@PathVariable String type, @PathVariable String id, @RequestParam long timeout) {
-		String link = type + "/model/" + id;
+		String link = RestApi.Generic.WORKLOAD_MODEL_LINK.get(type).path(id);
 		LOGGER.info("Waiting for the workload model at {} to be created", link);
 
 		JsonNode response;
@@ -188,8 +189,8 @@ public class WorkloadModelController {
 	 */
 	@RequestMapping(path = GET, method = RequestMethod.GET)
 	public ResponseEntity<JsonNode> getWorkloadModel(@PathVariable String type, @PathVariable String id) {
-		LOGGER.info("Trying to get the workload model from {}", Generic.GET_WORKLOAD_MODEL.get(type).path(id));
-		return restTemplate.getForEntity(Generic.GET_WORKLOAD_MODEL.get(type).requestUrl(id).get(), JsonNode.class);
+		LOGGER.info("Trying to get the workload model from {}", Generic.WORKLOAD_MODEL_LINK.get(type).path(id));
+		return restTemplate.getForEntity(Generic.WORKLOAD_MODEL_LINK.get(type).requestUrl(id).get(), JsonNode.class);
 	}
 
 }

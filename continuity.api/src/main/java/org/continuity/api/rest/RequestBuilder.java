@@ -15,6 +15,8 @@ public class RequestBuilder {
 	private final StringBuilder queryString = new StringBuilder();
 	private boolean queryStringEmpty = true;
 
+	private boolean includeProtocol = true;
+
 	/**
 	 * Constructor.
 	 *
@@ -34,7 +36,7 @@ public class RequestBuilder {
 	 * @return The request as string.
 	 */
 	public String get() {
-		return "http://" + host + path + queryString;
+		return (includeProtocol ? "http://" : "") + host + path + queryString;
 	}
 
 	/**
@@ -72,6 +74,16 @@ public class RequestBuilder {
 	 */
 	public RequestBuilder withHost(String host) {
 		this.host = host;
+		return this;
+	}
+
+	/**
+	 * Omits the {@code http://} at the beginning of the request.
+	 *
+	 * @return The builder for further request modifications.
+	 */
+	public RequestBuilder withoutProtocol() {
+		this.includeProtocol = false;
 		return this;
 	}
 

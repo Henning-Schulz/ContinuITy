@@ -4,6 +4,7 @@ import static org.continuity.api.rest.RestApi.JMeter.TestPlan.ROOT;
 import static org.continuity.api.rest.RestApi.JMeter.TestPlan.Paths.CREATE_AND_GET;
 
 import org.apache.jorphan.collections.ListedHashTree;
+import org.continuity.api.rest.RestApi;
 import org.continuity.api.rest.RestApi.IdpaAnnotation;
 import org.continuity.api.rest.RestApi.IdpaApplication;
 import org.continuity.commons.utils.WebUtils;
@@ -53,7 +54,7 @@ public class TestPlanController {
 	 */
 	@RequestMapping(value = CREATE_AND_GET, method = RequestMethod.GET)
 	public TestPlanBundle createAndGetLoadTest(@PathVariable("type") String workloadModelType, @PathVariable("id") String workloadModelId, @RequestParam String tag) {
-		return createAndGetLoadTest(workloadModelType + "/model/" + workloadModelId, tag);
+		return createAndGetLoadTest(RestApi.Generic.WORKLOAD_MODEL_LINK.get(workloadModelType).path(workloadModelId), tag);
 	}
 
 	/**

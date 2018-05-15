@@ -1,7 +1,7 @@
 package org.continuity.wessbas.controllers;
 
 import static org.continuity.api.rest.RestApi.Wessbas.Model.ROOT;
-import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET;
+import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET_WORKLOAD;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET_ANNOTATION;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET_APPLICATION;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.OVERVIEW;
@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.continuity.api.rest.RestApi;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.application.Application;
 import org.continuity.wessbas.entities.WorkloadModelPack;
@@ -73,7 +74,7 @@ public class WessbasModelController {
 	 *            The id of the stored model.
 	 * @return The stored model or a 404 (Not Found) if there is no such model.
 	 */
-	@RequestMapping(path = GET, method = RequestMethod.GET)
+	@RequestMapping(path = GET_WORKLOAD, method = RequestMethod.GET)
 	public ResponseEntity<WorkloadModelStorageEntry> getModel(@PathVariable String id) {
 		WorkloadModelStorageEntry entry = SimpleModelStorage.instance().get(id);
 
@@ -178,11 +179,11 @@ public class WessbasModelController {
 	@RequestMapping(path = RESERVE, method = RequestMethod.GET)
 	public ResponseEntity<String> reserveModelLink(@PathVariable String tag) {
 		String storageId = SimpleModelStorage.instance().reserve(tag);
-		String link = applicationName + "/model/" + storageId;
+		String link = RestApi.Wessbas.Model.OVERVIEW.requestUrl(storageId).withHost(applicationName).get();
 
 		LOGGER.info("Reserved workload model entry {}", storageId);
 
-		return ResponseEntity.created(URI.create("http://" + link)).body(link);
+		return ResponseEntity.created(URI.create(link)).body(link);
 	}
 
 }
