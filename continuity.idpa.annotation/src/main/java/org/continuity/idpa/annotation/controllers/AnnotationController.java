@@ -1,8 +1,9 @@
 package org.continuity.idpa.annotation.controllers;
 
 import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.ROOT;
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.GET_BASE;
 import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.GET;
+import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.GET_BASE;
+import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.LEGACY_UPDATE;
 import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.UPDATE;
 
 import java.io.IOException;
@@ -131,6 +132,36 @@ public class AnnotationController {
 		} else {
 			return new ResponseEntity<>(report.toString(), HttpStatus.CREATED);
 		}
+	}
+
+	/**
+	 * Updates a legacy IDPA.
+	 *
+	 * @param tag
+	 *            The tag of the IDPA.
+	 * @return A response entity providing a message whether the update was successful.
+	 */
+	@RequestMapping(path = LEGACY_UPDATE, method = RequestMethod.GET)
+	public ResponseEntity<String> updateLegacyIdpa(@PathVariable("tag") String tag) {
+		boolean updated;
+
+		try {
+			updated = storageManager.updateLegacyIdpa(tag);
+		} catch (IOException e) {
+			LOGGER.error("Exception when updating the legacy IDPA with tag {}!", tag);
+			LOGGER.error("Exception:", e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		String message;
+
+		if (updated) {
+			message = "The IDPA has been updated to the current version.";
+		} else {
+			message = "There was no need to update the IDPA.";
+		}
+
+		return ResponseEntity.ok(message);
 	}
 
 }

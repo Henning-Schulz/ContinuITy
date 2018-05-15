@@ -7,15 +7,16 @@ import java.util.EnumSet;
 import javax.ws.rs.NotSupportedException;
 
 import org.continuity.commons.utils.DataHolder;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.Parameter;
 import org.continuity.idpa.application.changes.SystemChangeDetector;
 import org.continuity.idpa.application.entities.SystemChange;
 import org.continuity.idpa.application.entities.SystemChangeReport;
 import org.continuity.idpa.application.entities.SystemChangeType;
-import org.continuity.idpa.application.Endpoint;
-import org.continuity.idpa.application.Application;
-import org.continuity.idpa.visitor.IdpaByClassSearcher;
+import org.continuity.idpa.legacy.IdpaFromOldAnnotationConverter;
 import org.continuity.idpa.visitor.FindById;
+import org.continuity.idpa.visitor.IdpaByClassSearcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,6 +208,29 @@ public class SystemModelRepositoryManager {
 		checker.compareTo(latestBefore);
 
 		return checker.getReport();
+	}
+
+	/**
+	 * Updates all legacy applications of version lower than 1.0.
+	 *
+	 * @param tag
+	 *            The tag of the applications.
+	 * @return The number of updated annotations.
+	 * @throws IOException
+	 *             If an error during reading occurs.
+	 */
+	public int updateAllLegacyApplications(String tag) throws IOException {
+		IdpaFromOldAnnotationConverter converter = new IdpaFromOldAnnotationConverter();
+
+		int i = 0;
+
+		for (String legacyApplication : repository.readLegacyApplications(tag)) {
+			Application application = converter.convertFromSystemModel(legacyApplication);
+			repository.save(tag, application);
+			i++;
+		}
+
+		return i;
 	}
 
 }

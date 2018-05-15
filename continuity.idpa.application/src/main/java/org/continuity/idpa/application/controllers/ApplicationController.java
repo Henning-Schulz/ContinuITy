@@ -1,8 +1,9 @@
 package org.continuity.idpa.application.controllers;
 
 import static org.continuity.api.rest.RestApi.IdpaApplication.Application.ROOT;
-import static org.continuity.api.rest.RestApi.IdpaApplication.Application.Paths.GET_DELTA;
 import static org.continuity.api.rest.RestApi.IdpaApplication.Application.Paths.GET;
+import static org.continuity.api.rest.RestApi.IdpaApplication.Application.Paths.GET_DELTA;
+import static org.continuity.api.rest.RestApi.IdpaApplication.Application.Paths.LEGACY_UPDATE;
 import static org.continuity.api.rest.RestApi.IdpaApplication.Application.Paths.UPDATE;
 
 import java.io.IOException;
@@ -159,6 +160,25 @@ public class ApplicationController {
 	 */
 	public ResponseEntity<String> updateApplication(@PathVariable String tag, @RequestBody Application system) {
 		return updateApplication(tag, system, false, false, false, false, false, false);
+	}
+
+	/**
+	 * Updates the legacy applications for versions lower than 1.0.
+	 *
+	 * @param tag
+	 *            The tag of the legacy applications.
+	 * @return A report holding the number of updated applications.
+	 */
+	@RequestMapping(path = LEGACY_UPDATE, method = RequestMethod.GET)
+	public ResponseEntity<String> updateLegacyApplications(@PathVariable String tag) {
+		int numUpdated;
+		try {
+			numUpdated = manager.updateAllLegacyApplications(tag);
+		} catch (IOException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error when updating the legacy applications!");
+		}
+
+		return ResponseEntity.ok("Updated " + numUpdated + " legacy applications.");
 	}
 
 	private EnumSet<SystemChangeType> changeTypesFromBooleans(boolean ignoreInterfaceChanged, boolean ignoreInterfaceRemoved, boolean ignoreInterfaceAdded, boolean ignoreParameterChanged,

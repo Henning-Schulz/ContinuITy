@@ -172,6 +172,8 @@ public class RestApi {
 
 			public static final RestEndpoint UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE, RequestMethod.POST);
 
+			public static final RestEndpoint LEGACY_UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.LEGACY_UPDATE, RequestMethod.GET);
+
 			private Annotation() {
 			}
 
@@ -180,6 +182,7 @@ public class RestApi {
 				public static final String GET = "/{tag}/annotation";
 				public static final String GET_BASE = "/{tag}/annotation/base";
 				public static final String UPDATE = "/{tag}/annotation";
+				public static final String LEGACY_UPDATE = "/legacy/{tag}/annotation/update";
 
 				private Paths() {
 				}
@@ -244,6 +247,8 @@ public class RestApi {
 
 			public static final RestEndpoint UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE, RequestMethod.POST);
 
+			public static final RestEndpoint LEGACY_UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.LEGACY_UPDATE, RequestMethod.GET);
+
 			private Application() {
 			}
 
@@ -252,6 +257,7 @@ public class RestApi {
 				public static final String GET = "/{tag}";
 				public static final String GET_DELTA = "/{tag}/delta";
 				public static final String UPDATE = "/{tag}";
+				public static final String LEGACY_UPDATE = "/legacy/{tag}/update";
 
 				private Paths() {
 				}

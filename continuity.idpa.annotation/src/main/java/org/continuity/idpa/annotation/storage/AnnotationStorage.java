@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
+import java.util.List;
 
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.application.Application;
@@ -23,7 +24,8 @@ public class AnnotationStorage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AnnotationStorage.class);
 
-	private static final String SYSTEM_MODEL_FILE_NAME = "system";
+	private static final String LEGACY_APPLICATION_FILE_NAME = "system";
+	private static final String APPLICATION_FILE_NAME = "application";
 	private static final String ANNOTATION_FILE_NAME = "annotation";
 	private static final String FILE_EXTENSION = ".yml";
 
@@ -106,7 +108,7 @@ public class AnnotationStorage {
 
 		boolean created = dirPath.toFile().mkdirs();
 
-		String filename = SYSTEM_MODEL_FILE_NAME;
+		String filename = APPLICATION_FILE_NAME;
 
 		if (suffix != null) {
 			filename += "-" + suffix;
@@ -286,7 +288,7 @@ public class AnnotationStorage {
 		if (dirPath == null) {
 			throw new NotDirectoryException(storagePath.resolve(tag).toAbsolutePath().toString());
 		}
-		String filename = SYSTEM_MODEL_FILE_NAME;
+		String filename = APPLICATION_FILE_NAME;
 
 		if (suffix != null) {
 			filename += "-" + suffix;
@@ -325,7 +327,7 @@ public class AnnotationStorage {
 			return null;
 		}
 
-		String filename = SYSTEM_MODEL_FILE_NAME;
+		String filename = APPLICATION_FILE_NAME;
 
 		if (suffix != null) {
 			filename += "-" + suffix;
@@ -422,7 +424,7 @@ public class AnnotationStorage {
 	 *         {@code false} otherwise.
 	 */
 	public boolean removeSystemIfPresent(String tag, String suffix) {
-		String filename = SYSTEM_MODEL_FILE_NAME;
+		String filename = APPLICATION_FILE_NAME;
 
 		if (suffix != null) {
 			filename += "-" + suffix;
@@ -480,7 +482,7 @@ public class AnnotationStorage {
 	 * @return {@code true} if there is a system model with the tag and suffix.
 	 */
 	public boolean systemSuffixExists(String tag, String suffix) {
-		String filename = SYSTEM_MODEL_FILE_NAME;
+		String filename = APPLICATION_FILE_NAME;
 
 		if (suffix != null) {
 			filename += "-" + suffix;
@@ -575,6 +577,68 @@ public class AnnotationStorage {
 		}
 	}
 
+	/**
+	 * Returns the legacy application of version lower than 1.0.
+	 *
+	 * @param tag
+	 *            The tag of the application.
+	 * @return The legacy application as string.
+	 * @throws IOException
+	 *             If the application cannot be read.
+	 */
+	public String readLegacyApplication(String tag) throws IOException {
+		Path dirPath = getDir(tag, false, true);
+
+		if (dirPath == null) {
+			return null;
+		}
+
+		String filename = LEGACY_APPLICATION_FILE_NAME + FILE_EXTENSION;
+
+		Path systemPath = dirPath.resolve(filename);
+
+		if (!systemPath.toFile().exists()) {
+			LOGGER.info("There is no file {}.", systemPath.toAbsolutePath());
+			return null;
+		}
+
+		String application = reduceLinesToString(Files.readAllLines(systemPath));
+
+		LOGGER.debug("Reading legacy application model from {}.", systemPath);
+		return application;
+	}
+
+	/**
+	 * Returns the legacy annotation of version lower than 1.0.
+	 *
+	 * @param tag
+	 *            The tag of the annotation.
+	 * @return The legacy annotation as string.
+	 * @throws IOException
+	 *             If the annotation cannot be read.
+	 */
+	public String readLegacyAnnotation(String tag) throws IOException {
+		Path dirPath = getDir(tag, false, true);
+
+		if (dirPath == null) {
+			return null;
+		}
+
+		String filename = ANNOTATION_FILE_NAME + FILE_EXTENSION;
+
+		Path annotationPath = dirPath.resolve(filename);
+		LOGGER.debug("Reading legacy annotation from {}.", dirPath);
+
+		if (!annotationPath.toFile().exists()) {
+			LOGGER.info("There is no file {}.", annotationPath.toAbsolutePath());
+			return null;
+		}
+
+		String annotation = reduceLinesToString(Files.readAllLines(annotationPath));
+
+		return annotation;
+	}
+
 	private Path getDir(String tag, boolean createIfAbsent, boolean expectPresence) {
 		Path dirPath = storagePath.resolve(tag);
 		File dir = dirPath.toFile();
@@ -594,6 +658,17 @@ public class AnnotationStorage {
 		}
 
 		return dirPath;
+	}
+
+	private String reduceLinesToString(List<String> lines) {
+		StringBuilder builder = new StringBuilder();
+
+		lines.forEach(l -> {
+			builder.append(l);
+			builder.append("\n");
+		});
+
+		return builder.toString();
 	}
 
 }

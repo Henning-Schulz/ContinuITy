@@ -7,6 +7,7 @@ import org.continuity.idpa.annotation.entities.AnnotationValidityReport;
 import org.continuity.idpa.annotation.validation.AnnotationFixer;
 import org.continuity.idpa.annotation.validation.AnnotationValidityChecker;
 import org.continuity.idpa.application.Application;
+import org.continuity.idpa.legacy.IdpaFromOldAnnotationConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -198,6 +199,43 @@ public class AnnotationStorageManager {
 	 */
 	public boolean isBroken(String tag) {
 		return storage.isMarkedAsBroken(tag);
+	}
+
+	/**
+	 * Updates the legacy application and annotation for versions lower than 1.0.
+	 *
+	 * @param tag
+	 *            The tag of the IDPA.
+	 * @return Whether the application or the annotation was updated.
+	 * @throws IOException
+	 *             If errors during reading the IDPA occur.
+	 */
+	public boolean updateLegacyIdpa(String tag) throws IOException {
+		String legacyApplication = storage.readLegacyApplication(tag);
+		String legacyAnnotation = storage.readLegacyAnnotation(tag);
+
+		IdpaFromOldAnnotationConverter converter = new IdpaFromOldAnnotationConverter();
+		boolean updated = false;
+
+		if (legacyApplication == null) {
+			LOGGER.info("There is no legacy application for tag {} to be updated.", tag);
+		} else {
+			Application application = converter.convertFromSystemModel(legacyApplication);
+			storage.saveOrUpdate(tag, application);
+			updated = true;
+			LOGGER.info("Updated the legacy application for tag {}.", tag);
+		}
+
+		if (legacyAnnotation == null) {
+			LOGGER.info("There is no legacy annotation for tag {} to be updated.", tag);
+		} else {
+			ApplicationAnnotation annotation = converter.convertFromAnnotation(legacyAnnotation);
+			storage.saveOrUpdate(tag, annotation);
+			updated = true;
+			LOGGER.info("Updated the legacy annotation for tag {}.", tag);
+		}
+
+		return updated;
 	}
 
 	private void deleteBaseAndLog(String tag) {

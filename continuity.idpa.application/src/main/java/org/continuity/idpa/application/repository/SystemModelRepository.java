@@ -2,11 +2,13 @@ package org.continuity.idpa.application.repository;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -31,7 +33,8 @@ public class SystemModelRepository {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SystemModelRepository.class);
 
-	private static final String SYSTEM_MODEL_FILE_NAME = "system.";
+	private static final String LEGACY_APPLICATION_FILE_NAME = "system.";
+	private static final String APPLICATION_FILE_NAME = "application.";
 	private static final String FILE_EXTENSION = ".yml";
 
 	private static final DateFormat DATE_FORMAT = CommonFormats.DATE_FORMAT;
@@ -73,7 +76,11 @@ public class SystemModelRepository {
 	}
 
 	private String createFileName(Date date) {
-		return SYSTEM_MODEL_FILE_NAME + DATE_FORMAT.format(date) + FILE_EXTENSION;
+		return createFileName(APPLICATION_FILE_NAME, date);
+	}
+
+	private String createFileName(String applicationFileName, Date date) {
+		return applicationFileName + DATE_FORMAT.format(date) + FILE_EXTENSION;
 	}
 
 	/**
@@ -188,6 +195,25 @@ public class SystemModelRepository {
 	}
 
 	/**
+	 * Retrieves all stored legacy applications (system models) for a given tag.
+	 *
+	 * @param tag
+	 *            The tag of the legacy applications.
+	 * @return A list of strings representing the legacy applications.
+	 * @throws NotDirectoryException
+	 */
+	public List<String> readLegacyApplications(String tag) throws NotDirectoryException {
+		List<String> legacyApplications = new ArrayList<>();
+		SystemModelIterator iterator = new SystemModelIterator(tag, LEGACY_APPLICATION_FILE_NAME);
+
+		while (iterator.hasNext()) {
+			legacyApplications.add(iterator.nextAsString());
+		}
+
+		return legacyApplications;
+	}
+
+	/**
 	 * Returns an {@link Iterable} allowing to iterate over all system models in combination with
 	 * the created date. The models are traversed in ascending order. That is, the newest model
 	 * comes first.
@@ -228,17 +254,23 @@ public class SystemModelRepository {
 		private final String tag;
 		private final List<Date> dates;
 		private final Iterator<Date> datesIterator;
+		private final String applicationFileName;
 
 		public SystemModelIterator(String tag) throws NotDirectoryException {
+			this(tag, APPLICATION_FILE_NAME);
+		}
+
+		public SystemModelIterator(String tag, String applicationFileName) throws NotDirectoryException {
 			this.tag = tag;
 			Path dir = getDirPath(tag);
-			this.dates = Arrays.stream(dir.toFile().list()).filter(name -> name.startsWith(SYSTEM_MODEL_FILE_NAME)).map(this::extractDate).collect(Collectors.toList());
+			this.applicationFileName = applicationFileName;
+			this.dates = Arrays.stream(dir.toFile().list()).filter(name -> name.startsWith(applicationFileName)).map(this::extractDate).collect(Collectors.toList());
 			Collections.sort(this.dates, Collections.reverseOrder());
 			this.datesIterator = dates.iterator();
 		}
 
 		private Date extractDate(String deltaFileName) {
-			String dateString = deltaFileName.substring(7, deltaFileName.length() - 4);
+			String dateString = deltaFileName.substring(applicationFileName.length(), deltaFileName.length() - FILE_EXTENSION.length());
 			try {
 				return DATE_FORMAT.parse(dateString);
 			} catch (ParseException e) {
@@ -263,14 +295,38 @@ public class SystemModelRepository {
 		@Override
 		public SystemModelEntry next() {
 			Date date = datesIterator.next();
-			String filename = createFileName(date);
+			String filename = createFileName(applicationFileName, date);
 			try {
 				return SystemModelEntry.of(SystemModelRepository.this, date, getDirPath(tag).resolve(filename));
-			} catch (NotDirectoryException e1) {
-				LOGGER.error("Could not read delta {} for tag {}! Returning null.", filename, tag);
-				e1.printStackTrace();
+			} catch (NotDirectoryException e) {
+				LOGGER.error("Could not read application {} for tag {}! Returning null.", filename, tag);
+				LOGGER.error("Expetion: ", e);
 				return SystemModelEntry.of(SystemModelRepository.this, date, null);
 			}
+		}
+
+		public String nextAsString() {
+			Date date = datesIterator.next();
+			String filename = createFileName(applicationFileName, date);
+
+			try {
+				return reduceLinesToString(Files.readAllLines(getDirPath(tag).resolve(filename)));
+			} catch (IOException e) {
+				LOGGER.error("Could not read legacy application {} for tag {}! Returning empty string.", filename, tag);
+				LOGGER.error("Expetion: ", e);
+				return "";
+			}
+		}
+
+		private String reduceLinesToString(List<String> lines) {
+			StringBuilder builder = new StringBuilder();
+
+			lines.forEach(l -> {
+				builder.append(l);
+				builder.append("\n");
+			});
+
+			return builder.toString();
 		}
 
 	}

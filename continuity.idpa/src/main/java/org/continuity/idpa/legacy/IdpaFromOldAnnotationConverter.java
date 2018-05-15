@@ -59,7 +59,7 @@ public class IdpaFromOldAnnotationConverter {
 
 	public ApplicationAnnotation convertFromAnnotation(String annotation) throws JsonParseException, JsonMappingException, IOException {
 		annotation = annotation.replaceFirst("interface-annotations:", "endpoint-annotations:");
-		annotation = annotation.replaceAll("  interface: ", "  endpoint: ");
+		annotation = annotation.replaceAll("- interface: ", "- endpoint: ");
 
 		annotation = renameOverrides(annotation);
 
