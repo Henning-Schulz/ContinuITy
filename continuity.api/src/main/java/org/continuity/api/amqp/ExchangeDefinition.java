@@ -48,7 +48,7 @@ public class ExchangeDefinition<F extends RoutingKeyFormatter> {
 	 * @return An {@link TopicExchange}.
 	 */
 	public TopicExchange create() {
-		return new TopicExchange(name, durable, autoDelete);
+		return new TopicExchange(name(), durable, autoDelete);
 	}
 
 	/**

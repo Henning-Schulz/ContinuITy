@@ -1,9 +1,9 @@
 package org.continuity.wessbas.controllers;
 
 import static org.continuity.api.rest.RestApi.Wessbas.Model.ROOT;
-import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET_WORKLOAD;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET_ANNOTATION;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET_APPLICATION;
+import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.GET_WORKLOAD;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.OVERVIEW;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.REMOVE;
 import static org.continuity.api.rest.RestApi.Wessbas.Model.Paths.RESERVE;
@@ -179,7 +179,7 @@ public class WessbasModelController {
 	@RequestMapping(path = RESERVE, method = RequestMethod.GET)
 	public ResponseEntity<String> reserveModelLink(@PathVariable String tag) {
 		String storageId = SimpleModelStorage.instance().reserve(tag);
-		String link = RestApi.Wessbas.Model.OVERVIEW.requestUrl(storageId).withHost(applicationName).get();
+		String link = applicationName + RestApi.Wessbas.Model.OVERVIEW.path(storageId);
 
 		LOGGER.info("Reserved workload model entry {}", storageId);
 

@@ -111,7 +111,7 @@ public class IdpaController {
 	@RequestMapping(path = UPDATE_APPLICATION, method = RequestMethod.POST)
 	public ResponseEntity<String> updateApplication(@PathVariable("tag") String tag, @RequestBody Application application) {
 		try {
-			return restTemplate.postForEntity(IdpaApplication.Application.UPDATE.requestUrl("tag").get(), application, String.class);
+			return restTemplate.postForEntity(IdpaApplication.Application.UPDATE.requestUrl(tag).get(), application, String.class);
 		} catch (HttpStatusCodeException e) {
 			LOGGER.warn("Updating the system model with tag {} resulted in a {} - {} response!", tag, e.getStatusCode(), e.getStatusCode().getReasonPhrase());
 			return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());

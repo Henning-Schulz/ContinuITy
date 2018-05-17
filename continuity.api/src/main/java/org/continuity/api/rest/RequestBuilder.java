@@ -36,7 +36,13 @@ public class RequestBuilder {
 	 * @return The request as string.
 	 */
 	public String get() {
-		return (includeProtocol ? "http://" : "") + host + path + queryString;
+		String protocol = "";
+
+		if (includeProtocol && !host.startsWith("http://") && !host.startsWith("https://")) {
+			protocol = "http://";
+		}
+
+		return protocol + host + path + queryString;
 	}
 
 	/**

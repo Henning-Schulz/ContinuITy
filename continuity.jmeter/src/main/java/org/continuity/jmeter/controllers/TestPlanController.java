@@ -54,7 +54,7 @@ public class TestPlanController {
 	 */
 	@RequestMapping(value = CREATE_AND_GET, method = RequestMethod.GET)
 	public TestPlanBundle createAndGetLoadTest(@PathVariable("type") String workloadModelType, @PathVariable("id") String workloadModelId, @RequestParam String tag) {
-		return createAndGetLoadTest(RestApi.Generic.WORKLOAD_MODEL_LINK.get(workloadModelType).path(workloadModelId), tag);
+		return createAndGetLoadTest(RestApi.Generic.WORKLOAD_MODEL_LINK.get(workloadModelType).requestUrl(workloadModelId).get(), tag);
 	}
 
 	/**

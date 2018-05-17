@@ -73,7 +73,7 @@ public class JMeterCommands {
 
 		String url = WebUtils.addProtocolIfMissing(propertiesProvider.get().getProperty(PropertiesProvider.KEY_URL));
 		String[] linkElements = workloadLink.split("\\/");
-		String workloadType = linkElements[1];
+		String workloadType = linkElements[0];
 		String workloadId = linkElements[linkElements.length - 1];
 		ResponseEntity<TestPlanBundle> response = restTemplate.getForEntity(Loadtest.CREATE_AND_GET.requestUrl("jmeter", workloadType, workloadId).withQuery("tag", tag).withHost(url).get(),
 				TestPlanBundle.class);

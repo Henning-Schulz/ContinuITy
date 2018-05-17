@@ -100,7 +100,7 @@ public class WorkloadModelController {
 			Connection connection = connectionFactory.createConnection();
 			Channel channel = connection.createChannel(false);
 
-			String queueName = AmqpApi.Workload.MODEL_CREATED.deriveQueueName(workloadLink);
+			String queueName = getResponseQueueName(workloadLink);
 			channel.queueDeclare(queueName, false, false, false, Collections.emptyMap());
 			channel.queueBind(queueName, AmqpApi.Workload.MODEL_CREATED.name(), AmqpApi.Workload.MODEL_CREATED.formatRoutingKey().of("*", workloadLink));
 
@@ -116,7 +116,7 @@ public class WorkloadModelController {
 			Connection connection = connectionFactory.createConnection();
 			Channel channel = connection.createChannel(false);
 
-			String queueName = AmqpApi.Workload.MODEL_CREATED.deriveQueueName(workloadLink);
+			String queueName = getResponseQueueName(workloadLink);
 			channel.queueDelete(queueName);
 
 			LOGGER.info("Deleted the response queue for {}.", workloadLink);
@@ -124,6 +124,10 @@ public class WorkloadModelController {
 			LOGGER.error("Could not delete the response queue for {}.", workloadLink);
 			e.printStackTrace();
 		}
+	}
+
+	private String getResponseQueueName(String workloadLink) {
+		return AmqpApi.Workload.MODEL_CREATED.deriveQueueName("frontend." + workloadLink);
 	}
 
 	/**
@@ -137,12 +141,12 @@ public class WorkloadModelController {
 	 */
 	@RequestMapping(path = WAIT, method = RequestMethod.GET)
 	public ResponseEntity<JsonNode> waitForModelCreated(@PathVariable String type, @PathVariable String id, @RequestParam long timeout) {
-		String link = RestApi.Generic.WORKLOAD_MODEL_LINK.get(type).path(id);
+		String link = RestApi.Generic.WORKLOAD_MODEL_LINK.get(type).requestUrl(id).withoutProtocol().get();
 		LOGGER.info("Waiting for the workload model at {} to be created", link);
 
 		JsonNode response;
 		try {
-			response = amqpTemplate.receiveAndConvert(AmqpApi.Workload.MODEL_CREATED.deriveQueueName(link), timeout, ParameterizedTypeReference.forType(JsonNode.class));
+			response = amqpTemplate.receiveAndConvert(getResponseQueueName(link), timeout, ParameterizedTypeReference.forType(JsonNode.class));
 		} catch (AmqpIOException e) {
 			LOGGER.error("Cannot wait for not existing response queue of model {}", link);
 

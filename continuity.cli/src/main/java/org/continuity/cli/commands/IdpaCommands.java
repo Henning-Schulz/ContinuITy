@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
  *
  */
 @ShellComponent
-public class AnnotationCommands {
+public class IdpaCommands {
 
 	@Autowired
 	private PropertiesProvider propertiesProvider;
@@ -87,7 +87,7 @@ public class AnnotationCommands {
 		String url = WebUtils.addProtocolIfMissing(propertiesProvider.get().getProperty(PropertiesProvider.KEY_URL));
 		ResponseEntity<String> response;
 		try {
-			response = restTemplate.postForEntity(Idpa.GET_ANNOTATION.requestUrl(tag).withHost(url).get(), annotation, String.class);
+			response = restTemplate.postForEntity(Idpa.UPDATE_ANNOTATION.requestUrl(tag).withHost(url).get(), annotation, String.class);
 		} catch (HttpStatusCodeException e) {
 			response = new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
 		}
@@ -108,7 +108,7 @@ public class AnnotationCommands {
 		String url = WebUtils.addProtocolIfMissing(propertiesProvider.get().getProperty(PropertiesProvider.KEY_URL));
 		ResponseEntity<String> response;
 		try {
-			response = restTemplate.postForEntity(Idpa.GET_APPLICATION.requestUrl(tag).withHost(url).get(), application, String.class);
+			response = restTemplate.postForEntity(Idpa.UPDATE_APPLICATION.requestUrl(tag).withHost(url).get(), application, String.class);
 		} catch (HttpStatusCodeException e) {
 			response = new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
 		}

@@ -40,10 +40,10 @@ public class WorkloadModelPack {
 	}
 
 	public WorkloadModelPack(String hostname, String id, String tag) {
-		this.workloadLink = Wessbas.Model.GET_WORKLOAD.path(id);
-		this.applicationLink = Wessbas.Model.GET_APPLICATION.path(id);
-		this.initialAnnotationLink = Wessbas.Model.GET_ANNOTATION.path(id);
-		this.jmeterLink = Wessbas.JMeter.CREATE.path(id);
+		this.workloadLink = hostname + Wessbas.Model.GET_WORKLOAD.path(id);
+		this.applicationLink = hostname + Wessbas.Model.GET_APPLICATION.path(id);
+		this.initialAnnotationLink = hostname + Wessbas.Model.GET_ANNOTATION.path(id);
+		this.jmeterLink = hostname + Wessbas.JMeter.CREATE.path(id);
 		this.tag = tag;
 		this.error = false;
 	}
