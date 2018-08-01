@@ -38,6 +38,10 @@ public class LinkExchangeModel {
 	@JsonInclude(Include.NON_NULL)
 	private String jmeterLink;
 
+	@JsonProperty(value = "session-logs-link", required = false)
+	@JsonInclude(Include.NON_NULL)
+	private String sessionLogsLink;
+
 	@JsonProperty(value = "error", required = false)
 	@JsonInclude(Include.NON_NULL)
 	private Boolean error;
@@ -54,56 +58,72 @@ public class LinkExchangeModel {
 		return applicationLink;
 	}
 
-	public void setApplicationLink(String applicationLink) {
+	public LinkExchangeModel setApplicationLink(String applicationLink) {
 		this.applicationLink = applicationLink;
+		return this;
 	}
 
 	public String getDeltaLink() {
 		return deltaLink;
 	}
 
-	public void setDeltaLink(String deltaLink) {
+	public LinkExchangeModel setDeltaLink(String deltaLink) {
 		this.deltaLink = deltaLink;
+		return this;
 	}
 
 	public String getWorkloadType() {
 		return workloadType;
 	}
 
-	public void setWorkloadType(String workloadType) {
+	public LinkExchangeModel setWorkloadType(String workloadType) {
 		this.workloadType = workloadType;
+		return this;
 	}
 
 	public String getWorkloadLink() {
 		return workloadLink;
 	}
 
-	public void setWorkloadLink(String workloadLink) {
+	public LinkExchangeModel setWorkloadLink(String workloadLink) {
 		this.workloadLink = workloadLink;
+		return this;
 	}
 
 	public String getJmeterLink() {
 		return jmeterLink;
 	}
 
-	public void setJmeterLink(String jmeterLink) {
+	public LinkExchangeModel setJmeterLink(String jmeterLink) {
 		this.jmeterLink = jmeterLink;
+		return this;
 	}
 
 	public String getInitialAnnotationLink() {
 		return initialAnnotationLink;
 	}
 
-	public void setInitialAnnotationLink(String initialAnnotationLink) {
+	public LinkExchangeModel setInitialAnnotationLink(String initialAnnotationLink) {
 		this.initialAnnotationLink = initialAnnotationLink;
+		return this;
+	}
+
+	public String getSessionLogsLink() {
+		return sessionLogsLink;
+	}
+
+	public LinkExchangeModel setSessionLogsLink(String sessionLogsLink) {
+		this.sessionLogsLink = sessionLogsLink;
+		return this;
 	}
 
 	public Boolean isError() {
 		return error;
 	}
 
-	public void setError(boolean error) {
+	public LinkExchangeModel setError(boolean error) {
 		this.error = error;
+		return this;
 	}
 
 	@Override

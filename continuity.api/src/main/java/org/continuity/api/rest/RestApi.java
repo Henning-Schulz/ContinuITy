@@ -376,9 +376,9 @@ public class RestApi {
 
 		public static final String SERVICE_NAME = "session-logs";
 
-		public static final String ROOT = "/";
+		public static final String ROOT = "/sessions";
 
-		/** / */
+		/** {@value #ROOT}/{id} */
 		public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
 		private SessionLogs() {
@@ -386,7 +386,7 @@ public class RestApi {
 
 		public static class Paths {
 
-			public static final String GET = "/";
+			public static final String GET = "/{id}";
 
 			private Paths() {
 			}
