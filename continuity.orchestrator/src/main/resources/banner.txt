@@ -8,6 +8,6 @@
  °OOO              .oOOOOOOOOOOo.              OOO°      | |___| (_) | | | | |_| | | | | |_| |_| |_   | | |_| |
   °OOOO         .oOOOO°      °OOOOo.         OOOO°        \_____\___/|_| |_|\__|_|_| |_|\__,_|_____|  |_|\__, |
     °OOOOOOOOOOOOOO              OOOOOOOOOOOOOO°             ============================================ __/ |===
-      °°OOOOOO°°                   °°OOOOOO°°                                  Frontend                  |___/     
+      °°OOOOOO°°                   °°OOOOOO°°                                Orchestrator                |___/     
 
   :: Spring Boot :: v${spring-boot.version} ::

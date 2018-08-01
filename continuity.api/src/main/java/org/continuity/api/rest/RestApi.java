@@ -23,16 +23,16 @@ public class RestApi {
 	}
 
 	/**
-	 * REST API of the frontend service.
+	 * REST API of the orchestrator service.
 	 *
 	 * @author Henning Schulz
 	 *
 	 */
-	public static class Frontend {
+	public static class Orchestrator {
 
-		public static final String SERVICE_NAME = "frontend";
+		public static final String SERVICE_NAME = "orchestrator";
 
-		private Frontend() {
+		private Orchestrator() {
 		}
 
 		/**
@@ -495,16 +495,32 @@ public class RestApi {
 	 */
 	public static class Generic {
 
-		/** [loadtest-type]/{type}/model/{id}/create */
+		/**
+		 * [loadtest-type]/{type}/model/{id}/create
+		 *
+		 * @see RestApi.JMeter.TestPlan#CREATE_AND_GET
+		 */
 		public static final Map<String, RestEndpoint> GET_AND_CREATE_LOAD_TEST = new HashMap<>();
 
-		/** [workload-model-type]/model/{id} */
+		/**
+		 * [workload-model-type]/model/{id}
+		 *
+		 * @see RestApi.Wessbas.Model#OVERVIEW
+		 */
 		public static final Map<String, RestEndpoint> WORKLOAD_MODEL_LINK = new HashMap<>();
 
-		/** [workload-model-type]/{tag}/reserve */
+		/**
+		 * [workload-model-type]/{tag}/reserve
+		 *
+		 * @see RestApi.Wessbas.Model#RESERVE
+		 */
 		public static final Map<String, RestEndpoint> RESERVE_WORKLOAD_MODEL = new HashMap<>();
 
-		/** [workload-model-type]/model/{id}/persist */
+		/**
+		 * [workload-model-type]/model/{id}/persist
+		 *
+		 * @see RestApi.Wessbas.Model#PERSIST
+		 */
 		public static final Map<String, RestEndpoint> PERSIST_WORKLOAD_MODEL = new HashMap<>();
 
 		static {

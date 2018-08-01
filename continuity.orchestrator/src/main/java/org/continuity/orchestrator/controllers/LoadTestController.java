@@ -1,15 +1,15 @@
-package org.continuity.frontend.controllers;
+package org.continuity.orchestrator.controllers;
 
-import static org.continuity.api.rest.RestApi.Frontend.Loadtest.ROOT;
-import static org.continuity.api.rest.RestApi.Frontend.Loadtest.Paths.CREATE_AND_EXECUTE;
-import static org.continuity.api.rest.RestApi.Frontend.Loadtest.Paths.CREATE_AND_GET;
-import static org.continuity.api.rest.RestApi.Frontend.Loadtest.Paths.EXECUTE;
-import static org.continuity.api.rest.RestApi.Frontend.Loadtest.Paths.REPORT_PATH;
+import static org.continuity.api.rest.RestApi.Orchestrator.Loadtest.ROOT;
+import static org.continuity.api.rest.RestApi.Orchestrator.Loadtest.Paths.CREATE_AND_EXECUTE;
+import static org.continuity.api.rest.RestApi.Orchestrator.Loadtest.Paths.CREATE_AND_GET;
+import static org.continuity.api.rest.RestApi.Orchestrator.Loadtest.Paths.EXECUTE;
+import static org.continuity.api.rest.RestApi.Orchestrator.Loadtest.Paths.REPORT_PATH;
 
 import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.entities.config.LoadTestConfiguration;
 import org.continuity.api.rest.RestApi.Generic;
-import org.continuity.frontend.config.RabbitMqConfig;
+import org.continuity.orchestrator.config.RabbitMqConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;

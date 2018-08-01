@@ -1,4 +1,4 @@
-package org.continuity.frontend;
+package org.continuity.orchestrator;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,10 +10,10 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
  */
 @SpringBootApplication
 @EnableEurekaClient
-public class FrontendApplication {
+public class OrchestratorApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(FrontendApplication.class, args);
+		SpringApplication.run(OrchestratorApplication.class, args);
 	}
 
 }

@@ -1,10 +1,10 @@
-package org.continuity.frontend.controllers;
+package org.continuity.orchestrator.controllers;
 
-import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.ROOT;
-import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.Paths.CREATE;
-import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.Paths.GET;
-import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.Paths.PERSIST;
-import static org.continuity.api.rest.RestApi.Frontend.WorkloadModel.Paths.WAIT;
+import static org.continuity.api.rest.RestApi.Orchestrator.WorkloadModel.ROOT;
+import static org.continuity.api.rest.RestApi.Orchestrator.WorkloadModel.Paths.CREATE;
+import static org.continuity.api.rest.RestApi.Orchestrator.WorkloadModel.Paths.GET;
+import static org.continuity.api.rest.RestApi.Orchestrator.WorkloadModel.Paths.PERSIST;
+import static org.continuity.api.rest.RestApi.Orchestrator.WorkloadModel.Paths.WAIT;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -14,7 +14,7 @@ import org.continuity.api.entities.config.WorkloadModelConfig;
 import org.continuity.api.entities.config.WorkloadModelReservedConfig;
 import org.continuity.api.rest.RestApi;
 import org.continuity.api.rest.RestApi.Generic;
-import org.continuity.frontend.entities.ModelCreatedReport;
+import org.continuity.orchestrator.entities.ModelCreatedReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpIOException;

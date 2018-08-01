@@ -1,4 +1,4 @@
-package org.continuity.frontend.entities;
+package org.continuity.orchestrator.entities;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

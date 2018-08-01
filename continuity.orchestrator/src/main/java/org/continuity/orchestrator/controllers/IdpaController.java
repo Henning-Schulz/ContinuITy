@@ -1,13 +1,13 @@
-package org.continuity.frontend.controllers;
+package org.continuity.orchestrator.controllers;
 
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.ROOT;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.GET_ANNOTATION;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.GET_APPLICATION;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.REPORT;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.UPDATE_ANNOTATION;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.UPDATE_APPLICATION;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.UPDATE_APP_FROM_OPEN_API_JSON;
-import static org.continuity.api.rest.RestApi.Frontend.Idpa.Paths.UPDATE_APP_FROM_OPEN_API_URL;
+import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.ROOT;
+import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.GET_ANNOTATION;
+import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.GET_APPLICATION;
+import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.REPORT;
+import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.UPDATE_ANNOTATION;
+import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.UPDATE_APPLICATION;
+import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.UPDATE_APP_FROM_OPEN_API_JSON;
+import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.UPDATE_APP_FROM_OPEN_API_URL;
 
 import java.io.IOException;
 import java.util.Map;
@@ -15,9 +15,9 @@ import java.util.Map;
 import org.continuity.api.rest.RestApi.IdpaAnnotation;
 import org.continuity.api.rest.RestApi.IdpaApplication;
 import org.continuity.commons.utils.WebUtils;
-import org.continuity.frontend.config.RabbitMqConfig;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.application.Application;
+import org.continuity.orchestrator.config.RabbitMqConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;

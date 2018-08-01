@@ -1,4 +1,4 @@
-package org.continuity.frontend.config;
+package org.continuity.orchestrator.config;
 
 import org.continuity.api.amqp.AmqpApi;
 import org.springframework.amqp.core.AmqpTemplate;

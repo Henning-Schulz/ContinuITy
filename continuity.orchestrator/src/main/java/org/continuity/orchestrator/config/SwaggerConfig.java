@@ -1,4 +1,4 @@
-package org.continuity.frontend.config;
+package org.continuity.orchestrator.config;
 
 import java.util.Collections;
 
@@ -22,7 +22,7 @@ public class SwaggerConfig {
 
 	@Bean
 	public Docket api() {
-		return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.basePackage("org.continuity.frontend.controllers")).build().apiInfo(apiInfo());
+		return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.basePackage("org.continuity.orchestrator.controllers")).build().apiInfo(apiInfo());
 	}
 
 	private ApiInfo apiInfo() {

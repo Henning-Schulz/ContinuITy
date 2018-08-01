@@ -59,7 +59,7 @@ public class TestPlanController {
 
 	/**
 	 * Transforms a workload model into a JMeter test and returns it. The workload model is
-	 * specified by a link, e.g., {@code TYPE/model/ID}.
+	 * specified by a link, i.e., {@code TYPE/model/ID}.
 	 *
 	 * @param workloadModelLink
 	 *            The link pointing to the workload model. When called, it is supposed to return an
