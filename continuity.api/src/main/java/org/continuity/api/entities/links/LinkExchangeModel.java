@@ -1,5 +1,8 @@
 package org.continuity.api.entities.links;
 
+import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,9 +45,14 @@ public class LinkExchangeModel {
 	@JsonInclude(Include.NON_NULL)
 	private String sessionLogsLink;
 
-	@JsonProperty(value = "error", required = false)
+	@JsonProperty(value = "external-data-link", required = false)
 	@JsonInclude(Include.NON_NULL)
-	private Boolean error;
+	private String externalDataLink;
+
+	@JsonProperty("external-data-timestamp")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH-mm-ss-SSSX")
+	@JsonInclude(Include.NON_NULL)
+	private Date externalDataTimestamp;
 
 	public String getTag() {
 		return tag;
@@ -117,12 +125,21 @@ public class LinkExchangeModel {
 		return this;
 	}
 
-	public Boolean isError() {
-		return error;
+	public String getExternalDataLink() {
+		return externalDataLink;
 	}
 
-	public LinkExchangeModel setError(boolean error) {
-		this.error = error;
+	public LinkExchangeModel setExternalDataLink(String externalDataLink) {
+		this.externalDataLink = externalDataLink;
+		return this;
+	}
+
+	public Date getExternalDataTimestamp() {
+		return externalDataTimestamp;
+	}
+
+	public LinkExchangeModel setExternalDataTimestamp(Date externalDataTimestamp) {
+		this.externalDataTimestamp = externalDataTimestamp;
 		return this;
 	}
 

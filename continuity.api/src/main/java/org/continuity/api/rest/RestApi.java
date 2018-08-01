@@ -144,7 +144,7 @@ public class RestApi {
 			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
 			/** {@value #ROOT}/get/{type}/model/{id} */
-			public static final RestEndpoint PERSIST = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.PERSIST, RequestMethod.GET);
+			public static final RestEndpoint PERSIST = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.PERSIST, RequestMethod.POST);
 
 			private WorkloadModel() {
 			}
@@ -446,9 +446,6 @@ public class RestApi {
 			/** {@value #ROOT}/{id} */
 			public static final RestEndpoint OVERVIEW = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.OVERVIEW, RequestMethod.GET);
 
-			/** {@value #ROOT}/{id}/workload */
-			public static final RestEndpoint GET_WORKLOAD = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_WORKLOAD, RequestMethod.GET);
-
 			/** {@value #ROOT}/{id} */
 			public static final RestEndpoint REMOVE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.REMOVE, RequestMethod.DELETE);
 
@@ -458,11 +455,8 @@ public class RestApi {
 			/** {@value #ROOT}/{id}/annotation */
 			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_ANNOTATION, RequestMethod.GET);
 
-			/** {@value #ROOT}/reserve/{tag} */
-			public static final RestEndpoint RESERVE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.RESERVE, RequestMethod.GET);
-
 			/** {@value #ROOT}/{id}/persist */
-			public static final RestEndpoint PERSIST = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.PERSIST, RequestMethod.GET);
+			public static final RestEndpoint PERSIST = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.PERSIST, RequestMethod.POST);
 
 			private Model() {
 			}
@@ -470,11 +464,9 @@ public class RestApi {
 			public static class Paths {
 
 				public static final String OVERVIEW = "/{id}";
-				public static final String GET_WORKLOAD = "/{id}/workload";
 				public static final String REMOVE = "/{id}";
 				public static final String GET_APPLICATION = "/{id}/application";
 				public static final String GET_ANNOTATION = "/{id}/annotation";
-				public static final String RESERVE = "/reserve/{tag}";
 				public static final String PERSIST = "/{id}/persist";
 
 				private Paths() {
@@ -510,13 +502,6 @@ public class RestApi {
 		public static final Map<String, RestEndpoint> WORKLOAD_MODEL_LINK = new HashMap<>();
 
 		/**
-		 * [workload-model-type]/{tag}/reserve
-		 *
-		 * @see RestApi.Wessbas.Model#RESERVE
-		 */
-		public static final Map<String, RestEndpoint> RESERVE_WORKLOAD_MODEL = new HashMap<>();
-
-		/**
 		 * [workload-model-type]/model/{id}/persist
 		 *
 		 * @see RestApi.Wessbas.Model#PERSIST
@@ -527,8 +512,6 @@ public class RestApi {
 			GET_AND_CREATE_LOAD_TEST.put("jmeter", JMeter.TestPlan.CREATE_AND_GET);
 
 			WORKLOAD_MODEL_LINK.put("wessbas", Wessbas.Model.OVERVIEW);
-
-			RESERVE_WORKLOAD_MODEL.put("wessbas", Wessbas.Model.RESERVE);
 
 			PERSIST_WORKLOAD_MODEL.put("wessbas", Wessbas.Model.PERSIST);
 		}

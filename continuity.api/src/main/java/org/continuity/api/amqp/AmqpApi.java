@@ -6,7 +6,6 @@ import org.continuity.api.amqp.RoutingKeyFormatter.ServiceName;
 import org.continuity.api.amqp.RoutingKeyFormatter.Tag;
 import org.continuity.api.amqp.RoutingKeyFormatter.WorkloadAndLoadTestType;
 import org.continuity.api.amqp.RoutingKeyFormatter.WorkloadType;
-import org.continuity.api.amqp.RoutingKeyFormatter.WorkloadTypeAndLink;
 
 /**
  * Holds all AMQP exchange definitions of all ContinuITy services.
@@ -25,6 +24,12 @@ public class AmqpApi {
 	private AmqpApi() {
 	}
 
+	/**
+	 * Global AMQP API not belonging to a specific service.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
 	public static class Global {
 
 		private static final String SCOPE = "global";
@@ -36,6 +41,12 @@ public class AmqpApi {
 
 	}
 
+	/**
+	 * AMQP API of the session logs service.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
 	public static class SessionLogs {
 
 		private static final String SCOPE = "sessionlogs";
@@ -43,6 +54,25 @@ public class AmqpApi {
 		public static final ExchangeDefinition<Tag> TASK_CREATE = ExchangeDefinition.task(SCOPE, "create").nonDurable().autoDelete().withRoutingKey(Tag.INSTANCE);
 
 		private SessionLogs() {
+		}
+
+	}
+
+	/**
+	 * AMQP API of the workload model services, e.g., wessbas.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
+	public static class WorkloadModel {
+
+		private static final String SCOPE = "workloadmodel";
+
+		public static final ExchangeDefinition<WorkloadType> TASK_CREATE = ExchangeDefinition.task(SCOPE, "create").nonDurable().autoDelete().withRoutingKey(WorkloadType.INSTANCE);
+
+		public static final ExchangeDefinition<WorkloadType> EVENT_CREATED = ExchangeDefinition.event(SCOPE, "created").nonDurable().autoDelete().withRoutingKey(WorkloadType.INSTANCE);
+
+		private WorkloadModel() {
 		}
 
 	}
@@ -60,8 +90,6 @@ public class AmqpApi {
 	public static class Frontend {
 
 		private static final String SCOPE = "frontend";
-
-		public static final ExchangeDefinition<WorkloadType> DATA_AVAILABLE = ExchangeDefinition.event(SCOPE, "data.available").nonDurable().autoDelete().withRoutingKey(WorkloadType.INSTANCE);
 
 		public static final ExchangeDefinition<LoadTestType> LOADTESTEXECUTION_REQUIRED = ExchangeDefinition.event(SCOPE, "loadtestexecution.required").nonDurable().autoDelete()
 				.withRoutingKey(LoadTestType.INSTANCE);
@@ -121,26 +149,6 @@ public class AmqpApi {
 		public static final ExchangeDefinition<LoadTestType> REPORT_AVAILABLE = ExchangeDefinition.event(SCOPE, "report").nonDurable().autoDelete().withRoutingKey(LoadTestType.INSTANCE);
 
 		private LoadTest() {
-		}
-
-	}
-
-	/**
-	 * AMQP API of the workload services, e.g., wessbas.
-	 *
-	 * @author Henning Schulz
-	 *
-	 */
-	public static class Workload {
-
-		private static final String SCOPE = "workload";
-
-		// Not declaring auto delete, since queues are bound dynamically so that the exchange might
-		// have no queue for a while
-		public static final ExchangeDefinition<WorkloadTypeAndLink> MODEL_CREATED = ExchangeDefinition.event(SCOPE, "model.created").nonDurable().nonAutoDelete()
-				.withRoutingKey(WorkloadTypeAndLink.INSTANCE);
-
-		private Workload() {
 		}
 
 	}

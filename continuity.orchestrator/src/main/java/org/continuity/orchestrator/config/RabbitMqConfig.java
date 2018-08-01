@@ -57,11 +57,6 @@ public class RabbitMqConfig {
 	}
 
 	@Bean
-	TopicExchange monitoringDataAvailableExchange() {
-		return AmqpApi.Frontend.DATA_AVAILABLE.create();
-	}
-
-	@Bean
 	TopicExchange loadTestExecutionRequiredExchange() {
 		return AmqpApi.Frontend.LOADTESTEXECUTION_REQUIRED.create();
 	}
@@ -101,11 +96,6 @@ public class RabbitMqConfig {
 	@Bean
 	Binding loadTestReportAvailableBinding() {
 		return BindingBuilder.bind(loadTestReportAvailableQueue()).to(loadTestReportAvailableExchange()).with(LOAD_TEST_REPORT_AVAILABLE_ROUTING_KEY);
-	}
-
-	@Bean
-	TopicExchange workloadModelCreatedExchange() {
-		return AmqpApi.Workload.MODEL_CREATED.create();
 	}
 
 	// Dead letter exchange and queue

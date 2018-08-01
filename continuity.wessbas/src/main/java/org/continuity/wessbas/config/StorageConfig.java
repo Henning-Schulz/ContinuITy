@@ -1,7 +1,7 @@
-package org.continuity.session.logs.config;
+package org.continuity.wessbas.config;
 
-import org.continuity.api.entities.artifact.SessionLogs;
 import org.continuity.commons.storage.MemoryStorage;
+import org.continuity.wessbas.entities.WessbasBundle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
 public class StorageConfig {
 
 	@Bean
-	public MemoryStorage<SessionLogs> sessionLogStorage() {
-		return new MemoryStorage<>(SessionLogs.class);
+	public MemoryStorage<WessbasBundle> sessionLogStorage() {
+		return new MemoryStorage<>(WessbasBundle.class);
 	}
 
 }

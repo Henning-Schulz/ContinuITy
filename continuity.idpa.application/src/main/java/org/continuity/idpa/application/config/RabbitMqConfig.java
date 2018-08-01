@@ -26,7 +26,7 @@ public class RabbitMqConfig {
 
 	public static final String SERVICE_NAME = "idpaapplication";
 
-	public static final String WORKLOAD_MODEL_CREATED_QUEUE_NAME = "continuity.idpaapplication.workload.model.created";
+	public static final String WORKLOAD_MODEL_CREATED_QUEUE_NAME = "continuity.idpaapplication.event.workloadmodel.created";
 
 	public static final String WORKLOAD_MODEL_CREATED_ROUTING_KEY = "#";
 
@@ -47,7 +47,7 @@ public class RabbitMqConfig {
 
 	@Bean
 	TopicExchange workloadModelCreatedExchange() {
-		return AmqpApi.Workload.MODEL_CREATED.create();
+		return AmqpApi.WorkloadModel.EVENT_CREATED.create();
 	}
 
 	@Bean

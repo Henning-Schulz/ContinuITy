@@ -1,10 +1,12 @@
 package org.continuity.session.logs.amqp;
 
+import java.util.Date;
+
 import org.continuity.api.amqp.AmqpApi;
-import org.continuity.api.entities.config.ExternalLinkDescription;
-import org.continuity.api.entities.config.SourceDescription;
+import org.continuity.api.entities.artifact.SessionLogs;
 import org.continuity.api.entities.config.TaskDescription;
 import org.continuity.api.entities.links.LinkExchangeModel;
+import org.continuity.api.entities.report.TaskError;
 import org.continuity.api.entities.report.TaskReport;
 import org.continuity.api.rest.RestApi;
 import org.continuity.commons.storage.MemoryStorage;
@@ -35,28 +37,28 @@ public class SessionLogsAmqpHandler {
 	private AmqpTemplate amqpTemplate;
 
 	@Autowired
-	private MemoryStorage<String> storage;
+	private MemoryStorage<SessionLogs> storage;
 
 	@RabbitListener(queues = RabbitMqConfig.TASK_CREATE_QUEUE_NAME)
 	public void createSessionLogs(TaskDescription task) {
 		TaskReport report;
 		String tag = task.getTag();
+		String link = task.getSource().getExternalDataLink();
+		Date timestamp = task.getSource().getExternalDataTimestamp();
 
-		if (task.getSource().getType() != SourceDescription.Type.EXTERNAL_LINK) {
-			LOGGER.error("Cannot create session logs for tag {}. Source type {} is not supported!", tag, task.getSource().getType());
-			report = new TaskReport(task.getTaskId(), false, null);
+		if ((tag == null) || (link == null) || (timestamp == null)) {
+			LOGGER.error("Cannot create session logs for tag {}, link {}, and timestamp {}. All values are required!", tag, link, timestamp);
+			report = TaskReport.error(task.getTaskId(), TaskError.MISSING_SOURCE);
 		} else {
-			String link = ((ExternalLinkDescription) task.getSource()).getLink();
-
 			LOGGER.info("Creating session logs for tag {} from data {} ...", tag, link);
 
 			SessionLogsPipelineManager manager = new SessionLogsPipelineManager(link, tag, plainRestTemplate, eurekaRestTemplate);
 
 			String sessionLog = manager.runPipeline();
-			String id = storage.put(sessionLog, tag);
-			String sessionLink = RestApi.SessionLogs.GET.path(id);
+			String id = storage.put(new SessionLogs(task.getSource().getExternalDataTimestamp(), sessionLog), tag);
+			String sessionLink = RestApi.SessionLogs.GET.requestUrl(id).withoutProtocol().get();
 
-			report = new TaskReport(task.getTaskId(), true, new LinkExchangeModel().setSessionLogsLink(sessionLink));
+			report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().setSessionLogsLink(sessionLink));
 
 			LOGGER.info("Session logs created for tag {} from data {}", tag, link);
 		}

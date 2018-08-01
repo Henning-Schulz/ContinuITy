@@ -2,6 +2,7 @@ package org.continuity.session.logs.controllers;
 
 import static org.continuity.api.rest.RestApi.SessionLogs.Paths.GET;
 
+import org.continuity.api.entities.artifact.SessionLogs;
 import org.continuity.api.rest.RestApi;
 import org.continuity.commons.storage.MemoryStorage;
 import org.slf4j.Logger;
@@ -26,11 +27,11 @@ public class SessionLogsController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SessionLogsController.class);
 
 	@Autowired
-	private MemoryStorage<String> storage;
+	private MemoryStorage<SessionLogs> storage;
 
 	@RequestMapping(value = GET, method = RequestMethod.GET)
-	public ResponseEntity<String> getSessionLogsFromLink(@PathVariable String id) {
-		String sessionLogs = storage.get(id);
+	public ResponseEntity<SessionLogs> getSessionLogsFromLink(@PathVariable String id) {
+		SessionLogs sessionLogs = storage.get(id);
 
 		if (sessionLogs == null) {
 			LOGGER.warn("Could not find session logs for id {}!", id);

@@ -26,11 +26,11 @@ public class RabbitMqConfig {
 
 	public static final String SERVICE_NAME = "idpaannotation";
 
-	public static final String WORKLOAD_MODEL_CREATED_QUEUE_NAME = "continuity.idpaannotation.workload.model.created";
+	public static final String WORKLOAD_MODEL_CREATED_QUEUE_NAME = "continuity.idpaannotation.event.workloadmodel.created";
 
 	public static final String WORKLOAD_MODEL_CREATED_ROUTING_KEY = "#";
 
-	public static final String IDPA_APPLICATION_CHANGED_QUEUE_NAME = "continuity.idpaannotation.idpaapplication.application.changed";
+	public static final String IDPA_APPLICATION_CHANGED_QUEUE_NAME = "continuity.idpaannotation.event.idpaapplication.changed";
 
 	public static final String IDPA_APPLICATION_CHANGED_ROUTING_KEY = AmqpApi.IdpaApplication.APPLICATION_CHANGED.formatRoutingKey().of("*");
 
@@ -51,7 +51,7 @@ public class RabbitMqConfig {
 
 	@Bean
 	TopicExchange workloadModelCreatedExchange() {
-		return AmqpApi.Workload.MODEL_CREATED.create();
+		return AmqpApi.WorkloadModel.EVENT_CREATED.create();
 	}
 
 	@Bean

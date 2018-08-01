@@ -1,18 +1,20 @@
 package org.continuity.api.entities.config;
 
+import org.continuity.api.entities.links.LinkExchangeModel;
+
 public class TaskDescription {
 
-	private long taskId;
+	private String taskId;
 
 	private String tag;
 
-	private SourceDescription source;
+	private LinkExchangeModel source;
 
-	public long getTaskId() {
+	public String getTaskId() {
 		return taskId;
 	}
 
-	public void setTaskId(long taskId) {
+	public void setTaskId(String taskId) {
 		this.taskId = taskId;
 	}
 
@@ -24,11 +26,11 @@ public class TaskDescription {
 		this.tag = tag;
 	}
 
-	public SourceDescription getSource() {
+	public LinkExchangeModel getSource() {
 		return source;
 	}
 
-	public void setSource(SourceDescription source) {
+	public void setSource(LinkExchangeModel source) {
 		this.source = source;
 	}
 
