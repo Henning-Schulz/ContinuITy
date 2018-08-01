@@ -4,7 +4,6 @@ import org.continuity.api.amqp.RoutingKeyFormatter.Keyword;
 import org.continuity.api.amqp.RoutingKeyFormatter.LoadTestType;
 import org.continuity.api.amqp.RoutingKeyFormatter.ServiceName;
 import org.continuity.api.amqp.RoutingKeyFormatter.Tag;
-import org.continuity.api.amqp.RoutingKeyFormatter.WorkloadAndLoadTestType;
 import org.continuity.api.amqp.RoutingKeyFormatter.WorkloadType;
 
 /**
@@ -77,30 +76,28 @@ public class AmqpApi {
 
 	}
 
-	//
-	// Old API
-	//
-
 	/**
-	 * AMQP API of the frontend.
+	 * AMQP API of the load test services, e.g., jmeter.
 	 *
 	 * @author Henning Schulz
 	 *
 	 */
-	public static class Frontend {
+	public static class LoadTest {
 
-		private static final String SCOPE = "frontend";
+		private static final String SCOPE = "loadtest";
 
-		public static final ExchangeDefinition<LoadTestType> LOADTESTEXECUTION_REQUIRED = ExchangeDefinition.event(SCOPE, "loadtestexecution.required").nonDurable().autoDelete()
-				.withRoutingKey(LoadTestType.INSTANCE);
+		public static final ExchangeDefinition<LoadTestType> TASK_CREATE = ExchangeDefinition.task(SCOPE, "create").nonDurable().autoDelete().withRoutingKey(LoadTestType.INSTANCE);
 
-		public static final ExchangeDefinition<WorkloadAndLoadTestType> LOADTESTCREATIONANDEXECUTION_REQUIRED = ExchangeDefinition.event(SCOPE, "loadtestcreationandexecution.required").nonDurable()
-				.autoDelete().withRoutingKey(WorkloadAndLoadTestType.INSTANCE);
+		public static final ExchangeDefinition<LoadTestType> TASK_EXECUTE = ExchangeDefinition.task(SCOPE, "execute").nonDurable().autoDelete().withRoutingKey(LoadTestType.INSTANCE);
 
-		private Frontend() {
+		private LoadTest() {
 		}
 
 	}
+
+	//
+	// Old API
+	//
 
 	/**
 	 * AMQP API of the IDPA annotation service.
@@ -132,23 +129,6 @@ public class AmqpApi {
 		public static final ExchangeDefinition<Tag> APPLICATION_CHANGED = ExchangeDefinition.event(SCOPE, "changed").nonDurable().autoDelete().withRoutingKey(Tag.INSTANCE);
 
 		private IdpaApplication() {
-		}
-
-	}
-
-	/**
-	 * AMQP API of the load test services, e.g., jmeter.
-	 *
-	 * @author Henning Schulz
-	 *
-	 */
-	public static class LoadTest {
-
-		private static final String SCOPE = "loadtest";
-
-		public static final ExchangeDefinition<LoadTestType> REPORT_AVAILABLE = ExchangeDefinition.event(SCOPE, "report").nonDurable().autoDelete().withRoutingKey(LoadTestType.INSTANCE);
-
-		private LoadTest() {
 		}
 
 	}

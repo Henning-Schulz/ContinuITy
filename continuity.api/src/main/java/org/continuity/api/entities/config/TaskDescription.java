@@ -2,6 +2,9 @@ package org.continuity.api.entities.config;
 
 import org.continuity.api.entities.links.LinkExchangeModel;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 public class TaskDescription {
 
 	private String taskId;
@@ -9,6 +12,9 @@ public class TaskDescription {
 	private String tag;
 
 	private LinkExchangeModel source;
+
+	@JsonInclude(Include.NON_NULL)
+	private PropertySpecification properties;
 
 	public String getTaskId() {
 		return taskId;
@@ -32,6 +38,14 @@ public class TaskDescription {
 
 	public void setSource(LinkExchangeModel source) {
 		this.source = source;
+	}
+
+	public PropertySpecification getProperties() {
+		return properties;
+	}
+
+	public void setProperties(PropertySpecification properties) {
+		this.properties = properties;
 	}
 
 }

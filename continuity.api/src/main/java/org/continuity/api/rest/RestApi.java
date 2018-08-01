@@ -3,7 +3,6 @@ package org.continuity.api.rest;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.continuity.api.rest.RestApi.JMeter.TestPlan;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
@@ -95,15 +94,6 @@ public class RestApi {
 
 			public static final String ROOT = "/loadtest";
 
-			/** {@value #ROOT}/{type}/createandexecute */
-			public static final RestEndpoint CREATE_AND_EXECUTE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE_AND_EXECUTE, RequestMethod.POST);
-
-			/** {@value #ROOT}/{type}/execute */
-			public static final RestEndpoint EXECUTE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.EXECUTE, RequestMethod.POST);
-
-			/** {@value #ROOT}/{lt-type}/{wm-type}/model/{id}/create */
-			public static final RestEndpoint CREATE_AND_GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE_AND_GET, RequestMethod.GET);
-
 			/** {@value #ROOT}/report */
 			public static final RestEndpoint REPORT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.REPORT_PATH, RequestMethod.GET);
 
@@ -113,9 +103,6 @@ public class RestApi {
 
 			public static class Paths {
 
-				public static final String CREATE_AND_EXECUTE = "/{type}/createandexecute";
-				public static final String EXECUTE = "/{type}/execute";
-				public static final String CREATE_AND_GET = "/{lt-type}/{wm-type}/model/{id}/create";
 				public static final String REPORT_PATH = "/report";
 
 				private Paths() {
@@ -349,15 +336,15 @@ public class RestApi {
 
 			public static final String ROOT = "/loadtest";
 
-			/** {@value #ROOT}/{type}/model/{id}/create */
-			public static final RestEndpoint CREATE_AND_GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE_AND_GET, RequestMethod.GET);
+			/** {@value #ROOT}/can-execute */
+			public static final RestEndpoint CAN_EXECUTE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CAN_EXECUTE, RequestMethod.GET);
 
 			private TestPlan() {
 			}
 
 			public static class Paths {
 
-				public static final String CREATE_AND_GET = "/{type}/model/{id}/create";
+				public static final String CAN_EXECUTE = "/can-execute";
 
 				private Paths() {
 				}
@@ -479,20 +466,13 @@ public class RestApi {
 
 	/**
 	 * Generic, abstract REST endpoints. The implementing endpoints can be retrieved via the
-	 * {@link Map#get(Object)} method, e.g., the JMeter {@link TestPlan#CREATE_AND_GET} via
-	 * {@link Generic#GET_AND_CREATE_LOAD_TEST}<code>.get("jmeter")</code>.
+	 * {@link Map#get(Object)} method, e.g., the JMeter {@link Model#OVERVIEW} via
+	 * {@link Generic#WORKLOAD_MODEL_LINK}<code>.get("jmeter")</code>.
 	 *
 	 * @author Henning Schulz
 	 *
 	 */
 	public static class Generic {
-
-		/**
-		 * [loadtest-type]/{type}/model/{id}/create
-		 *
-		 * @see RestApi.JMeter.TestPlan#CREATE_AND_GET
-		 */
-		public static final Map<String, RestEndpoint> GET_AND_CREATE_LOAD_TEST = new HashMap<>();
 
 		/**
 		 * [workload-model-type]/model/{id}
@@ -509,8 +489,6 @@ public class RestApi {
 		public static final Map<String, RestEndpoint> PERSIST_WORKLOAD_MODEL = new HashMap<>();
 
 		static {
-			GET_AND_CREATE_LOAD_TEST.put("jmeter", JMeter.TestPlan.CREATE_AND_GET);
-
 			WORKLOAD_MODEL_LINK.put("wessbas", Wessbas.Model.OVERVIEW);
 
 			PERSIST_WORKLOAD_MODEL.put("wessbas", Wessbas.Model.PERSIST);

@@ -28,10 +28,6 @@ public class RabbitMqConfig {
 
 	public static final String IDPA_ANNOTATION_MESSAGE_AVAILABLE_ROUTING_KEY = AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.formatRoutingKey().of("report");
 
-	public static final String LOAD_TEST_REPORT_AVAILABLE_QUEUE_NAME = AmqpApi.LoadTest.REPORT_AVAILABLE.deriveQueueName(SERVICE_NAME);
-
-	public static final String LOAD_TEST_REPORT_AVAILABLE_ROUTING_KEY = AmqpApi.LoadTest.REPORT_AVAILABLE.formatRoutingKey().of("jmeter");
-
 	public static final String DEAD_LETTER_QUEUE_NAME = AmqpApi.DEAD_LETTER_EXCHANGE.deriveQueueName(SERVICE_NAME);
 
 	@Bean
@@ -57,16 +53,6 @@ public class RabbitMqConfig {
 	}
 
 	@Bean
-	TopicExchange loadTestExecutionRequiredExchange() {
-		return AmqpApi.Frontend.LOADTESTEXECUTION_REQUIRED.create();
-	}
-
-	@Bean
-	TopicExchange loadTestCreationAndExecutionRequiredExchange() {
-		return AmqpApi.Frontend.LOADTESTCREATIONANDEXECUTION_REQUIRED.create();
-	}
-
-	@Bean
 	Queue idpaAnnotationMessageAvailableQueue() {
 		return QueueBuilder.nonDurable(IDPA_ANNOTATION_MESSAGE_AVAILABLE_QUEUE_NAME).withArgument(AmqpApi.DEAD_LETTER_EXCHANGE_KEY, AmqpApi.DEAD_LETTER_EXCHANGE.name())
 				.withArgument(AmqpApi.DEAD_LETTER_ROUTING_KEY_KEY, SERVICE_NAME).build();
@@ -80,22 +66,6 @@ public class RabbitMqConfig {
 	@Bean
 	Binding idpaAnnotationMessageAvailableBinding() {
 		return BindingBuilder.bind(idpaAnnotationMessageAvailableQueue()).to(idpaAnnotationMessageAvailableExchange()).with(IDPA_ANNOTATION_MESSAGE_AVAILABLE_ROUTING_KEY);
-	}
-
-	@Bean
-	Queue loadTestReportAvailableQueue() {
-		return QueueBuilder.nonDurable(LOAD_TEST_REPORT_AVAILABLE_QUEUE_NAME).withArgument(AmqpApi.DEAD_LETTER_EXCHANGE_KEY, AmqpApi.DEAD_LETTER_EXCHANGE.name())
-				.withArgument(AmqpApi.DEAD_LETTER_ROUTING_KEY_KEY, SERVICE_NAME).build();
-	}
-
-	@Bean
-	TopicExchange loadTestReportAvailableExchange() {
-		return AmqpApi.LoadTest.REPORT_AVAILABLE.create();
-	}
-
-	@Bean
-	Binding loadTestReportAvailableBinding() {
-		return BindingBuilder.bind(loadTestReportAvailableQueue()).to(loadTestReportAvailableExchange()).with(LOAD_TEST_REPORT_AVAILABLE_ROUTING_KEY);
 	}
 
 	// Dead letter exchange and queue

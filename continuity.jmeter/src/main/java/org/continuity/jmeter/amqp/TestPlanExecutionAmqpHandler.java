@@ -13,12 +13,12 @@ import org.apache.jmeter.engine.StandardJMeterEngine;
 import org.apache.jmeter.testelement.TestStateListener;
 import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.entities.artifact.JMeterTestPlanBundle;
-import org.continuity.api.entities.config.LoadTestConfiguration;
+import org.continuity.api.entities.config.PropertySpecification;
+import org.continuity.api.entities.config.TaskDescription;
 import org.continuity.commons.jmeter.JMeterPropertiesCorrector;
 import org.continuity.commons.jmeter.TestPlanWriter;
 import org.continuity.commons.utils.JMeterUtils;
 import org.continuity.jmeter.config.RabbitMqConfig;
-import org.continuity.jmeter.controllers.TestPlanController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -32,12 +32,9 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class TestPlanAmqpHandler {
+public class TestPlanExecutionAmqpHandler {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TestPlanAmqpHandler.class);
-
-	@Autowired
-	private TestPlanController testPlanController;
+	private static final Logger LOGGER = LoggerFactory.getLogger(TestPlanExecutionAmqpHandler.class);
 
 	@Autowired
 	private TestPlanWriter testPlanWriter;
@@ -52,34 +49,26 @@ public class TestPlanAmqpHandler {
 	private final AtomicInteger testCounter = new AtomicInteger(0);
 
 	/**
-	 * Listens to the {@link RabbitMqConfig#LOAD_TEST_CREATION_AND_EXECUTION_REQUIRED_QUEUE_NAME} queue,
-	 * annotates the test plan and executes the test.
+	 * Listens to the {@link RabbitMqConfig#TASK_EXECUTE_QUEUE_NAME} queue and executes the JMeter
+	 * test plan.
 	 *
-	 * @param specification
-	 *            The specification of the test plan.
+	 * @param task
+	 *            Task to be processed.
 	 */
-	@RabbitListener(queues = RabbitMqConfig.LOAD_TEST_CREATION_AND_EXECUTION_REQUIRED_QUEUE_NAME)
-	public void createAndExecuteTestPlan(LoadTestConfiguration specification) {
-		LOGGER.debug("Received test plan specification.");
+	@RabbitListener(queues = RabbitMqConfig.TASK_EXECUTE_QUEUE_NAME)
+	public void executeTestPlan(TaskDescription task) {
+		JMeterTestPlanBundle testPlanBundle = null; // TODO: get from storage
 
-		JMeterTestPlanBundle testPlanBundle = testPlanController.createAndGetLoadTest(specification.getWorkloadModelLink(), specification.getTag());
+		PropertySpecification properties = task.getProperties();
 
-		LOGGER.debug("Got an annotated test plan pack.");
+		if ((properties.getNumUsers() != null) && (properties.getDuration() != null) && (properties.getRampup() != null)) {
+			jmeterPropertiesCorrector.setRuntimeProperties(testPlanBundle.getTestPlan(), properties.getNumUsers(), properties.getDuration(), properties.getRampup());
+			LOGGER.info("Set JMeter properties num-users = {}, duration = {}, rampup = {}.", properties.getNumUsers(), properties.getDuration(), properties.getRampup());
+		} else {
+			LOGGER.warn("Could not set JMeter properties, as some of them are null: num-users = {}, duration = {}, rampup = {}.", properties.getNumUsers(), properties.getDuration(),
+					properties.getRampup());
+		}
 
-		jmeterPropertiesCorrector.setRuntimeProperties(testPlanBundle.getTestPlan(), specification.getNumUsers(), specification.getDuration(), specification.getRampup());
-		executeTestPlan(testPlanBundle);
-	}
-
-	/**
-	 * Listens to the {@link RabbitMqConfig#EXECUTE_LOAD_TEST_QUEUE_NAME} queue and executes the
-	 * sent JMeter test plan.
-	 *
-	 * @param testPlanBundle
-	 *            Test plan bundle including the test plan itself and the behaviors for
-	 *            Markov4JMeter.
-	 */
-	@RabbitListener(queues = RabbitMqConfig.LOAD_TEST_EXECUTION_REQUIRED_QUEUE_NAME)
-	public void executeTestPlan(JMeterTestPlanBundle testPlanBundle) {
 		Path tmpPath;
 
 		try {
@@ -132,6 +121,7 @@ public class TestPlanAmqpHandler {
 
 					runningTests.put(testId, false);
 
+					// TODO: Report storage and send to finished exchange
 					amqpTemplate.convertAndSend(AmqpApi.LoadTest.REPORT_AVAILABLE.name(), AmqpApi.LoadTest.REPORT_AVAILABLE.formatRoutingKey().of("jmeter"),
 							FileUtils.readFileToString(resultsPath.toFile(), Charset.defaultCharset()) + appendix);
 					LOGGER.info("JMeter test finished. Results are stored to {}.", resultsPath);
