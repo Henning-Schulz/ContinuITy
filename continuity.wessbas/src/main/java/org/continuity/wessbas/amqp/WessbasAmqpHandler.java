@@ -2,6 +2,7 @@ package org.continuity.wessbas.amqp;
 
 import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.entities.config.TaskDescription;
+import org.continuity.api.entities.links.LinkExchangeModel;
 import org.continuity.api.entities.report.TaskError;
 import org.continuity.api.entities.report.TaskReport;
 import org.continuity.commons.storage.MemoryStorage;
@@ -74,7 +75,7 @@ public class WessbasAmqpHandler {
 				LOGGER.info("Created a new workload model with id '{}'.", storageId);
 
 				WorkloadModelPack responsePack = new WorkloadModelPack(applicationName, storageId, task.getTag());
-				report = TaskReport.successful(task.getTaskId(), responsePack);
+				report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().setWorkloadLink(responsePack.getWorkloadLink()).setWorkloadType(responsePack.getWorkloadType()));
 
 				amqpTemplate.convertAndSend(AmqpApi.WorkloadModel.EVENT_CREATED.name(), AmqpApi.WorkloadModel.EVENT_CREATED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), responsePack);
 			}
