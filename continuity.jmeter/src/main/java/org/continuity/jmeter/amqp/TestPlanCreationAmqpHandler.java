@@ -3,12 +3,16 @@ package org.continuity.jmeter.amqp;
 import org.apache.jorphan.collections.ListedHashTree;
 import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.entities.artifact.JMeterTestPlanBundle;
+import org.continuity.api.entities.config.PropertySpecification;
 import org.continuity.api.entities.config.TaskDescription;
 import org.continuity.api.entities.links.LinkExchangeModel;
 import org.continuity.api.entities.report.TaskError;
 import org.continuity.api.entities.report.TaskReport;
+import org.continuity.api.rest.RestApi;
 import org.continuity.api.rest.RestApi.IdpaAnnotation;
 import org.continuity.api.rest.RestApi.IdpaApplication;
+import org.continuity.commons.jmeter.JMeterPropertiesCorrector;
+import org.continuity.commons.storage.MemoryStorage;
 import org.continuity.commons.utils.WebUtils;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.application.Application;
@@ -34,18 +38,27 @@ public class TestPlanCreationAmqpHandler {
 	@Autowired
 	private AmqpTemplate amqpTemplate;
 
+	@Autowired
+	private MemoryStorage<JMeterTestPlanBundle> storage;
+
+	private JMeterPropertiesCorrector jmeterPropertiesCorrector = new JMeterPropertiesCorrector();
+
 	@RabbitListener(queues = RabbitMqConfig.TASK_CREATE_QUEUE_NAME)
 	public void createTestPlan(TaskDescription task) {
 		TaskReport report;
 
 		if (task.getSource().getWorkloadLink() == null) {
+			LOGGER.error("Cannot create a load test for task {}. The workload link is null!", task.getTaskId());
 			report = TaskReport.error(task.getTaskId(), TaskError.MISSING_SOURCE);
 		} else {
-			JMeterTestPlanBundle bundle = createAndGetLoadTest(task.getSource().getWorkloadLink(), task.getTag());
+			LOGGER.info("Creating a load test from {}...", task.getSource().getWorkloadLink());
 
-			// TODO: store bundle in storage
+			JMeterTestPlanBundle bundle = createAndGetLoadTest(task.getSource().getWorkloadLink(), task.getTag(), task.getProperties());
 
-			report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().setJmeterLink("TODO"));
+			String id = storage.put(bundle, task.getTag());
+			LOGGER.info("Created a load test from {}.", task.getSource().getWorkloadLink());
+
+			report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().setJmeterLink(RestApi.JMeter.TestPlan.GET.requestUrl(id).withoutProtocol().get()));
 		}
 
 		amqpTemplate.convertAndSend(AmqpApi.Global.EVENT_FINISHED.name(), AmqpApi.Global.EVENT_FINISHED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), report);
@@ -63,9 +76,7 @@ public class TestPlanCreationAmqpHandler {
 	 *            The tag to be used to retrieve the annotation.
 	 * @return The transformed JMeter test plan.
 	 */
-	private JMeterTestPlanBundle createAndGetLoadTest(String workloadModelLink, String tag) {
-		LOGGER.debug("Creating a load test from {}.", workloadModelLink);
-
+	private JMeterTestPlanBundle createAndGetLoadTest(String workloadModelLink, String tag, PropertySpecification properties) {
 		LinkExchangeModel workloadLinks = restTemplate.getForObject(WebUtils.addProtocolIfMissing(workloadModelLink), LinkExchangeModel.class);
 
 		if ((workloadLinks == null) || (workloadLinks.getJmeterLink() == null)) {
@@ -79,6 +90,16 @@ public class TestPlanCreationAmqpHandler {
 		if (annotatedTestPlan == null) {
 			LOGGER.error("Could not annotate the test plan! Ignoring the annotation.");
 			annotatedTestPlan = testPlanPack.getTestPlan();
+		}
+
+		if (properties == null) {
+			LOGGER.warn("Could not set JMeter properties, as they are null.");
+		} else if ((properties.getNumUsers() != null) && (properties.getDuration() != null) && (properties.getRampup() != null)) {
+			jmeterPropertiesCorrector.setRuntimeProperties(testPlanPack.getTestPlan(), properties.getNumUsers(), properties.getDuration(), properties.getRampup());
+			LOGGER.info("Set JMeter properties num-users = {}, duration = {}, rampup = {}.", properties.getNumUsers(), properties.getDuration(), properties.getRampup());
+		} else {
+			LOGGER.warn("Could not set JMeter properties, as some of them are null: num-users = {}, duration = {}, rampup = {}.", properties.getNumUsers(), properties.getDuration(),
+					properties.getRampup());
 		}
 
 		return new JMeterTestPlanBundle(annotatedTestPlan, testPlanPack.getBehaviors());

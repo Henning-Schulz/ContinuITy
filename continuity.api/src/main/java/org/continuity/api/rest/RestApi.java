@@ -336,15 +336,45 @@ public class RestApi {
 
 			public static final String ROOT = "/loadtest";
 
-			/** {@value #ROOT}/can-execute */
-			public static final RestEndpoint CAN_EXECUTE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CAN_EXECUTE, RequestMethod.GET);
+			/** {@value #ROOT}/{id} */
+			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
 			private TestPlan() {
 			}
 
 			public static class Paths {
 
-				public static final String CAN_EXECUTE = "/can-execute";
+				public static final String GET = "/{id}";
+
+				private Paths() {
+				}
+			}
+		}
+
+		/**
+		 * Report API of the JMeter service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
+		public static class Report {
+
+			public static final String ROOT = "/report";
+
+			/** {@value #ROOT}/{id} */
+			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
+
+			/** {@value #ROOT}/{id} */
+			public static final RestEndpoint DELETE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.DELETE, RequestMethod.DELETE);
+
+			private Report() {
+			}
+
+			public static class Paths {
+
+				public static final String GET = "/{id}";
+
+				public static final String DELETE = "/{id}";
 
 				private Paths() {
 				}

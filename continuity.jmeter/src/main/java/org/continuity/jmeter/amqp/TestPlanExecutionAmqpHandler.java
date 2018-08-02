@@ -15,8 +15,13 @@ import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.entities.artifact.JMeterTestPlanBundle;
 import org.continuity.api.entities.config.PropertySpecification;
 import org.continuity.api.entities.config.TaskDescription;
+import org.continuity.api.entities.links.LinkExchangeModel;
+import org.continuity.api.entities.report.TaskError;
+import org.continuity.api.entities.report.TaskReport;
+import org.continuity.api.rest.RestApi;
 import org.continuity.commons.jmeter.JMeterPropertiesCorrector;
 import org.continuity.commons.jmeter.TestPlanWriter;
+import org.continuity.commons.storage.MemoryStorage;
 import org.continuity.commons.utils.JMeterUtils;
 import org.continuity.jmeter.config.RabbitMqConfig;
 import org.slf4j.Logger;
@@ -25,6 +30,7 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,6 +48,14 @@ public class TestPlanExecutionAmqpHandler {
 	@Autowired
 	private AmqpTemplate amqpTemplate;
 
+	@Autowired
+	@Qualifier("testPlanStorage")
+	private MemoryStorage<JMeterTestPlanBundle> testplanStorage;
+
+	@Autowired
+	@Qualifier("reportStorage")
+	private MemoryStorage<String> reportStorage;
+
 	private JMeterPropertiesCorrector jmeterPropertiesCorrector = new JMeterPropertiesCorrector();
 
 	private final ConcurrentHashMap<Integer, Boolean> runningTests = new ConcurrentHashMap<>();
@@ -57,11 +71,24 @@ public class TestPlanExecutionAmqpHandler {
 	 */
 	@RabbitListener(queues = RabbitMqConfig.TASK_EXECUTE_QUEUE_NAME)
 	public void executeTestPlan(TaskDescription task) {
-		JMeterTestPlanBundle testPlanBundle = null; // TODO: get from storage
+		String jmeterLink = task.getSource().getJmeterLink();
+
+		if (jmeterLink == null) {
+			LOGGER.error("Cannot execute test for task {}. jmeter-link is null!", task.getTaskId());
+
+			TaskReport report = TaskReport.error(task.getTaskId(), TaskError.MISSING_SOURCE);
+			amqpTemplate.convertAndSend(AmqpApi.Global.EVENT_FINISHED.name(), AmqpApi.Global.EVENT_FINISHED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), report);
+			return;
+		}
+
+		String storageId = jmeterLink.substring(jmeterLink.lastIndexOf("/") + 1);
+		JMeterTestPlanBundle testPlanBundle = testplanStorage.get(storageId);
 
 		PropertySpecification properties = task.getProperties();
 
-		if ((properties.getNumUsers() != null) && (properties.getDuration() != null) && (properties.getRampup() != null)) {
+		if (properties == null) {
+			LOGGER.warn("Could not set JMeter properties, as they are null.");
+		} else if ((properties.getNumUsers() != null) && (properties.getDuration() != null) && (properties.getRampup() != null)) {
 			jmeterPropertiesCorrector.setRuntimeProperties(testPlanBundle.getTestPlan(), properties.getNumUsers(), properties.getDuration(), properties.getRampup());
 			LOGGER.info("Set JMeter properties num-users = {}, duration = {}, rampup = {}.", properties.getNumUsers(), properties.getDuration(), properties.getRampup());
 		} else {
@@ -121,9 +148,12 @@ public class TestPlanExecutionAmqpHandler {
 
 					runningTests.put(testId, false);
 
-					// TODO: Report storage and send to finished exchange
-					amqpTemplate.convertAndSend(AmqpApi.LoadTest.REPORT_AVAILABLE.name(), AmqpApi.LoadTest.REPORT_AVAILABLE.formatRoutingKey().of("jmeter"),
-							FileUtils.readFileToString(resultsPath.toFile(), Charset.defaultCharset()) + appendix);
+					String reportId = reportStorage.put(FileUtils.readFileToString(resultsPath.toFile(), Charset.defaultCharset()) + appendix, task.getTag());
+					String reportLink = RestApi.JMeter.Report.GET.requestUrl(reportId).withoutProtocol().get();
+
+					TaskReport report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().setJmeterReportLink(reportLink));
+					amqpTemplate.convertAndSend(AmqpApi.Global.EVENT_FINISHED.name(), AmqpApi.Global.EVENT_FINISHED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), report);
+
 					LOGGER.info("JMeter test finished. Results are stored to {}.", resultsPath);
 				} catch (AmqpException | IOException e) {
 					LOGGER.error("Error when pushing the test results to the queue!", e);

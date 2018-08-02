@@ -41,6 +41,10 @@ public class LinkExchangeModel {
 	@JsonInclude(Include.NON_NULL)
 	private String jmeterLink;
 
+	@JsonProperty(value = "jmeter-report-link", required = false)
+	@JsonInclude(Include.NON_NULL)
+	private String jmeterReportLink;
+
 	@JsonProperty(value = "session-logs-link", required = false)
 	@JsonInclude(Include.NON_NULL)
 	private String sessionLogsLink;
@@ -104,6 +108,15 @@ public class LinkExchangeModel {
 
 	public LinkExchangeModel setJmeterLink(String jmeterLink) {
 		this.jmeterLink = jmeterLink;
+		return this;
+	}
+
+	public String getJmeterReportLink() {
+		return jmeterReportLink;
+	}
+
+	public LinkExchangeModel setJmeterReportLink(String jmeterReportLink) {
+		this.jmeterReportLink = jmeterReportLink;
 		return this;
 	}
 
