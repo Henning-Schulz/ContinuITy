@@ -2,6 +2,7 @@ package org.continuity.api.amqp;
 
 import org.continuity.api.amqp.RoutingKeyFormatter.Keyword;
 import org.continuity.api.amqp.RoutingKeyFormatter.LoadTestType;
+import org.continuity.api.amqp.RoutingKeyFormatter.RecipeId;
 import org.continuity.api.amqp.RoutingKeyFormatter.ServiceName;
 import org.continuity.api.amqp.RoutingKeyFormatter.Tag;
 import org.continuity.api.amqp.RoutingKeyFormatter.WorkloadType;
@@ -36,6 +37,23 @@ public class AmqpApi {
 		public static final ExchangeDefinition<ServiceName> EVENT_FINISHED = ExchangeDefinition.event(SCOPE, "finished").nonDurable().autoDelete().withRoutingKey(ServiceName.INSTANCE);
 
 		private Global() {
+		}
+
+	}
+
+	/**
+	 * AMQP API of the orchestrator service.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
+	public static class Orchestrator {
+
+		private static final String SCOPE = "orchestrator";
+
+		public static final ExchangeDefinition<RecipeId> EVENT_FINISHED = ExchangeDefinition.event(SCOPE, "finished").nonDurable().autoDelete().withRoutingKey(RecipeId.INSTANCE);
+
+		private Orchestrator() {
 		}
 
 	}
@@ -96,7 +114,7 @@ public class AmqpApi {
 	}
 
 	//
-	// Old API
+	// TODO: Old API
 	//
 
 	/**

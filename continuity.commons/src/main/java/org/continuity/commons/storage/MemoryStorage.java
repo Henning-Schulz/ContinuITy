@@ -33,8 +33,20 @@ public class MemoryStorage<T> {
 	 *            The tag of the entity.
 	 * @return An id for the slot.
 	 */
-	private String reserve(String tag) {
+	public String reserve(String tag) {
 		return tag + TAG_DELIM + Integer.toString(counter.getAndIncrement());
+	}
+
+	/**
+	 * Adds a new entity to an already reserved slot.
+	 *
+	 * @param id
+	 *            The ID of the slot.
+	 * @param entity
+	 *            The entity to be stored.
+	 */
+	public void putToReserved(String id, T entity) {
+		storedEntities.put(id, entity);
 	}
 
 	/**
@@ -48,7 +60,7 @@ public class MemoryStorage<T> {
 	 */
 	public String put(T entity, String tag) {
 		String id = reserve(tag);
-		storedEntities.put(id, entity);
+		putToReserved(id, entity);
 		return id;
 	}
 

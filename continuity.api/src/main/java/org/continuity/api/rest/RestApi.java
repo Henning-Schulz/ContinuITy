@@ -35,7 +35,43 @@ public class RestApi {
 		}
 
 		/**
-		 * IDPA API of the frontend service.
+		 * Orchestration API of the orchestration service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
+		public static class Orchestration {
+
+			public static final String ROOT = "/orchestration";
+
+			/** {@value #ROOT}/{id}/result */
+			public static final RestEndpoint RESULT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.RESULT, RequestMethod.GET);
+
+			/** {@value #ROOT}/{id}/wait */
+			public static final RestEndpoint WAIT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.WAIT, RequestMethod.GET);
+
+			/** {@value #ROOT}/submit */
+			public static final RestEndpoint SUBMIT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.SUBMIT, RequestMethod.GET);
+
+			private Orchestration() {
+			}
+
+			public static class Paths {
+
+				public static final String RESULT = "/{id}/result";
+
+				public static final String WAIT = "/{id}/wait";
+
+				public static final String SUBMIT = "/submit";
+
+				private Paths() {
+				}
+			}
+
+		}
+
+		/**
+		 * IDPA API of the orchestration service.
 		 *
 		 * @author Henning Schulz
 		 *
@@ -83,6 +119,10 @@ public class RestApi {
 			}
 
 		}
+
+		//
+		// OLD
+		//
 
 		/**
 		 * Loadtest API of the frontend service.

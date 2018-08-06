@@ -1,5 +1,6 @@
 package org.continuity.api.entities.links;
 
+import java.lang.reflect.Field;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -154,6 +155,14 @@ public class LinkExchangeModel {
 	public LinkExchangeModel setExternalDataTimestamp(Date externalDataTimestamp) {
 		this.externalDataTimestamp = externalDataTimestamp;
 		return this;
+	}
+
+	public void merge(LinkExchangeModel other) throws IllegalArgumentException, IllegalAccessException {
+		for (Field field : LinkExchangeModel.class.getDeclaredFields()) {
+			if (field.get(this) == null) {
+				field.set(this, field.get(other));
+			}
+		}
 	}
 
 	@Override

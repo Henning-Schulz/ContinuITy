@@ -168,4 +168,30 @@ public interface RoutingKeyFormatter {
 
 	}
 
+	/**
+	 * Use the recipe ID as routing key.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
+	public static class RecipeId implements RoutingKeyFormatter {
+
+		public static RecipeId INSTANCE = new RecipeId();
+
+		private RecipeId() {
+		}
+
+		/**
+		 * Use the recipe ID as routing key.
+		 *
+		 * @param recipeId
+		 *            The recipe ID.
+		 * @return The formatted recipe ID.
+		 */
+		public String of(String recipeId) {
+			return recipeId;
+		}
+
+	}
+
 }

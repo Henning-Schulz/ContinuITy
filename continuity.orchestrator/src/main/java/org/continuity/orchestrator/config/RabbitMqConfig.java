@@ -22,7 +22,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMqConfig {
 
-	private static final String SERVICE_NAME = "frontend";
+	public static final String SERVICE_NAME = "orchestrator";
+
+	public static final String EVENT_FINISHED_QUEUE_NAME = "continuity.orchestrator.event.global.finished";
+
+	public static final String EVENT_FINISHED_ROUTING_KEY = AmqpApi.Global.EVENT_FINISHED.formatRoutingKey().of("*");
 
 	public static final String IDPA_ANNOTATION_MESSAGE_AVAILABLE_QUEUE_NAME = AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.deriveQueueName(SERVICE_NAME);
 
@@ -53,6 +57,22 @@ public class RabbitMqConfig {
 	}
 
 	@Bean
+	Queue eventFinishedQueue() {
+		return QueueBuilder.nonDurable(EVENT_FINISHED_QUEUE_NAME).withArgument(AmqpApi.DEAD_LETTER_EXCHANGE_KEY, AmqpApi.DEAD_LETTER_EXCHANGE.name())
+				.withArgument(AmqpApi.DEAD_LETTER_ROUTING_KEY_KEY, SERVICE_NAME).build();
+	}
+
+	@Bean
+	TopicExchange eventFinishedExchange() {
+		return AmqpApi.Global.EVENT_FINISHED.create();
+	}
+
+	@Bean
+	Binding eventFinishedBinding() {
+		return BindingBuilder.bind(eventFinishedQueue()).to(eventFinishedExchange()).with(EVENT_FINISHED_ROUTING_KEY);
+	}
+
+	@Bean
 	Queue idpaAnnotationMessageAvailableQueue() {
 		return QueueBuilder.nonDurable(IDPA_ANNOTATION_MESSAGE_AVAILABLE_QUEUE_NAME).withArgument(AmqpApi.DEAD_LETTER_EXCHANGE_KEY, AmqpApi.DEAD_LETTER_EXCHANGE.name())
 				.withArgument(AmqpApi.DEAD_LETTER_ROUTING_KEY_KEY, SERVICE_NAME).build();
@@ -66,6 +86,11 @@ public class RabbitMqConfig {
 	@Bean
 	Binding idpaAnnotationMessageAvailableBinding() {
 		return BindingBuilder.bind(idpaAnnotationMessageAvailableQueue()).to(idpaAnnotationMessageAvailableExchange()).with(IDPA_ANNOTATION_MESSAGE_AVAILABLE_ROUTING_KEY);
+	}
+
+	@Bean
+	TopicExchange eventRecipeFinishedExchange() {
+		return AmqpApi.Orchestrator.EVENT_FINISHED.create();
 	}
 
 	// Dead letter exchange and queue
