@@ -42,7 +42,7 @@ public class RestApi {
 		 */
 		public static class Orchestration {
 
-			public static final String ROOT = "/orchestration";
+			public static final String ROOT = "/order";
 
 			/** {@value #ROOT}/{id}/result */
 			public static final RestEndpoint RESULT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.RESULT, RequestMethod.GET);
@@ -120,10 +120,6 @@ public class RestApi {
 
 		}
 
-		//
-		// OLD
-		//
-
 		/**
 		 * Loadtest API of the frontend service.
 		 *
@@ -134,16 +130,51 @@ public class RestApi {
 
 			public static final String ROOT = "/loadtest";
 
-			/** {@value #ROOT}/report */
-			public static final RestEndpoint REPORT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.REPORT_PATH, RequestMethod.GET);
+			/** {@value #ROOT}/{type}/test/{id} */
+			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
+			/** {@value #ROOT}/{type}/report/{id} */
+			public static final RestEndpoint REPORT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.REPORT, RequestMethod.GET);
+
+			/** {@value #ROOT}/{type}/report/{id} */
+			public static final RestEndpoint DELETE_REPORT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.DELETE_REPORT, RequestMethod.DELETE);
 
 			private Loadtest() {
 			}
 
 			public static class Paths {
 
-				public static final String REPORT_PATH = "/report";
+				public static final String GET = "/{type}/test/{id}";
+
+				public static final String REPORT = "/{type}/report/{id}";
+
+				public static final String DELETE_REPORT = "/{type}/test/{id}";
+
+				private Paths() {
+				}
+			}
+
+		}
+
+		/**
+		 * Session logs API of the orchestration service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
+		public static class SessionLogs {
+
+			public static final String ROOT = "/sessions";
+
+			/** {@value #ROOT}/{id} */
+			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
+
+			private SessionLogs() {
+			}
+
+			public static class Paths {
+
+				public static final String GET = "/{id}";
 
 				private Paths() {
 				}
@@ -161,16 +192,10 @@ public class RestApi {
 
 			public static final String ROOT = "/workloadmodel";
 
-			/** {@value #ROOT}/{type}/create */
-			public static final RestEndpoint CREATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE, RequestMethod.GET);
-
-			/** {@value #ROOT}/wait/{type}/model/{id} */
-			public static final RestEndpoint WAIT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.WAIT, RequestMethod.GET);
-
-			/** {@value #ROOT}/get/{type}/model/{id} */
+			/** {@value #ROOT}/{type}/model/{id} */
 			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
-			/** {@value #ROOT}/get/{type}/model/{id} */
+			/** {@value #ROOT}/{type}/model/{id}/persist */
 			public static final RestEndpoint PERSIST = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.PERSIST, RequestMethod.POST);
 
 			private WorkloadModel() {
@@ -178,10 +203,8 @@ public class RestApi {
 
 			public static class Paths {
 
-				public static final String CREATE = "/{type}/create";
-				public static final String WAIT = "/wait/{type}/model/{id}";
-				public static final String GET = "/get/{type}/model/{id}";
-				public static final String PERSIST = "/persist/{type}/model/{id}";
+				public static final String GET = "/{type}/model/{id}";
+				public static final String PERSIST = "/{type}/model/{id}/persist";
 
 				private Paths() {
 				}
@@ -558,10 +581,37 @@ public class RestApi {
 		 */
 		public static final Map<String, RestEndpoint> PERSIST_WORKLOAD_MODEL = new HashMap<>();
 
+		/**
+		 * [load-test-type]/loadtest/{id}
+		 *
+		 * @see RestApi.JMeter.TestPlan#GET
+		 */
+		public static final Map<String, RestEndpoint> GET_LOAD_TEST = new HashMap<>();
+
+		/**
+		 * [load-test-type]/report/{id}
+		 *
+		 * @see RestApi.JMeter.Report#GET
+		 */
+		public static final Map<String, RestEndpoint> GET_LOAD_TEST_REPORT = new HashMap<>();
+
+		/**
+		 * [load-test-type]/report/{id}
+		 *
+		 * @see RestApi.JMeter.Report#DELETE
+		 */
+		public static final Map<String, RestEndpoint> DELETE_LOAD_TEST_REPORT = new HashMap<>();
+
 		static {
 			WORKLOAD_MODEL_LINK.put("wessbas", Wessbas.Model.OVERVIEW);
 
 			PERSIST_WORKLOAD_MODEL.put("wessbas", Wessbas.Model.PERSIST);
+
+			GET_LOAD_TEST.put("jmeter", JMeter.TestPlan.GET);
+
+			GET_LOAD_TEST_REPORT.put("jmeter", JMeter.Report.GET);
+
+			DELETE_LOAD_TEST_REPORT.put("jmeter", JMeter.Report.DELETE);
 		}
 
 		private Generic() {

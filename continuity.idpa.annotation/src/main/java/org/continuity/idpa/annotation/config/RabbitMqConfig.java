@@ -32,7 +32,7 @@ public class RabbitMqConfig {
 
 	public static final String IDPA_APPLICATION_CHANGED_QUEUE_NAME = "continuity.idpaannotation.event.idpaapplication.changed";
 
-	public static final String IDPA_APPLICATION_CHANGED_ROUTING_KEY = AmqpApi.IdpaApplication.APPLICATION_CHANGED.formatRoutingKey().of("*");
+	public static final String IDPA_APPLICATION_CHANGED_ROUTING_KEY = AmqpApi.IdpaApplication.EVENT_CHANGED.formatRoutingKey().of("*");
 
 	public static final String DEAD_LETTER_QUEUE_NAME = AmqpApi.DEAD_LETTER_EXCHANGE.deriveQueueName(SERVICE_NAME);
 
@@ -46,7 +46,7 @@ public class RabbitMqConfig {
 
 	@Bean
 	TopicExchange messageAvailableExchange() {
-		return AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.create();
+		return AmqpApi.IdpaAnnotation.EVENT_MESSAGE.create();
 	}
 
 	@Bean
@@ -67,7 +67,7 @@ public class RabbitMqConfig {
 
 	@Bean
 	TopicExchange idpaApplicationChangedExchange() {
-		return AmqpApi.IdpaApplication.APPLICATION_CHANGED.create();
+		return AmqpApi.IdpaApplication.EVENT_CHANGED.create();
 	}
 
 	@Bean

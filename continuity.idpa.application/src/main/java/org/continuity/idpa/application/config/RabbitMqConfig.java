@@ -42,7 +42,7 @@ public class RabbitMqConfig {
 
 	@Bean
 	TopicExchange idpaApplicationChangedExchange() {
-		return AmqpApi.IdpaApplication.APPLICATION_CHANGED.create();
+		return AmqpApi.IdpaApplication.EVENT_CHANGED.create();
 	}
 
 	@Bean

@@ -84,10 +84,10 @@ public class UpdateSystemModelAmqpHandler {
 
 		if (report.changed()) {
 			try {
-				amqpTemplate.convertAndSend(AmqpApi.IdpaApplication.APPLICATION_CHANGED.name(), AmqpApi.IdpaApplication.APPLICATION_CHANGED.formatRoutingKey().of(link.getTag()),
+				amqpTemplate.convertAndSend(AmqpApi.IdpaApplication.EVENT_CHANGED.name(), AmqpApi.IdpaApplication.EVENT_CHANGED.formatRoutingKey().of(link.getTag()),
 						new ApplicationModelLink(applicationName, link.getTag(), report.getBeforeChange()));
 			} catch (AmqpException e) {
-				LOGGER.error("Could not send the system model with tag {} to the {} exchange!", link.getTag(), AmqpApi.IdpaApplication.APPLICATION_CHANGED.name());
+				LOGGER.error("Could not send the system model with tag {} to the {} exchange!", link.getTag(), AmqpApi.IdpaApplication.EVENT_CHANGED.name());
 				LOGGER.error("Exception:", e);
 			}
 		} else {

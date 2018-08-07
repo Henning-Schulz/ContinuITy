@@ -48,4 +48,9 @@ public class LinkExchangeTest {
 		assertThat(read.getWorkloadModelLinks().parent()).isEqualTo(read).as("The parent has to be the actual parent!");
 	}
 
+	@Test
+	public void testMerge() {
+		// TODO
+	}
+
 }

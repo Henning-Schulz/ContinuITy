@@ -88,7 +88,7 @@ public class OrchestrationController {
 			storage.putToReserved(recipeId, recipe);
 			recipe.next().execute();
 
-			responseMap.put("get-link", RestApi.Orchestrator.Orchestration.RESULT.requestUrl(recipeId).withHost(applicationName).get());
+			responseMap.put("result-link", RestApi.Orchestrator.Orchestration.RESULT.requestUrl(recipeId).withHost(applicationName).get());
 			responseMap.put("wait-link", RestApi.Orchestrator.Orchestration.WAIT.requestUrl(recipeId).withHost(applicationName).get());
 
 			return ResponseEntity.accepted().body(responseMap);

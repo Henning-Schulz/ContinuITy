@@ -28,9 +28,9 @@ public class RabbitMqConfig {
 
 	public static final String EVENT_FINISHED_ROUTING_KEY = AmqpApi.Global.EVENT_FINISHED.formatRoutingKey().of("*");
 
-	public static final String IDPA_ANNOTATION_MESSAGE_AVAILABLE_QUEUE_NAME = AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.deriveQueueName(SERVICE_NAME);
+	public static final String IDPA_ANNOTATION_MESSAGE_AVAILABLE_QUEUE_NAME = AmqpApi.IdpaAnnotation.EVENT_MESSAGE.deriveQueueName(SERVICE_NAME);
 
-	public static final String IDPA_ANNOTATION_MESSAGE_AVAILABLE_ROUTING_KEY = AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.formatRoutingKey().of("report");
+	public static final String IDPA_ANNOTATION_MESSAGE_AVAILABLE_ROUTING_KEY = AmqpApi.IdpaAnnotation.EVENT_MESSAGE.formatRoutingKey().of("report");
 
 	public static final String DEAD_LETTER_QUEUE_NAME = AmqpApi.DEAD_LETTER_EXCHANGE.deriveQueueName(SERVICE_NAME);
 
@@ -80,7 +80,7 @@ public class RabbitMqConfig {
 
 	@Bean
 	TopicExchange idpaAnnotationMessageAvailableExchange() {
-		return AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.create();
+		return AmqpApi.IdpaAnnotation.EVENT_MESSAGE.create();
 	}
 
 	@Bean

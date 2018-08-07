@@ -47,12 +47,13 @@ public class WorkloadModelController {
 	}
 
 	/**
-	 * Retrieves the created workload model of the specified type and id. It does not wait if the
-	 * model is not yet created.
+	 * Persists the workload model.
 	 *
-	 * @param request
-	 *            The request.
-	 * @return The workload model.
+	 * @param type
+	 *            The workload model type (e.g., wessbas).
+	 * @param id
+	 *            The ID of the workload model.
+	 * @return The created file's name.
 	 */
 	@RequestMapping(path = PERSIST, method = RequestMethod.POST)
 	public ResponseEntity<String> persistWorkloadModel(@PathVariable String type, @PathVariable String id) {

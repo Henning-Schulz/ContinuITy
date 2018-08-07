@@ -95,7 +95,7 @@ public class AnnotationAmpqHandler {
 
 		if (!report.isOk()) {
 			LOGGER.warn("Updating the annotation for tag {} resulted in a {} annotation.", link.getTag(), (report.isBreaking() ? "broken" : "warning"));
-			amqpTemplate.convertAndSend(AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.name(), AmqpApi.IdpaAnnotation.MESSAGE_AVAILABLE.formatRoutingKey().of("report"), report);
+			amqpTemplate.convertAndSend(AmqpApi.IdpaAnnotation.EVENT_MESSAGE.name(), AmqpApi.IdpaAnnotation.EVENT_MESSAGE.formatRoutingKey().of("report"), report);
 		} else {
 			LOGGER.info("Updated the annotation for tag {} without warnings or errors.", link.getTag());
 		}

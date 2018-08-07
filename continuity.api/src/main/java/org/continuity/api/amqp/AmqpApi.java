@@ -113,10 +113,6 @@ public class AmqpApi {
 
 	}
 
-	//
-	// TODO: Old API
-	//
-
 	/**
 	 * AMQP API of the IDPA annotation service.
 	 *
@@ -127,7 +123,7 @@ public class AmqpApi {
 
 		private static final String SCOPE = "idpaannotation";
 
-		public static final ExchangeDefinition<Keyword> MESSAGE_AVAILABLE = ExchangeDefinition.event(SCOPE, "message").nonDurable().autoDelete().withRoutingKey(Keyword.INSTANCE);
+		public static final ExchangeDefinition<Keyword> EVENT_MESSAGE = ExchangeDefinition.event(SCOPE, "message").nonDurable().autoDelete().withRoutingKey(Keyword.INSTANCE);
 
 		private IdpaAnnotation() {
 		}
@@ -144,7 +140,7 @@ public class AmqpApi {
 
 		private static final String SCOPE = "idpaapplication";
 
-		public static final ExchangeDefinition<Tag> APPLICATION_CHANGED = ExchangeDefinition.event(SCOPE, "changed").nonDurable().autoDelete().withRoutingKey(Tag.INSTANCE);
+		public static final ExchangeDefinition<Tag> EVENT_CHANGED = ExchangeDefinition.event(SCOPE, "changed").nonDurable().autoDelete().withRoutingKey(Tag.INSTANCE);
 
 		private IdpaApplication() {
 		}
