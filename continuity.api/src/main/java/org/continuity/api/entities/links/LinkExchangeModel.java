@@ -71,14 +71,18 @@ public class LinkExchangeModel {
 		return loadTestLinks;
 	}
 
-	public void merge(LinkExchangeModel other) throws IllegalArgumentException, IllegalAccessException {
+	public void merge(LinkExchangeModel other) {
 		if (this.getTag() == null) {
 			this.setTag(other.getTag());
 		}
 
 		for (Field field : LinkExchangeModel.class.getDeclaredFields()) {
 			if (AbstractLinks.class.isAssignableFrom(field.getType())) {
-				mergeLinks(field, other);
+				try {
+					mergeLinks(field, other);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

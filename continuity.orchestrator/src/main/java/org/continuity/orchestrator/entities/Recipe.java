@@ -1,23 +1,16 @@
 package org.continuity.orchestrator.entities;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.continuity.api.entities.config.Order;
 import org.continuity.api.entities.config.PropertySpecification;
 import org.continuity.api.entities.config.TaskDescription;
 import org.continuity.api.entities.links.LinkExchangeModel;
 import org.continuity.api.entities.report.TaskReport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Recipe {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Recipe.class);
-
 	private final String recipeId;
-
-	private final List<RecipeStep> steps;
 
 	private final Iterator<RecipeStep> iterator;
 
@@ -29,9 +22,8 @@ public class Recipe {
 
 	private PropertySpecification properties;
 
-	public Recipe(String recipeId, List<RecipeStep> steps, Order order) {
+	public Recipe(String recipeId, Iterable<RecipeStep> steps, Order order) {
 		this.recipeId = recipeId;
-		this.steps = steps;
 		this.iterator = steps.iterator();
 		this.tag = order.getTag();
 		this.source = order.getSource();
@@ -69,11 +61,7 @@ public class Recipe {
 	}
 
 	public void updateFromReport(TaskReport report) {
-		try {
-			source.merge(report.getResult());
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			LOGGER.error("Error when merging the response and existing source!", e);
-		}
+		source.merge(report.getResult());
 	}
 
 }

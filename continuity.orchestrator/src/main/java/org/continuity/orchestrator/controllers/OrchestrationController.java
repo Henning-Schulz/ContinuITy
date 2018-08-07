@@ -13,11 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.entities.config.LoadTestType;
 import org.continuity.api.entities.config.Order;
 import org.continuity.api.entities.config.OrderGoal;
 import org.continuity.api.entities.config.WorkloadModelType;
+import org.continuity.api.entities.links.LinkExchangeModel;
 import org.continuity.api.entities.report.OrderReport;
 import org.continuity.api.rest.RestApi;
 import org.continuity.commons.storage.MemoryStorage;
@@ -100,7 +103,7 @@ public class OrchestrationController {
 	}
 
 	@RequestMapping(path = WAIT, method = RequestMethod.GET)
-	public ResponseEntity<OrderReport> waitUntilFinished(@PathVariable("id") String orderId, @RequestParam long timeout) {
+	public ResponseEntity<OrderReport> waitUntilFinished(@PathVariable("id") String orderId, @RequestParam long timeout, HttpServletRequest servletRequest) {
 		LOGGER.info("Waiting {} ms for the result of order {} to be created", timeout, orderId);
 
 		OrderReport report;
@@ -116,6 +119,8 @@ public class OrchestrationController {
 		if (report != null) {
 			deleteResponseQueue(orderId);
 
+			report.setCreatedArtifacts(transfromToExternalLinks(report.getInternalArtifacts(), servletRequest.getServerName() + ":" + servletRequest.getServerPort()));
+
 			LOGGER.info("Report for order {} is ready.", orderId);
 			return ResponseEntity.ok(report);
 		} else {
@@ -126,9 +131,9 @@ public class OrchestrationController {
 	}
 
 	@RequestMapping(path = RESULT, method = RequestMethod.GET)
-	public ResponseEntity<OrderReport> getResultWithoutWaiting(@PathVariable("id") String orderId) {
+	public ResponseEntity<OrderReport> getResultWithoutWaiting(@PathVariable("id") String orderId, HttpServletRequest servletRequest) {
 		LOGGER.info("Trying to get result for order {} without waiting...", orderId);
-		return waitUntilFinished(orderId, 0);
+		return waitUntilFinished(orderId, 0, servletRequest);
 	}
 
 	private RecipeStep createRecipeStep(OrderGoal goal, Order order) {
@@ -216,6 +221,67 @@ public class OrchestrationController {
 
 	private String getResponseQueueName(String recipeId) {
 		return AmqpApi.Orchestrator.EVENT_FINISHED.deriveQueueName(recipeId);
+	}
+
+	private LinkExchangeModel transfromToExternalLinks(LinkExchangeModel internal, String host) {
+		LinkExchangeModel external = new LinkExchangeModel();
+
+		if (internal.getSessionLogsLinks().getLink() != null) {
+			List<String> params = RestApi.SessionLogs.GET.parsePathParameters(internal.getSessionLogsLinks().getLink());
+
+			if (params != null) {
+				external.getSessionLogsLinks().setLink(RestApi.Orchestrator.SessionLogs.GET.requestUrl(params.get(0)).withHost(host).get());
+			} else {
+				LOGGER.warn("The link {} does not match the endpoint {}!", internal.getSessionLogsLinks().getLink(), RestApi.Orchestrator.SessionLogs.GET.genericPath());
+			}
+		}
+
+		if (internal.getWorkloadModelLinks().getLink() != null) {
+			WorkloadModelType type = internal.getWorkloadModelLinks().getType();
+
+			if (type != null) {
+				List<String> params = RestApi.Generic.WORKLOAD_MODEL_LINK.get(type.toPrettyString()).parsePathParameters(internal.getWorkloadModelLinks().getLink());
+
+				if (params != null) {
+					external.getWorkloadModelLinks().setType(type);
+					external.getWorkloadModelLinks().setLink(RestApi.Orchestrator.WorkloadModel.GET.requestUrl(type.toPrettyString(), params.get(0)).withHost(host).get());
+				} else {
+					LOGGER.warn("The link {} does not match the endpoint {}!", internal.getWorkloadModelLinks().getLink(), RestApi.Orchestrator.WorkloadModel.GET.genericPath());
+				}
+			}
+		}
+
+		if (internal.getLoadTestLinks().getLink() != null) {
+			LoadTestType type = internal.getLoadTestLinks().getType();
+
+			if (type != null) {
+				List<String> params = RestApi.Generic.GET_LOAD_TEST.get(type.toPrettyString()).parsePathParameters(internal.getLoadTestLinks().getLink());
+
+				if (params != null) {
+					external.getLoadTestLinks().setType(type);
+					external.getLoadTestLinks().setLink(RestApi.Orchestrator.Loadtest.GET.requestUrl(type.toPrettyString(), params.get(0)).withHost(host).get());
+				} else {
+					LOGGER.warn("The link {} does not match the endpoint {}!", internal.getLoadTestLinks().getLink(), RestApi.Orchestrator.Loadtest.GET.genericPath());
+				}
+			}
+		}
+
+		if (internal.getLoadTestLinks().getReportLink() != null) {
+			LoadTestType type = internal.getLoadTestLinks().getType();
+
+			if (type != null) {
+				List<String> params = RestApi.Generic.GET_LOAD_TEST_REPORT.get(type.toPrettyString()).parsePathParameters(internal.getLoadTestLinks().getReportLink());
+
+				if (params != null) {
+					external.getLoadTestLinks().setType(type);
+					external.getLoadTestLinks().setReportLink(RestApi.Orchestrator.Loadtest.REPORT.requestUrl(type.toPrettyString(), params.get(0)).withHost(host).get());
+				} else {
+					LOGGER.warn("The link {} does not match the endpoint {}!", internal.getLoadTestLinks().getReportLink(), RestApi.Orchestrator.Loadtest.REPORT.genericPath());
+				}
+			}
+		}
+
+		return external;
 	}
 
 }

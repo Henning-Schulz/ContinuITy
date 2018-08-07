@@ -54,6 +54,8 @@ public class OrchestrationAmqpHandler {
 	private void finishRecipe(OrderReport report) {
 		amqpTemplate.convertAndSend(AmqpApi.Orchestrator.EVENT_FINISHED.name(), AmqpApi.Orchestrator.EVENT_FINISHED.formatRoutingKey().of(report.getOrderId()), report);
 
+		storage.remove(report.getOrderId());
+
 		LOGGER.info("Sent recipe {} to finished queue.", report.getOrderId());
 	}
 

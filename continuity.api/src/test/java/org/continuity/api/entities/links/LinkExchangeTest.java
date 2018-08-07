@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 
+import org.continuity.api.entities.config.LoadTestType;
 import org.continuity.api.entities.config.WorkloadModelType;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,11 +15,15 @@ public class LinkExchangeTest {
 
 	private LinkExchangeModel model;
 
+	private LinkExchangeModel secondModel;
+
 	private ObjectMapper mapper = new ObjectMapper();
 
 	@Before
 	public void setup() {
 		model = new LinkExchangeModel().setTag("foo").getWorkloadModelLinks().setApplicationLink("foo/bar/app").setType(WorkloadModelType.WESSBAS).parent();
+
+		secondModel = new LinkExchangeModel().setTag("bar").getLoadTestLinks().setLink("abc/xyz/loadtest").setType(LoadTestType.JMETER).parent();
 	}
 
 	@Test
@@ -50,7 +55,13 @@ public class LinkExchangeTest {
 
 	@Test
 	public void testMerge() {
-		// TODO
+		model.merge(secondModel);
+
+		assertThat(model.getTag()).isEqualTo("foo");
+		assertThat(model.getWorkloadModelLinks().getApplicationLink()).isEqualTo("foo/bar/app");
+		assertThat(model.getWorkloadModelLinks().getType()).isEqualTo(WorkloadModelType.WESSBAS);
+		assertThat(model.getLoadTestLinks().getLink()).isEqualTo("abc/xyz/loadtest");
+		assertThat(model.getLoadTestLinks().getType()).isEqualTo(LoadTestType.JMETER);
 	}
 
 }
