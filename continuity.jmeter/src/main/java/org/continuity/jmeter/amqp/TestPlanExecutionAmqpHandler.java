@@ -13,6 +13,7 @@ import org.apache.jmeter.engine.StandardJMeterEngine;
 import org.apache.jmeter.testelement.TestStateListener;
 import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.entities.artifact.JMeterTestPlanBundle;
+import org.continuity.api.entities.config.LoadTestType;
 import org.continuity.api.entities.config.PropertySpecification;
 import org.continuity.api.entities.config.TaskDescription;
 import org.continuity.api.entities.links.LinkExchangeModel;
@@ -71,10 +72,19 @@ public class TestPlanExecutionAmqpHandler {
 	 */
 	@RabbitListener(queues = RabbitMqConfig.TASK_EXECUTE_QUEUE_NAME)
 	public void executeTestPlan(TaskDescription task) {
-		String jmeterLink = task.getSource().getJmeterLink();
+		LoadTestType loadTestType = task.getSource().getLoadTestLinks().getType();
+		String jmeterLink = task.getSource().getLoadTestLinks().getLink();
+
+		if (loadTestType != LoadTestType.JMETER) {
+			LOGGER.error("Task {}: Cannot execute {} tests!", task.getTaskId(), loadTestType);
+
+			TaskReport report = TaskReport.error(task.getTaskId(), TaskError.ILLEGAL_TYPE);
+			amqpTemplate.convertAndSend(AmqpApi.Global.EVENT_FINISHED.name(), AmqpApi.Global.EVENT_FINISHED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), report);
+			return;
+		}
 
 		if (jmeterLink == null) {
-			LOGGER.error("Cannot execute test for task {}. jmeter-link is null!", task.getTaskId());
+			LOGGER.error("Task {}: Cannot execute test. jmeter-link is null!", task.getTaskId());
 
 			TaskReport report = TaskReport.error(task.getTaskId(), TaskError.MISSING_SOURCE);
 			amqpTemplate.convertAndSend(AmqpApi.Global.EVENT_FINISHED.name(), AmqpApi.Global.EVENT_FINISHED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), report);
@@ -87,12 +97,13 @@ public class TestPlanExecutionAmqpHandler {
 		PropertySpecification properties = task.getProperties();
 
 		if (properties == null) {
-			LOGGER.warn("Could not set JMeter properties, as they are null.");
+			LOGGER.warn("Task {}: Could not set JMeter properties, as they are null.", task.getTaskId());
 		} else if ((properties.getNumUsers() != null) && (properties.getDuration() != null) && (properties.getRampup() != null)) {
 			jmeterPropertiesCorrector.setRuntimeProperties(testPlanBundle.getTestPlan(), properties.getNumUsers(), properties.getDuration(), properties.getRampup());
-			LOGGER.info("Set JMeter properties num-users = {}, duration = {}, rampup = {}.", properties.getNumUsers(), properties.getDuration(), properties.getRampup());
+			LOGGER.info("Task {}: Set JMeter properties num-users = {}, duration = {}, rampup = {}.", task.getTaskId(), properties.getNumUsers(), properties.getDuration(), properties.getRampup());
 		} else {
-			LOGGER.warn("Could not set JMeter properties, as some of them are null: num-users = {}, duration = {}, rampup = {}.", properties.getNumUsers(), properties.getDuration(),
+			LOGGER.warn("Task {}: Could not set JMeter properties, as some of them are null: num-users = {}, duration = {}, rampup = {}.", task.getTaskId(), properties.getNumUsers(),
+					properties.getDuration(),
 					properties.getRampup());
 		}
 
@@ -111,7 +122,7 @@ public class TestPlanExecutionAmqpHandler {
 		jmeterPropertiesCorrector.configureResultFile(testPlanBundle.getTestPlan(), resultsPath);
 		jmeterPropertiesCorrector.prepareForHeadlessExecution(testPlanBundle.getTestPlan());
 		Path testPlanPath = testPlanWriter.write(testPlanBundle.getTestPlan(), testPlanBundle.getBehaviors(), tmpPath);
-		LOGGER.info("Created a test plan at {}.", testPlanPath);
+		LOGGER.info("Task {}: Created a test plan at {}.", task.getTaskId(), testPlanPath);
 
 		final int testId = testCounter.getAndIncrement();
 		runningTests.put(testId, true);
@@ -142,7 +153,7 @@ public class TestPlanExecutionAmqpHandler {
 					String appendix = "";
 
 					if ((runningTests.get(testId) == null) || !runningTests.get(testId)) {
-						LOGGER.warn("The test {} has been aborted with force!", testId);
+						LOGGER.warn("Task {}: The test {} has been aborted with force!", task.getTaskId(), testId);
 						appendix = "\nWARNING: The test has been aborted with force!\n";
 					}
 
@@ -151,18 +162,18 @@ public class TestPlanExecutionAmqpHandler {
 					String reportId = reportStorage.put(FileUtils.readFileToString(resultsPath.toFile(), Charset.defaultCharset()) + appendix, task.getTag());
 					String reportLink = RestApi.JMeter.Report.GET.requestUrl(reportId).withoutProtocol().get();
 
-					TaskReport report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().setJmeterReportLink(reportLink));
+					TaskReport report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().getLoadTestLinks().setType(LoadTestType.JMETER).setReportLink(reportLink).parent());
 					amqpTemplate.convertAndSend(AmqpApi.Global.EVENT_FINISHED.name(), AmqpApi.Global.EVENT_FINISHED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), report);
 
-					LOGGER.info("JMeter test finished. Results are stored to {}.", resultsPath);
+					LOGGER.info("Task {}: JMeter test finished. Results are stored to {}.", task.getTaskId(), resultsPath);
 				} catch (AmqpException | IOException e) {
-					LOGGER.error("Error when pushing the test results to the queue!", e);
+					LOGGER.error("Task {}: Error when pushing the test results to the queue!", task.getTaskId(), e);
 				}
 			}
 		});
 		jmeter.start(arguments);
 
-		LOGGER.info("Test {} started.", testId);
+		LOGGER.info("Task {}: Test {} started.", task.getTaskId(), testId);
 		new StopEngineAfterTime(testId, JMeterUtils.getDuration(testPlanBundle.getTestPlan())).start();
 	}
 

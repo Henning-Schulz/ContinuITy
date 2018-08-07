@@ -2,7 +2,6 @@ package org.continuity.wessbas.amqp;
 
 import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.entities.config.TaskDescription;
-import org.continuity.api.entities.links.LinkExchangeModel;
 import org.continuity.api.entities.report.TaskError;
 import org.continuity.api.entities.report.TaskReport;
 import org.continuity.commons.storage.MemoryStorage;
@@ -54,28 +53,28 @@ public class WessbasAmqpHandler {
 	 */
 	@RabbitListener(queues = RabbitMqConfig.TASK_CREATE_QUEUE_NAME)
 	public void onMonitoringDataAvailable(TaskDescription task) {
-		LOGGER.info("Received new task to be processed for tag '{}'", task.getTag());
+		LOGGER.info("Task {}: Received new task to be processed for tag '{}'", task.getTaskId(), task.getTag());
 
 		TaskReport report;
 
-		if (task.getSource().getSessionLogsLink() == null) {
-			LOGGER.error("Session logs link is missing for tag {}!", task.getTag());
+		if (task.getSource().getSessionLogsLinks().getLink() == null) {
+			LOGGER.error("Task {}: Session logs link is missing for tag {}!", task.getTaskId(), task.getTag());
 			report = TaskReport.error(task.getTaskId(), TaskError.MISSING_SOURCE);
 		} else {
 			WessbasPipelineManager pipelineManager = new WessbasPipelineManager(restTemplate);
-			WessbasBundle workloadModel = pipelineManager.runPipeline(task.getSource().getSessionLogsLink());
+			WessbasBundle workloadModel = pipelineManager.runPipeline(task.getSource().getSessionLogsLinks().getLink());
 
 			if (workloadModel == null) {
-				LOGGER.info("Could not create a new workload model for tag '{}'.", task.getTag());
+				LOGGER.info("Task {}: Could not create a new workload model for tag '{}'.", task.getTaskId(), task.getTag());
 
 				report = TaskReport.error(task.getTaskId(), TaskError.INTERNAL_ERROR);
 			} else {
 				String storageId = storage.put(workloadModel, task.getTag());
 
-				LOGGER.info("Created a new workload model with id '{}'.", storageId);
+				LOGGER.info("Task {}: Created a new workload model with id '{}'.", task.getTaskId(), storageId);
 
 				WorkloadModelPack responsePack = new WorkloadModelPack(applicationName, storageId, task.getTag());
-				report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().setWorkloadLink(responsePack.getWorkloadLink()).setWorkloadType(responsePack.getWorkloadType()));
+				report = TaskReport.successful(task.getTaskId(), responsePack);
 
 				amqpTemplate.convertAndSend(AmqpApi.WorkloadModel.EVENT_CREATED.name(), AmqpApi.WorkloadModel.EVENT_CREATED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), responsePack);
 			}

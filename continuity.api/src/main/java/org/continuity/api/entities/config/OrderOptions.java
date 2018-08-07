@@ -1,10 +1,8 @@
 package org.continuity.api.entities.config;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 
 public class OrderOptions {
 
@@ -74,44 +72,6 @@ public class OrderOptions {
 		props.setRampup(rampup);
 
 		return props;
-	}
-
-	public static enum WorkloadModelType {
-		WESSBAS;
-
-		@JsonCreator
-		public static OrderGoal fromPrettyString(String key) {
-			return key == null ? null : OrderGoal.valueOf(key.toUpperCase());
-		}
-
-		@JsonValue
-		public String toPrettyString() {
-			return toString().toLowerCase();
-		}
-	}
-
-	public static enum LoadTestType {
-		JMETER(true), BENCHFLOW(false);
-
-		private final boolean canExecute;
-
-		private LoadTestType(boolean canExecute) {
-			this.canExecute = canExecute;
-		}
-
-		public boolean canExecute() {
-			return canExecute;
-		}
-
-		@JsonCreator
-		public static OrderGoal fromPrettyString(String key) {
-			return key == null ? null : OrderGoal.valueOf(key.toUpperCase());
-		}
-
-		@JsonValue
-		public String toPrettyString() {
-			return toString().toLowerCase();
-		}
 	}
 
 }

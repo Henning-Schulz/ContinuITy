@@ -3,6 +3,7 @@ package org.continuity.jmeter.amqp;
 import org.apache.jorphan.collections.ListedHashTree;
 import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.entities.artifact.JMeterTestPlanBundle;
+import org.continuity.api.entities.config.LoadTestType;
 import org.continuity.api.entities.config.PropertySpecification;
 import org.continuity.api.entities.config.TaskDescription;
 import org.continuity.api.entities.links.LinkExchangeModel;
@@ -47,18 +48,28 @@ public class TestPlanCreationAmqpHandler {
 	public void createTestPlan(TaskDescription task) {
 		TaskReport report;
 
-		if (task.getSource().getWorkloadLink() == null) {
-			LOGGER.error("Cannot create a load test for task {}. The workload link is null!", task.getTaskId());
+		String workloadModelLink = task.getSource().getWorkloadModelLinks().getLink();
+
+		if (workloadModelLink == null) {
+			LOGGER.error("Task {}: Cannot create a load test. The workload link is null!", task.getTaskId());
 			report = TaskReport.error(task.getTaskId(), TaskError.MISSING_SOURCE);
 		} else {
-			LOGGER.info("Creating a load test from {}...", task.getSource().getWorkloadLink());
+			LOGGER.info("Task {}: Creating a load test from {}...", task.getTaskId(), workloadModelLink);
 
-			JMeterTestPlanBundle bundle = createAndGetLoadTest(task.getSource().getWorkloadLink(), task.getTag(), task.getProperties());
+			LinkExchangeModel workloadLinks = restTemplate.getForObject(WebUtils.addProtocolIfMissing(workloadModelLink), LinkExchangeModel.class);
 
-			String id = storage.put(bundle, task.getTag());
-			LOGGER.info("Created a load test from {}.", task.getSource().getWorkloadLink());
+			if ((workloadLinks == null) || (workloadLinks.getWorkloadModelLinks().getJmeterLink() == null)) {
+				LOGGER.error("The workload model at {} does not provide a link to JMeter!", workloadModelLink);
+				report = TaskReport.error(task.getTaskId(), TaskError.MISSING_SOURCE);
+			} else {
+				JMeterTestPlanBundle bundle = createAndGetLoadTest(workloadLinks, task.getTag(), task.getProperties());
 
-			report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().setJmeterLink(RestApi.JMeter.TestPlan.GET.requestUrl(id).withoutProtocol().get()));
+				String id = storage.put(bundle, task.getTag());
+				LOGGER.info("Task {}: Created a load test from {}.", task.getTaskId(), workloadModelLink);
+
+				report = TaskReport.successful(task.getTaskId(),
+						new LinkExchangeModel().getLoadTestLinks().setType(LoadTestType.JMETER).setLink(RestApi.JMeter.TestPlan.GET.requestUrl(id).withoutProtocol().get()).parent());
+			}
 		}
 
 		amqpTemplate.convertAndSend(AmqpApi.Global.EVENT_FINISHED.name(), AmqpApi.Global.EVENT_FINISHED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), report);
@@ -68,22 +79,14 @@ public class TestPlanCreationAmqpHandler {
 	 * Transforms a workload model into a JMeter test and returns it. The workload model is
 	 * specified by a link, i.e., {@code TYPE/model/ID}.
 	 *
-	 * @param workloadModelLink
-	 *            The link pointing to the workload model. When called, it is supposed to return an
-	 *            object containing a field {@code jmeter-link} which holds a link to the
-	 *            corresponding JMeter test plan.
+	 * @param workloadLinks
+	 *            The links pointing to the workload model.
 	 * @param tag
 	 *            The tag to be used to retrieve the annotation.
 	 * @return The transformed JMeter test plan.
 	 */
-	private JMeterTestPlanBundle createAndGetLoadTest(String workloadModelLink, String tag, PropertySpecification properties) {
-		LinkExchangeModel workloadLinks = restTemplate.getForObject(WebUtils.addProtocolIfMissing(workloadModelLink), LinkExchangeModel.class);
-
-		if ((workloadLinks == null) || (workloadLinks.getJmeterLink() == null)) {
-			throw new IllegalArgumentException("The workload model at " + workloadModelLink + " cannot be transformed into JMeter!");
-		}
-
-		JMeterTestPlanBundle testPlanPack = restTemplate.getForObject(WebUtils.addProtocolIfMissing(workloadLinks.getJmeterLink()), JMeterTestPlanBundle.class);
+	private JMeterTestPlanBundle createAndGetLoadTest(LinkExchangeModel workloadLinks, String tag, PropertySpecification properties) {
+		JMeterTestPlanBundle testPlanPack = restTemplate.getForObject(WebUtils.addProtocolIfMissing(workloadLinks.getWorkloadModelLinks().getJmeterLink()), JMeterTestPlanBundle.class);
 
 		ListedHashTree annotatedTestPlan = createAnnotatedTestPlan(testPlanPack, tag);
 

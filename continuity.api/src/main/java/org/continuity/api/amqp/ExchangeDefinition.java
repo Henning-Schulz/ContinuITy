@@ -77,7 +77,7 @@ public class ExchangeDefinition<F extends RoutingKeyFormatter> {
 
 	@Override
 	public String toString() {
-		return name;
+		return name();
 	}
 
 }

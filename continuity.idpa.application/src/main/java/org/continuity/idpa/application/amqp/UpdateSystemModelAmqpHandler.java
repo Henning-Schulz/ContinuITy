@@ -61,16 +61,16 @@ public class UpdateSystemModelAmqpHandler {
 	public void onModelCreated(LinkExchangeModel link) {
 		LOGGER.info("Received workload model link: {}", link);
 
-		if ("INVALID".equals(link.getApplicationLink())) {
+		if ("INVALID".equals(link.getWorkloadModelLinks().getApplicationLink())) {
 			LOGGER.error("Received invalid system model link: {}", link);
 			return;
 		}
 
 		ResponseEntity<Application> systemResponse;
 		try {
-			systemResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getApplicationLink()), Application.class);
+			systemResponse = restTemplate.getForEntity(WebUtils.addProtocolIfMissing(link.getWorkloadModelLinks().getApplicationLink()), Application.class);
 		} catch (HttpStatusCodeException e) {
-			LOGGER.error("Could not retrieve the system model from {}. Got response code {}!", link.getApplicationLink(), e.getStatusCode());
+			LOGGER.error("Could not retrieve the system model from {}. Got response code {}!", link.getWorkloadModelLinks().getApplicationLink(), e.getStatusCode());
 			LOGGER.error("Exception:", e);
 			return;
 		}

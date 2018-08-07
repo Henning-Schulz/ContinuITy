@@ -43,24 +43,24 @@ public class SessionLogsAmqpHandler {
 	public void createSessionLogs(TaskDescription task) {
 		TaskReport report;
 		String tag = task.getTag();
-		String link = task.getSource().getExternalDataLink();
-		Date timestamp = task.getSource().getExternalDataTimestamp();
+		String link = task.getSource().getExternalDataLinks().getLink();
+		Date timestamp = task.getSource().getExternalDataLinks().getTimestamp();
 
 		if ((tag == null) || (link == null) || (timestamp == null)) {
-			LOGGER.error("Cannot create session logs for tag {}, link {}, and timestamp {}. All values are required!", tag, link, timestamp);
+			LOGGER.error("Task {}: cannot create session logs for tag {}, link {}, and timestamp {}. All values are required!", task.getTaskId(), tag, link, timestamp);
 			report = TaskReport.error(task.getTaskId(), TaskError.MISSING_SOURCE);
 		} else {
-			LOGGER.info("Creating session logs for tag {} from data {} ...", tag, link);
+			LOGGER.info("Task {}: Creating session logs for tag {} from data {} ...", task.getTaskId(), tag, link);
 
 			SessionLogsPipelineManager manager = new SessionLogsPipelineManager(link, tag, plainRestTemplate, eurekaRestTemplate);
 
 			String sessionLog = manager.runPipeline();
-			String id = storage.put(new SessionLogs(task.getSource().getExternalDataTimestamp(), sessionLog), tag);
+			String id = storage.put(new SessionLogs(task.getSource().getExternalDataLinks().getTimestamp(), sessionLog), tag);
 			String sessionLink = RestApi.SessionLogs.GET.requestUrl(id).withoutProtocol().get();
 
-			report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().setSessionLogsLink(sessionLink));
+			report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().getSessionLogsLinks().setLink(sessionLink).parent());
 
-			LOGGER.info("Session logs created for tag {} from data {}", tag, link);
+			LOGGER.info("Task {}: Session logs created for tag {} from data {}", task.getTaskId(), tag, link);
 		}
 
 		amqpTemplate.convertAndSend(AmqpApi.Global.EVENT_FINISHED.name(), AmqpApi.Global.EVENT_FINISHED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), report);

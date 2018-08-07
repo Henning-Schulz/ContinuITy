@@ -258,9 +258,8 @@ public class AnnotationAmqpValidityCheckTest {
 		LinkExchangeModel link = new LinkExchangeModel();
 		link.setTag(TAG);
 
-		link.setApplicationLink(testInstance.getSystemLink());
-		link.setInitialAnnotationLink(testInstance.getAnnotationLink());
-		link.setDeltaLink(testInstance.getSystemLink() + "/delta");
+		link.getIdpaLinks().setApplicationLink(testInstance.getSystemLink());
+		link.getIdpaLinks().setApplicationDeltaLink(testInstance.getSystemLink() + "/delta");
 
 		annotationHandler.onApplicationModelChanged(link);
 	}
@@ -269,9 +268,7 @@ public class AnnotationAmqpValidityCheckTest {
 		LinkExchangeModel link = new LinkExchangeModel();
 		link.setTag(TAG);
 
-		link.setApplicationLink(testInstance.getSystemLink());
-		link.setInitialAnnotationLink(testInstance.getAnnotationLink());
-		link.setDeltaLink(testInstance.getSystemLink() + "/delta");
+		link.getWorkloadModelLinks().setInitialAnnotationLink(testInstance.getAnnotationLink());
 
 		annotationHandler.onAnnotationModelCreated(link);
 	}
