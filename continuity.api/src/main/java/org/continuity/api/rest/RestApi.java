@@ -446,7 +446,7 @@ public class RestApi {
 		}
 
 	}
-	
+
 	/**
 	 * REST API of the BenchFlow service.
 	 *
@@ -484,7 +484,7 @@ public class RestApi {
 				}
 			}
 		}
-		
+
 		/**
 		 * Report API of the BenchFlow service.
 		 *
@@ -514,6 +514,77 @@ public class RestApi {
 				}
 			}
 		}
+	}
+
+	/**
+	 * REST API of the request rates service.
+	 *
+	 * @author Henning Schulz
+	 *
+	 */
+	public static class RequestRates {
+
+		public static final String SERVICE_NAME = "request-rates";
+
+		private RequestRates() {
+		}
+
+		/**
+		 * JMeter API of the request rates service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
+		public static class JMeter {
+
+			public static final String ROOT = "/jmeter";
+
+			/** {@value #ROOT}/{id}/create */
+			public static final RestEndpoint CREATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE, RequestMethod.GET);
+
+			private JMeter() {
+			}
+
+			public static class Paths {
+
+				public static final String CREATE = "/{id}";
+
+				private Paths() {
+				}
+			}
+
+		}
+
+		/**
+		 * Workload model API of the request rates service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
+		public static class Model {
+
+			public static final String ROOT = "/model";
+
+			/** {@value #ROOT}/{id} */
+			public static final RestEndpoint OVERVIEW = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.OVERVIEW, RequestMethod.GET);
+
+			/** {@value #ROOT}/{id} */
+			public static final RestEndpoint REMOVE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.REMOVE, RequestMethod.DELETE);
+
+			private Model() {
+			}
+
+			public static class Paths {
+
+				public static final String OVERVIEW = "/{id}";
+				public static final String REMOVE = "/{id}";
+
+				private Paths() {
+				}
+			}
+
+		}
+
 	}
 
 	/**
@@ -582,7 +653,7 @@ public class RestApi {
 			}
 
 		}
-		
+
 		/**
 		 * BehaviorModel API of the WESSBAS service.
 		 *
@@ -700,17 +771,18 @@ public class RestApi {
 		public static final Map<String, RestEndpoint> DELETE_LOAD_TEST_REPORT = new HashMap<>();
 
 		static {
-			WORKLOAD_MODEL_LINK.put("wessbas", Wessbas.Model.OVERVIEW);
+			WORKLOAD_MODEL_LINK.put(Wessbas.SERVICE_NAME, Wessbas.Model.OVERVIEW);
+			WORKLOAD_MODEL_LINK.put(RequestRates.SERVICE_NAME, RequestRates.Model.OVERVIEW);
 
-			PERSIST_WORKLOAD_MODEL.put("wessbas", Wessbas.Model.PERSIST);
+			PERSIST_WORKLOAD_MODEL.put(Wessbas.SERVICE_NAME, Wessbas.Model.PERSIST);
 
-			GET_LOAD_TEST.put("jmeter", JMeter.TestPlan.GET);
-			GET_LOAD_TEST.put("benchflow", BenchFlow.DSL.GET);
+			GET_LOAD_TEST.put(JMeter.SERVICE_NAME, JMeter.TestPlan.GET);
+			GET_LOAD_TEST.put(BenchFlow.SERVICE_NAME, BenchFlow.DSL.GET);
 
-			GET_LOAD_TEST_REPORT.put("jmeter", JMeter.Report.GET);
-			GET_LOAD_TEST_REPORT.put("benchflow", BenchFlow.Report.GET);
+			GET_LOAD_TEST_REPORT.put(JMeter.SERVICE_NAME, JMeter.Report.GET);
+			GET_LOAD_TEST_REPORT.put(BenchFlow.SERVICE_NAME, BenchFlow.Report.GET);
 
-			DELETE_LOAD_TEST_REPORT.put("jmeter", JMeter.Report.DELETE);
+			DELETE_LOAD_TEST_REPORT.put(JMeter.SERVICE_NAME, JMeter.Report.DELETE);
 		}
 
 		private Generic() {

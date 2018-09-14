@@ -1,6 +1,7 @@
 package org.continuity.session.logs.amqp;
 
 import java.util.Date;
+import java.util.EnumSet;
 
 import org.continuity.api.amqp.AmqpApi;
 import org.continuity.api.entities.artifact.SessionLogs;
@@ -56,6 +57,11 @@ public class SessionLogsAmqpHandler {
 		}
 		Date timestamp = task.getSource().getExternalDataLinks().getTimestamp();
 
+		if (!EnumSet.of(ExternalDataLinkType.OPEN_XTRACE, ExternalDataLinkType.INSPECTIT).contains(task.getSource().getExternalDataLinks().getLinkType())) {
+			LOGGER.error("Task {}: cannot create session logs for tag {}, link {}, and timestamp {}. External data type {} is not supported!", task.getTaskId(), tag, link, timestamp,
+					task.getSource().getExternalDataLinks().getLinkType());
+			report = TaskReport.error(task.getTaskId(), TaskError.ILLEGAL_TYPE);
+		}
 		if ((tag == null) || (link == null) || (timestamp == null)) {
 			LOGGER.error("Task {}: cannot create session logs for tag {}, link {}, and timestamp {}. All values are required!", task.getTaskId(), tag, link, timestamp);
 			report = TaskReport.error(task.getTaskId(), TaskError.MISSING_SOURCE);

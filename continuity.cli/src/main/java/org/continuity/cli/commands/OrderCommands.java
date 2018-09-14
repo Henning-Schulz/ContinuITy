@@ -165,7 +165,7 @@ public class OrderCommands {
 	private Order initializeOrder() {
 		Order order = new Order();
 
-		order.setMode(OrderMode.PAST_WORKLOAD);
+		order.setMode(OrderMode.PAST_SESSIONS);
 
 		order.setTag("TAG");
 		order.setTestingContext(Collections.singleton("CONTEXT"));
