@@ -1,8 +1,6 @@
 package org.continuity.request.rates.model;
 
-import java.util.Map;
-
-import org.continuity.idpa.application.Endpoint;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -13,28 +11,28 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Henning Schulz
  *
  */
-@JsonPropertyOrder({ "request-per-minute", "endpoints" })
+@JsonPropertyOrder({ "requests-per-minute", "mix" })
 public class RequestRatesModel {
 
-	@JsonProperty("request-per-minute")
-	private double requestPerMinute;
+	@JsonProperty("requests-per-minute")
+	private double requestsPerMinute;
 
-	private Map<Double, Endpoint<?>> endpoints;
+	private List<RequestFrequency> mix;
 
-	public double getRequestPerMinute() {
-		return requestPerMinute;
+	public double getRequestsPerMinute() {
+		return requestsPerMinute;
 	}
 
-	public void setRequestPerMinute(double requestPerMinute) {
-		this.requestPerMinute = requestPerMinute;
+	public void setRequestsPerMinute(double requestPerMinute) {
+		this.requestsPerMinute = requestPerMinute;
 	}
 
-	public Map<Double, Endpoint<?>> getEndpoints() {
-		return endpoints;
+	public List<RequestFrequency> getMix() {
+		return mix;
 	}
 
-	public void setEndpoints(Map<Double, Endpoint<?>> endpoints) {
-		this.endpoints = endpoints;
+	public void setMix(List<RequestFrequency> mix) {
+		this.mix = mix;
 	}
 
 }

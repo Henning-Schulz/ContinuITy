@@ -61,7 +61,7 @@ public class OrderCycleManager {
 		for (OrderCycle cycle : cycles.get(mode)) {
 			int idx = cycle.getGoals().indexOf(goal);
 
-			if (idx > 0) {
+			if (idx >= 0) {
 				return cycle.getGoals().subList(0, idx + 1);
 			}
 		}

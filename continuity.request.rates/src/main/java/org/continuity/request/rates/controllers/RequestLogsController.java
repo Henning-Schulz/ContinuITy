@@ -4,7 +4,6 @@ import static org.continuity.api.rest.RestApi.RequestRates.RequestLogs.ROOT;
 import static org.continuity.api.rest.RestApi.RequestRates.RequestLogs.Paths.GET;
 import static org.continuity.api.rest.RestApi.RequestRates.RequestLogs.Paths.UPLOAD;
 
-import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.List;
 
@@ -19,10 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.univocity.parsers.common.processor.BeanListProcessor;
-import com.univocity.parsers.csv.CsvParser;
-import com.univocity.parsers.csv.CsvParserSettings;
 
 @RestController
 @RequestMapping(ROOT)
@@ -51,7 +46,7 @@ public class RequestLogsController {
 			return ResponseEntity.badRequest().body("Missing body.");
 		}
 
-		List<CsvRow> rows = parseRequestLogs(requestLogs);
+		List<CsvRow> rows = CsvRow.fromString(requestLogs);
 
 		boolean parseable = rows.stream().map(CsvRow::checkDates).reduce(Boolean::logicalAnd).get();
 
@@ -62,20 +57,6 @@ public class RequestLogsController {
 		} else {
 			return ResponseEntity.badRequest().body("Illegal date format!");
 		}
-	}
-
-	private List<CsvRow> parseRequestLogs(String requestLogs) {
-		BeanListProcessor<CsvRow> rowProcessor = new BeanListProcessor<>(CsvRow.class);
-
-		CsvParserSettings settings = new CsvParserSettings();
-		settings.setProcessor(rowProcessor);
-		settings.setHeaderExtractionEnabled(true);
-		settings.setDelimiterDetectionEnabled(true, ',', ';');
-
-		CsvParser parser = new CsvParser(settings);
-		parser.parse(new ByteArrayInputStream(requestLogs.getBytes()));
-
-		return rowProcessor.getBeans();
 	}
 
 }

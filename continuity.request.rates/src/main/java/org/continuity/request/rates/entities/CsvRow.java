@@ -1,16 +1,20 @@
 package org.continuity.request.rates.entities;
 
+import java.io.ByteArrayInputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.List;
 
-import org.continuity.commons.exception.IllegalDateFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.univocity.parsers.annotations.Headers;
 import com.univocity.parsers.annotations.Parsed;
+import com.univocity.parsers.common.processor.BeanListProcessor;
+import com.univocity.parsers.csv.CsvParser;
+import com.univocity.parsers.csv.CsvParserSettings;
 
 /**
  * A CSV record representing a single request.
@@ -194,7 +198,7 @@ public class CsvRow {
 		return builder.toString();
 	}
 
-	public RequestRecord toRecord() throws IllegalDateFormatException {
+	public RequestRecord toRecord() {
 		RequestRecord record = new RequestRecord();
 
 		if (startDate != null) {
@@ -202,7 +206,6 @@ public class CsvRow {
 				record.setStartDate(DATE_FORMAT.parse(startDate));
 			} catch (ParseException e) {
 				LOGGER.error("Cannot parse start date!", e);
-				throw new IllegalDateFormatException(startDate, DATE_FORMAT);
 			}
 		}
 
@@ -211,7 +214,6 @@ public class CsvRow {
 				record.setEndDate(DATE_FORMAT.parse(endDate));
 			} catch (ParseException e) {
 				LOGGER.error("Cannot parse end date!", e);
-				throw new IllegalDateFormatException(endDate, DATE_FORMAT);
 			}
 		}
 
@@ -222,10 +224,30 @@ public class CsvRow {
 		record.setMethod(method);
 		record.setEncoding(encoding);
 		record.setProtocol(protocol);
-		record.setParameters(Arrays.asList(parameters.split("\\&")));
-		record.setHeaders(Arrays.asList(headers.split("\\&")));
+
+		if (parameters != null) {
+			record.setParameters(Arrays.asList(parameters.split("\\&")));
+		}
+
+		if (headers != null) {
+			record.setHeaders(Arrays.asList(headers.split("\\&")));
+		}
 
 		return record;
+	}
+
+	public static List<CsvRow> fromString(String requestLogs) {
+		BeanListProcessor<CsvRow> rowProcessor = new BeanListProcessor<>(CsvRow.class);
+
+		CsvParserSettings settings = new CsvParserSettings();
+		settings.setProcessor(rowProcessor);
+		settings.setHeaderExtractionEnabled(true);
+		settings.setDelimiterDetectionEnabled(true, ',', ';');
+
+		CsvParser parser = new CsvParser(settings);
+		parser.parse(new ByteArrayInputStream(requestLogs.getBytes()));
+
+		return rowProcessor.getBeans();
 	}
 
 }

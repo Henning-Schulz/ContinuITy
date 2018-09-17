@@ -47,19 +47,19 @@ public class SessionLogsAmqpHandler {
 	public void createSessionLogs(TaskDescription task) {
 		TaskReport report;
 		String tag = task.getTag();
-		String link = task.getSource().getExternalDataLinks().getLink();
-		boolean useOpenXtrace = task.getSource().getExternalDataLinks().getLinkType().equals(ExternalDataLinkType.OPEN_XTRACE) ? true : false;
+		String link = task.getSource().getMeasurementDataLinks().getLink();
+		boolean useOpenXtrace = task.getSource().getMeasurementDataLinks().getLinkType().equals(ExternalDataLinkType.OPEN_XTRACE) ? true : false;
 		boolean applyModularization = false;
 
 		if (null != task.getModularizationOptions()) {
 			ModularizationOptions modularizationOptions = task.getModularizationOptions();
 			applyModularization = modularizationOptions.getModularizationApproach().equals(ModularizationApproach.SESSION_LOGS) ? true : false;
 		}
-		Date timestamp = task.getSource().getExternalDataLinks().getTimestamp();
+		Date timestamp = task.getSource().getMeasurementDataLinks().getTimestamp();
 
-		if (!EnumSet.of(ExternalDataLinkType.OPEN_XTRACE, ExternalDataLinkType.INSPECTIT).contains(task.getSource().getExternalDataLinks().getLinkType())) {
+		if (!EnumSet.of(ExternalDataLinkType.OPEN_XTRACE, ExternalDataLinkType.INSPECTIT).contains(task.getSource().getMeasurementDataLinks().getLinkType())) {
 			LOGGER.error("Task {}: cannot create session logs for tag {}, link {}, and timestamp {}. External data type {} is not supported!", task.getTaskId(), tag, link, timestamp,
-					task.getSource().getExternalDataLinks().getLinkType());
+					task.getSource().getMeasurementDataLinks().getLinkType());
 			report = TaskReport.error(task.getTaskId(), TaskError.ILLEGAL_TYPE);
 		}
 		if ((tag == null) || (link == null) || (timestamp == null)) {
@@ -78,7 +78,7 @@ public class SessionLogsAmqpHandler {
 				LOGGER.info("Task {}: Creating session logs for tag {} from data {} ...", task.getTaskId(), tag, link);
 				sessionLog = manager.runPipeline(useOpenXtrace);
 			}
-			String id = storage.put(new SessionLogs(task.getSource().getExternalDataLinks().getTimestamp(), sessionLog), tag);
+			String id = storage.put(new SessionLogs(task.getSource().getMeasurementDataLinks().getTimestamp(), sessionLog), tag);
 			String sessionLink = RestApi.SessionLogs.GET.requestUrl(id).withoutProtocol().get();
 
 			report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().getSessionLogsLinks().setLink(sessionLink).parent());

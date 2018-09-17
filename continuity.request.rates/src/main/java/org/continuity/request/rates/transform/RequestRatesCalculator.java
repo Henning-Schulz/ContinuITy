@@ -4,14 +4,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.continuity.commons.idpa.RequestUriMapper;
 import org.continuity.commons.utils.StringUtils;
 import org.continuity.idpa.application.Application;
@@ -20,6 +18,7 @@ import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.idpa.application.HttpParameter;
 import org.continuity.idpa.application.HttpParameterType;
 import org.continuity.request.rates.entities.RequestRecord;
+import org.continuity.request.rates.model.RequestFrequency;
 import org.continuity.request.rates.model.RequestRatesModel;
 
 public class RequestRatesCalculator {
@@ -43,12 +42,12 @@ public class RequestRatesCalculator {
 
 		sortRecords(records);
 
-		model.setRequestPerMinute(records.size() / calculateDuration(records));
+		model.setRequestsPerMinute(((double) records.size()) / calculateDuration(records));
 
 		if (application == null) {
-			model.setEndpoints(calculateEndpointsUsingNames(records));
+			model.setMix(calculateEndpointsUsingNames(records));
 		} else {
-			model.setEndpoints(calculateEndpointsUsingApplication(records));
+			model.setMix(calculateEndpointsUsingApplication(records));
 		}
 
 		return model;
@@ -73,14 +72,14 @@ public class RequestRatesCalculator {
 		return TimeUnit.MINUTES.convert(endDate.getTime() - startDate.getTime(), TimeUnit.MILLISECONDS);
 	}
 
-	private Map<Double, Endpoint<?>> calculateEndpointsUsingApplication(List<RequestRecord> records) {
+	private List<RequestFrequency> calculateEndpointsUsingApplication(List<RequestRecord> records) {
 		return records.stream().map(rec -> uriMapper.map(rec.getPath(), rec.getMethod())).filter(Objects::nonNull).collect(Collectors.groupingBy(HttpEndpoint::getId)).entrySet().stream()
-				.map(entry -> Pair.of(((double) entry.getValue().size()) / records.size(), entry.getValue().get(0))).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+				.map(entry -> new RequestFrequency(((double) entry.getValue().size()) / records.size(), entry.getValue().get(0))).collect(Collectors.toList());
 	}
 
-	private Map<Double, Endpoint<?>> calculateEndpointsUsingNames(List<RequestRecord> records) {
+	private List<RequestFrequency> calculateEndpointsUsingNames(List<RequestRecord> records) {
 		return records.stream().collect(Collectors.groupingBy(RequestRecord::getName)).entrySet().stream()
-				.map(entry -> Pair.of(((double) entry.getValue().size()) / records.size(), aggregateRequests(entry.getValue()))).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+				.map(entry -> new RequestFrequency(((double) entry.getValue().size()) / records.size(), aggregateRequests(entry.getValue()))).collect(Collectors.toList());
 	}
 
 	private Endpoint<?> aggregateRequests(List<RequestRecord> records) {
@@ -115,11 +114,11 @@ public class RequestRatesCalculator {
 	}
 
 	private List<String> extractHeaders(List<RequestRecord> records) {
-		return records.stream().map(RequestRecord::getHeaders).flatMap(List::stream).distinct().collect(Collectors.toList());
+		return records.stream().map(RequestRecord::getHeaders).filter(Objects::nonNull).flatMap(List::stream).distinct().collect(Collectors.toList());
 	}
 
 	private List<HttpParameter> extractHttpParameters(List<RequestRecord> records) {
-		return records.stream().map(RequestRecord::getHeaders).flatMap(List::stream).distinct().map(name -> {
+		return records.stream().map(RequestRecord::getHeaders).filter(Objects::nonNull).flatMap(List::stream).distinct().map(name -> {
 			HttpParameter param = new HttpParameter();
 
 			if (name.startsWith("_BODY")) {

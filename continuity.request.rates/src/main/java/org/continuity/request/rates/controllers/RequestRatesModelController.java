@@ -1,6 +1,7 @@
 package org.continuity.request.rates.controllers;
 
 import static org.continuity.api.rest.RestApi.RequestRates.Model.ROOT;
+import static org.continuity.api.rest.RestApi.RequestRates.Model.Paths.GET_MODEL;
 import static org.continuity.api.rest.RestApi.RequestRates.Model.Paths.OVERVIEW;
 import static org.continuity.api.rest.RestApi.RequestRates.Model.Paths.REMOVE;
 
@@ -49,6 +50,24 @@ public class RequestRatesModelController {
 		String tag = storage.getTagForId(id);
 
 		return ResponseEntity.ok(new WorkloadModelPack(applicationName, id, tag));
+	}
+
+	/**
+	 * Gets the model with the passed id.
+	 *
+	 * @param id
+	 *            The id of the stored model.
+	 * @return The stored model or a 404 (Not Found) if there is no such model.
+	 */
+	@RequestMapping(path = GET_MODEL, method = RequestMethod.GET)
+	public ResponseEntity<RequestRatesModel> getModel(@PathVariable String id) {
+		RequestRatesModel model = storage.get(id);
+
+		if (model == null) {
+			return ResponseEntity.notFound().build();
+		} else {
+			return ResponseEntity.ok(model);
+		}
 	}
 
 	/**
