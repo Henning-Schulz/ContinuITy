@@ -6,7 +6,8 @@ import org.continuity.request.rates.model.RequestRatesModel;
 public class RequestRatesToJMeterConverter {
 
 	public JMeterTestPlanBundle convertToLoadTest(RequestRatesModel model) {
-
+		// TODO
+		return null;
 	}
 
 }

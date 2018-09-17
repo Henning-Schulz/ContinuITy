@@ -31,9 +31,6 @@ public class RequestRatesModelController {
 	@Value("${spring.application.name}")
 	private String applicationName;
 
-	@Value("${persist.path:persisted}")
-	private String persistPath;
-
 	/**
 	 * Gets an overview of the model with the passed id.
 	 *

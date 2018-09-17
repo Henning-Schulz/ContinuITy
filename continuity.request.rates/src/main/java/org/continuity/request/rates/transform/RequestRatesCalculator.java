@@ -5,30 +5,37 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.continuity.commons.idpa.RequestUriMapper;
 import org.continuity.commons.utils.StringUtils;
 import org.continuity.idpa.application.Application;
 import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.idpa.application.HttpParameter;
-import org.continuity.idpa.visitor.FindById;
+import org.continuity.idpa.application.HttpParameterType;
 import org.continuity.request.rates.entities.RequestRecord;
 import org.continuity.request.rates.model.RequestRatesModel;
 
 public class RequestRatesCalculator {
 
-	private Application application;
+	private final Application application;
+
+	private final RequestUriMapper uriMapper;
 
 	public RequestRatesCalculator() {
+		this.application = null;
+		this.uriMapper = null;
 	}
 
 	public RequestRatesCalculator(Application application) {
 		this.application = application;
+		this.uriMapper = new RequestUriMapper(application);
 	}
 
 	public RequestRatesModel calculate(List<RequestRecord> records) {
@@ -39,11 +46,9 @@ public class RequestRatesCalculator {
 		model.setRequestPerMinute(records.size() / calculateDuration(records));
 
 		if (application == null) {
-			application = new Application();
-
-			model.setEndpoints(calculateEndpoints(records, this::aggregateRequestsAndAddEndpoint));
+			model.setEndpoints(calculateEndpointsUsingNames(records));
 		} else {
-			model.setEndpoints(calculateEndpoints(records, entry -> FindById.find(entry.getKey(), Endpoint.class).in(application).getFound()));
+			model.setEndpoints(calculateEndpointsUsingApplication(records));
 		}
 
 		return model;
@@ -68,15 +73,17 @@ public class RequestRatesCalculator {
 		return TimeUnit.MINUTES.convert(endDate.getTime() - startDate.getTime(), TimeUnit.MILLISECONDS);
 	}
 
-	private Map<Double, Endpoint<?>> calculateEndpoints(List<RequestRecord> records, Function<Map.Entry<String, List<RequestRecord>>, Endpoint<?>> requestsToEndpoint) {
-		return records.stream().collect(Collectors.groupingBy(RequestRecord::getName)).entrySet().stream()
-				.map(entry -> Pair.of(((double) entry.getValue().size()) / records.size(), requestsToEndpoint.apply(entry)))
-				.collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+	private Map<Double, Endpoint<?>> calculateEndpointsUsingApplication(List<RequestRecord> records) {
+		return records.stream().map(rec -> uriMapper.map(rec.getPath(), rec.getMethod())).filter(Objects::nonNull).collect(Collectors.groupingBy(HttpEndpoint::getId)).entrySet().stream()
+				.map(entry -> Pair.of(((double) entry.getValue().size()) / records.size(), entry.getValue().get(0))).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 	}
 
-	private Endpoint<?> aggregateRequestsAndAddEndpoint(Map.Entry<String, List<RequestRecord>> entry) {
-		List<RequestRecord> records = entry.getValue();
+	private Map<Double, Endpoint<?>> calculateEndpointsUsingNames(List<RequestRecord> records) {
+		return records.stream().collect(Collectors.groupingBy(RequestRecord::getName)).entrySet().stream()
+				.map(entry -> Pair.of(((double) entry.getValue().size()) / records.size(), aggregateRequests(entry.getValue()))).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+	}
 
+	private Endpoint<?> aggregateRequests(List<RequestRecord> records) {
 		HttpEndpoint endpoint = new HttpEndpoint();
 
 		endpoint.setId(getFirst(records, RequestRecord::getName));
@@ -92,8 +99,6 @@ public class RequestRatesCalculator {
 
 		endpoint.setParameters(extractHttpParameters(records));
 		setParameterIds(endpoint);
-
-		application.addEndpoint(endpoint);
 
 		return endpoint;
 	}
@@ -117,8 +122,15 @@ public class RequestRatesCalculator {
 		return records.stream().map(RequestRecord::getHeaders).flatMap(List::stream).distinct().map(name -> {
 			HttpParameter param = new HttpParameter();
 
-			param.setName(name);
-			param.setParameterType(null); // TODO
+			if (name.startsWith("_BODY")) {
+				param.setParameterType(HttpParameterType.BODY);
+			} else if (name.startsWith("URL_PART")) {
+				param.setName(name.substring("URL_PART".length()));
+				param.setParameterType(HttpParameterType.URL_PART);
+			} else {
+				param.setName(name);
+				param.setParameterType(HttpParameterType.REQ_PARAM);
+			}
 
 			return param;
 		}).collect(Collectors.toList());

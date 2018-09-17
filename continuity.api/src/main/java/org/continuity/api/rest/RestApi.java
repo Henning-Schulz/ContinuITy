@@ -585,6 +585,36 @@ public class RestApi {
 
 		}
 
+		/**
+		 * Request logs API of the request rates service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
+		public static class RequestLogs {
+
+			public static final String ROOT = "/requestlogs";
+
+			/** {@value #ROOT}/{id} */
+			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
+
+			/** {@value #ROOT}/ */
+			public static final RestEndpoint UPLOAD = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPLOAD, RequestMethod.POST);
+
+			private RequestLogs() {
+			}
+
+			public static class Paths {
+
+				public static final String GET = "/{id}";
+				public static final String UPLOAD = "/";
+
+				private Paths() {
+				}
+			}
+
+		}
+
 	}
 
 	/**
