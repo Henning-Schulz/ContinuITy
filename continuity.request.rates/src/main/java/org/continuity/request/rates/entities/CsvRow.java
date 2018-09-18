@@ -236,7 +236,7 @@ public class CsvRow {
 		return record;
 	}
 
-	public static List<CsvRow> fromString(String requestLogs) {
+	public static List<CsvRow> listFromString(String requestLogs) {
 		BeanListProcessor<CsvRow> rowProcessor = new BeanListProcessor<>(CsvRow.class);
 
 		CsvParserSettings settings = new CsvParserSettings();

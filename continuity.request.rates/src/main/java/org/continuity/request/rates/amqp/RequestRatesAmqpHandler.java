@@ -9,6 +9,7 @@ import org.continuity.api.entities.links.ExternalDataLinkType;
 import org.continuity.api.entities.links.MeasurementDataLinks;
 import org.continuity.api.entities.report.TaskError;
 import org.continuity.api.entities.report.TaskReport;
+import org.continuity.api.rest.RestApi.IdpaApplication;
 import org.continuity.commons.storage.CsvFileStorage;
 import org.continuity.commons.storage.MixedStorage;
 import org.continuity.commons.utils.WebUtils;
@@ -26,6 +27,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
@@ -72,17 +74,22 @@ public class RequestRatesAmqpHandler {
 				csvRecords = requestLogsStorage.get(extractIdFromLink(link.getLink()));
 			} else {
 				String csvString = restTemplate.getForObject(WebUtils.addProtocolIfMissing(link.getLink()), String.class);
-				csvRecords = CsvRow.fromString(csvString);
+				csvRecords = CsvRow.listFromString(csvString);
 			}
 
 			List<RequestRecord> records = csvRecords.stream().map(CsvRow::toRecord).collect(Collectors.toList());
 
-			String appLink = task.getSource().getIdpaLinks().getApplicationLink();
+			Application application;
+			try {
+				application = restTemplate.getForObject(IdpaApplication.Application.GET.requestUrl(task.getTag()).get(), Application.class);
+			} catch (HttpStatusCodeException e) {
+				LOGGER.info("Could not get application model for tag {}. Response: {} - {}.", task.getTag(), e.getRawStatusCode(), e.getStatusCode().getReasonPhrase());
+				application = null;
+			}
 
 			RequestRatesCalculator calculator;
 
-			if (appLink != null) {
-				Application application = restTemplate.getForObject(WebUtils.addProtocolIfMissing(task.getSource().getIdpaLinks().getApplicationLink()), Application.class);
+			if (application != null) {
 				calculator = new RequestRatesCalculator(application);
 			} else {
 				calculator = new RequestRatesCalculator();
@@ -95,6 +102,10 @@ public class RequestRatesAmqpHandler {
 
 			WorkloadModelPack responsePack = new WorkloadModelPack(applicationName, storageId, task.getTag());
 			report = TaskReport.successful(task.getTaskId(), responsePack);
+
+			if (application == null) {
+				amqpTemplate.convertAndSend(AmqpApi.WorkloadModel.EVENT_CREATED.name(), AmqpApi.WorkloadModel.EVENT_CREATED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), responsePack);
+			}
 		}
 
 

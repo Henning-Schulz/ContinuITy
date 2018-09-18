@@ -574,6 +574,12 @@ public class RestApi {
 			/** {@value #ROOT}/{id} */
 			public static final RestEndpoint REMOVE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.REMOVE, RequestMethod.DELETE);
 
+			/** {@value #ROOT}/{id}/application */
+			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_APPLICATION, RequestMethod.GET);
+
+			/** {@value #ROOT}/{id}/annotation */
+			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_ANNOTATION, RequestMethod.GET);
+
 			private Model() {
 			}
 
@@ -582,6 +588,8 @@ public class RestApi {
 				public static final String OVERVIEW = "/{id}";
 				public static final String GET_MODEL = "/{id}/model";
 				public static final String REMOVE = "/{id}";
+				public static final String GET_APPLICATION = "/{id}/application";
+				public static final String GET_ANNOTATION = "/{id}/annotation";
 
 				private Paths() {
 				}

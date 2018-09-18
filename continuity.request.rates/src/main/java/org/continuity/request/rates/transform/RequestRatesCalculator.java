@@ -23,6 +23,8 @@ import org.continuity.request.rates.model.RequestRatesModel;
 
 public class RequestRatesCalculator {
 
+	private static final String UNKNOWN_ENDPOINT = "UNKNOWN";
+
 	private final Application application;
 
 	private final RequestUriMapper uriMapper;
@@ -78,20 +80,27 @@ public class RequestRatesCalculator {
 	}
 
 	private List<RequestFrequency> calculateEndpointsUsingNames(List<RequestRecord> records) {
-		return records.stream().collect(Collectors.groupingBy(RequestRecord::getName)).entrySet().stream()
+		return records.stream().map(this::replaceNullName).collect(Collectors.groupingBy(RequestRecord::getName)).entrySet().stream()
 				.map(entry -> new RequestFrequency(((double) entry.getValue().size()) / records.size(), aggregateRequests(entry.getValue()))).collect(Collectors.toList());
+	}
+
+	private RequestRecord replaceNullName(RequestRecord record) {
+		if (record.getName() == null) {
+			record.setName(UNKNOWN_ENDPOINT);
+		}
+
+		return record;
 	}
 
 	private Endpoint<?> aggregateRequests(List<RequestRecord> records) {
 		HttpEndpoint endpoint = new HttpEndpoint();
 
 		endpoint.setId(getFirst(records, RequestRecord::getName));
-
 		endpoint.setDomain(getFirst(records, RequestRecord::getDomain));
 		endpoint.setPort(getFirst(records, RequestRecord::getPort));
 		endpoint.setPath(getFirst(records, RequestRecord::getPath));
 		endpoint.setMethod(getFirst(records, RequestRecord::getMethod));
-		endpoint.setProtocol(getFirst(records, RequestRecord::getMethod));
+		endpoint.setProtocol(getFirst(records, RequestRecord::getProtocol));
 		endpoint.setEncoding(getFirst(records, RequestRecord::getEncoding));
 
 		endpoint.setHeaders(extractHeaders(records));

@@ -46,7 +46,7 @@ public class RequestLogsController {
 			return ResponseEntity.badRequest().body("Missing body.");
 		}
 
-		List<CsvRow> rows = CsvRow.fromString(requestLogs);
+		List<CsvRow> rows = CsvRow.listFromString(requestLogs);
 
 		boolean parseable = rows.stream().map(CsvRow::checkDates).reduce(Boolean::logicalAnd).get();
 
