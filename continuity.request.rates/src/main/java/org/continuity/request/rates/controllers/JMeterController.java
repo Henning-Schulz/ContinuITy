@@ -28,9 +28,6 @@ public class JMeterController {
 	@Autowired
 	private MixedStorage<RequestRatesModel> storage;
 
-	@Autowired
-	private RequestRatesToJMeterConverter jmeterConverter;
-
 	@RequestMapping(value = CREATE, method = RequestMethod.GET)
 	public JMeterTestPlanBundle createTestPlan(@PathVariable("id") String workloadModelId) {
 		if (workloadModelId == null) {
@@ -43,6 +40,7 @@ public class JMeterController {
 			throw new IllegalArgumentException("There is no request rates model with id " + workloadModelId + "!");
 		}
 
+		RequestRatesToJMeterConverter jmeterConverter = new RequestRatesToJMeterConverter();
 		JMeterTestPlanBundle testPlanPack = jmeterConverter.convertToLoadTest(model);
 
 		LOGGER.info("Created JMeter test plan with id {}.", workloadModelId);
