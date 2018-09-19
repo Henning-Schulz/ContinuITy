@@ -26,7 +26,7 @@ public class ValueExtractorsAnnotator extends AbstractSamplerAnnotator {
 
 	@Override
 	protected void annotateHttpSampler(HTTPSamplerProxy sampler, HttpEndpoint endpoint, EndpointAnnotation annotation, HashTree samplerTree) {
-		IdpaByClassSearcher<ExtractedInput> searcher = new IdpaByClassSearcher<>(ExtractedInput.class, e -> onExtractionFound(annotation, samplerTree, e));
+		IdpaByClassSearcher<ExtractedInput> searcher = new IdpaByClassSearcher<>(ExtractedInput.class, e -> onExtractionFound(annotation, samplerTree.getTree(sampler), e));
 		searcher.visit(getAnnotation());
 	}
 

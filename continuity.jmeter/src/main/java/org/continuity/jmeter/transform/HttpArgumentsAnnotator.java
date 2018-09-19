@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.jmeter.config.Arguments;
-import org.apache.jmeter.protocol.http.gui.HTTPArgumentsPanel;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
 import org.apache.jmeter.protocol.http.util.HTTPArgument;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
@@ -101,8 +100,7 @@ public class HttpArgumentsAnnotator {
 	}
 
 	private HTTPArgument createArgument(HttpParameter param) {
-		HTTPArgumentsPanel gui = new HTTPArgumentsPanel();
-		HTTPArgument arg = (HTTPArgument) gui.createTestElement();
+		HTTPArgument arg = new HTTPArgument();
 
 		arg.setName(param.getName());
 
@@ -157,8 +155,6 @@ public class HttpArgumentsAnnotator {
 			if ((param instanceof HttpParameter) && (((HttpParameter) param).getParameterType() == HttpParameterType.URL_PART)) {
 				String paramName = ((HttpParameter) param).getName();
 				path = path.replace("{" + paramName + "}", getInputString(paramAnn.getInput()));
-			} else {
-				LOGGER.error("Cannot annotate parameter {} of type {}!", param.getId(), param.getClass());
 			}
 		}
 
