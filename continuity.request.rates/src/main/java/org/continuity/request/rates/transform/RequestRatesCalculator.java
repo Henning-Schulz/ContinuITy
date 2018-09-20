@@ -17,11 +17,16 @@ import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.idpa.application.HttpParameter;
 import org.continuity.idpa.application.HttpParameterType;
+import org.continuity.idpa.visitor.FindBy;
 import org.continuity.request.rates.entities.RequestRecord;
 import org.continuity.request.rates.model.RequestFrequency;
 import org.continuity.request.rates.model.RequestRatesModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestRatesCalculator {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(RequestRatesCalculator.class);
 
 	private static final String UNKNOWN_ENDPOINT = "UNKNOWN";
 
@@ -44,15 +49,39 @@ public class RequestRatesCalculator {
 
 		sortRecords(records);
 
-		model.setRequestsPerMinute(((double) records.size()) / calculateDuration(records));
+		List<RequestFrequency> mix;
 
 		if (application == null) {
-			model.setMix(calculateEndpointsUsingNames(records));
+			mix = calculateAbsoluteMixUsingNames(records);
 		} else {
-			model.setMix(calculateEndpointsUsingApplication(records));
+			mix = calculateAbsoluteMixUsingApplication(records);
 		}
 
+		double overallNumRequests = getOverallNumberOfRequests(mix);
+		relativizeMix(mix, overallNumRequests);
+
+		model.setRequestsPerMinute(overallNumRequests / calculateDuration(records));
+		model.setMix(mix);
+
+		checkMix(mix);
+
 		return model;
+	}
+
+	private double getOverallNumberOfRequests(List<RequestFrequency> absoluteMix) {
+		return absoluteMix.stream().map(RequestFrequency::getFreq).reduce(Double::sum).get();
+	}
+
+	private void relativizeMix(List<RequestFrequency> absoluteMix, double overallNumRequests) {
+		absoluteMix.forEach(freq -> freq.setFreq(freq.getFreq() / overallNumRequests));
+	}
+
+	private void checkMix(List<RequestFrequency> mix) {
+		double sum = mix.stream().map(RequestFrequency::getFreq).reduce(Double::sum).get();
+
+		if (Math.abs(sum - 1.0) > 0.0001) {
+			LOGGER.warn("The frequencies of the mix don't sum up to 1! The sum is {}.", sum);
+		}
 	}
 
 	private void sortRecords(List<RequestRecord> records) {
@@ -74,14 +103,28 @@ public class RequestRatesCalculator {
 		return TimeUnit.MINUTES.convert(endDate.getTime() - startDate.getTime(), TimeUnit.MILLISECONDS);
 	}
 
-	private List<RequestFrequency> calculateEndpointsUsingApplication(List<RequestRecord> records) {
-		return records.stream().map(rec -> uriMapper.map(rec.getPath(), rec.getMethod())).filter(Objects::nonNull).collect(Collectors.groupingBy(HttpEndpoint::getId)).entrySet().stream()
-				.map(entry -> new RequestFrequency(((double) entry.getValue().size()) / records.size(), entry.getValue().get(0))).collect(Collectors.toList());
+	private List<RequestFrequency> calculateAbsoluteMixUsingApplication(List<RequestRecord> records) {
+		return records.stream().map(this::mapToEndpoint).filter(Objects::nonNull).collect(Collectors.groupingBy(HttpEndpoint::getId)).entrySet().stream()
+				.map(entry -> new RequestFrequency(entry.getValue().size(), entry.getValue().get(0))).collect(Collectors.toList());
 	}
 
-	private List<RequestFrequency> calculateEndpointsUsingNames(List<RequestRecord> records) {
+	private HttpEndpoint mapToEndpoint(RequestRecord record) {
+		HttpEndpoint endpoint = null;
+
+		if (record.getName() != null) {
+			endpoint = FindBy.findById(record.getName(), HttpEndpoint.class).in(application).getFound();
+		}
+
+		if ((endpoint == null) && (record.getPath() != null)) {
+			endpoint = uriMapper.map(record.getPath(), record.getMethod());
+		}
+
+		return endpoint;
+	}
+
+	private List<RequestFrequency> calculateAbsoluteMixUsingNames(List<RequestRecord> records) {
 		return records.stream().map(this::replaceNullName).collect(Collectors.groupingBy(RequestRecord::getName)).entrySet().stream()
-				.map(entry -> new RequestFrequency(((double) entry.getValue().size()) / records.size(), aggregateRequests(entry.getValue()))).collect(Collectors.toList());
+				.map(entry -> new RequestFrequency(entry.getValue().size(), aggregateRequests(entry.getValue()))).collect(Collectors.toList());
 	}
 
 	private RequestRecord replaceNullName(RequestRecord record) {

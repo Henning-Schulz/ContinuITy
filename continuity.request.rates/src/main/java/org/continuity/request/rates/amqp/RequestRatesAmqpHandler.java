@@ -9,6 +9,7 @@ import org.continuity.api.entities.links.ExternalDataLinkType;
 import org.continuity.api.entities.links.MeasurementDataLinks;
 import org.continuity.api.entities.report.TaskError;
 import org.continuity.api.entities.report.TaskReport;
+import org.continuity.api.rest.RestApi;
 import org.continuity.api.rest.RestApi.IdpaApplication;
 import org.continuity.commons.storage.CsvFileStorage;
 import org.continuity.commons.storage.MixedStorage;
@@ -71,7 +72,8 @@ public class RequestRatesAmqpHandler {
 			List<CsvRow> csvRecords;
 
 			if (link.getLink().startsWith(applicationName)) {
-				csvRecords = requestLogsStorage.get(extractIdFromLink(link.getLink()));
+				List<String> pathParams = RestApi.RequestRates.RequestLogs.GET.parsePathParameters(link.getLink());
+				csvRecords = requestLogsStorage.get(pathParams.get(0));
 			} else {
 				String csvString = restTemplate.getForObject(WebUtils.addProtocolIfMissing(link.getLink()), String.class);
 				csvRecords = CsvRow.listFromString(csvString);
@@ -108,13 +110,7 @@ public class RequestRatesAmqpHandler {
 			}
 		}
 
-
-
 		amqpTemplate.convertAndSend(AmqpApi.Global.EVENT_FINISHED.name(), AmqpApi.Global.EVENT_FINISHED.formatRoutingKey().of(RabbitMqConfig.SERVICE_NAME), report);
-	}
-
-	private String extractIdFromLink(String link) {
-		return link.substring(link.lastIndexOf("/") + 1, link.length());
 	}
 
 }
