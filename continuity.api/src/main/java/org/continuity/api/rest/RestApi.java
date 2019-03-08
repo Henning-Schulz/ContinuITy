@@ -142,6 +142,9 @@ public class RestApi {
 			/** {@value #ROOT}"/{type}/test/upload/{tag} */
 			public static final RestEndpoint POST = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.POST, RequestMethod.POST);
 
+			/** {@value #ROOT}"/{type}/restart */
+			public static final RestEndpoint RESTART = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.RESTART, RequestMethod.GET);
+
 			private Loadtest() {
 			}
 
@@ -154,6 +157,8 @@ public class RestApi {
 				public static final String DELETE_REPORT = "/{type}/test/{id}";
 
 				public static final String POST = "/{type}/test/upload/{tag}";
+
+				public static final String RESTART = "/{type}/restart";
 
 				private Paths() {
 				}
@@ -397,6 +402,28 @@ public class RestApi {
 		public static final String SERVICE_NAME = "jmeter";
 
 		private JMeter() {
+		}
+
+		/**
+		 * API for checking the availability.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
+		public static class Availability {
+
+			public static final String ROOT = "/available";
+
+			/** {@value #ROOT}/ */
+			public static final RestEndpoint CHECK = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CHECK, RequestMethod.GET);
+
+			public static class Paths {
+
+				public static final String CHECK = "/";
+
+				private Paths() {
+				}
+			}
 		}
 
 		/**

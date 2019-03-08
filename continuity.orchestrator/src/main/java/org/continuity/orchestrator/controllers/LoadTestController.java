@@ -5,6 +5,9 @@ import static org.continuity.api.rest.RestApi.Orchestrator.Loadtest.Paths.DELETE
 import static org.continuity.api.rest.RestApi.Orchestrator.Loadtest.Paths.GET;
 import static org.continuity.api.rest.RestApi.Orchestrator.Loadtest.Paths.POST;
 import static org.continuity.api.rest.RestApi.Orchestrator.Loadtest.Paths.REPORT;
+import static org.continuity.api.rest.RestApi.Orchestrator.Loadtest.Paths.RESTART;
+
+import java.util.List;
 
 import org.continuity.api.entities.links.LinkExchangeModel;
 import org.continuity.api.rest.RestApi;
@@ -17,10 +20,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.core.DockerClientBuilder;
 
 @RestController
 @RequestMapping(ROOT)
@@ -106,7 +113,58 @@ public class LoadTestController {
 
 		return restTemplate.postForEntity(link, testConfiguration, LinkExchangeModel.class);
 	}
-	
-	
+
+	/**
+	 * Restarts the services of the given load test type. Currently only works with {@code jmeter}.
+	 *
+	 * @param type
+	 *            The type of load test service to be restarted.
+	 * @return Whether restarting was successful
+	 */
+	@RequestMapping(path = RESTART, method = RequestMethod.GET)
+	public ResponseEntity<String> restart(@PathVariable String type) {
+		if (!"jmeter".equals(type)) {
+			return ResponseEntity.badRequest().body("Cannot restart " + type);
+		}
+
+		DockerClient dockerClient = DockerClientBuilder.getInstance("tcp://localhost:2375").build();
+
+		List<Container> containers = dockerClient.listContainersCmd().exec();
+
+		for (Container cont : containers) {
+			LOGGER.info("Restarting container {}...", cont.getId());
+			dockerClient.stopContainerCmd(cont.getId()).exec();
+
+			LOGGER.debug("Container {} stopped. Starting again...", cont.getId());
+			dockerClient.startContainerCmd(cont.getId()).exec();
+			LOGGER.info("Container {} restarted.", cont.getId());
+		}
+
+		boolean available = false;
+
+		do {
+			ResponseEntity<String> response;
+			try {
+				response = restTemplate.getForEntity(RestApi.JMeter.Availability.CHECK.path(), String.class);
+			} catch (HttpStatusCodeException e) {
+				LOGGER.debug("JMeter not there, yet. Status code is {} - {}.", e.getRawStatusCode(), e.getStatusCode());
+
+				response = new ResponseEntity<>(e.getStatusCode());
+			}
+
+			if (response.getStatusCode().is2xxSuccessful()) {
+				LOGGER.info("JMeter is available again. Response: '{}'", response.getBody());
+				available = true;
+			}
+
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				LOGGER.error("Error during 10s sleep!", e);
+			}
+		} while (available);
+
+		return ResponseEntity.ok("Restarted.");
+	}
 
 }
