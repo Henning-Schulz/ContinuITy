@@ -2,16 +2,25 @@ package org.continuity.session.logs.converter;
 
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import org.continuity.api.entities.ApiFormats;
+import org.continuity.api.rest.RestApi.IdpaApplication;
+import org.continuity.commons.idpa.RequestUriMapper;
+import org.continuity.idpa.application.Application;
+import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.session.logs.entities.RowObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
 
 
 /**
@@ -21,17 +30,32 @@ import org.continuity.session.logs.entities.RowObject;
  *
  */
 public class SessionConverterCSVData {
-	
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SessionConverterCSVData.class);
+
+	private final RestTemplate restTemplate;
+
+	public SessionConverterCSVData(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
+
 	/**
 	 * Creates session logs from CSV data.
 	 * @param dataList
 	 * @return
 	 */
-	public String createSessionLogsFromCSV(ArrayList<RowObject> dataList) {
-		LinkedHashMap<String, LinkedList<RowObject>> map = processSessions(dataList);
+	public String createSessionLogsFromCSV(List<RowObject> dataList, String tag) {
+		Application application = retrieveApplicationModel(tag);
+
+		if (application != null) {
+			LOGGER.info("Updating the CSV rows from the application for tag {}.", tag);
+			dataList = updateRowsFromApplication(dataList, application);
+		}
+
+		LinkedHashMap<String, List<RowObject>> map = processSessions(dataList);
 		boolean first = true;
 		String sessionLogs = "";
-		for (Entry<String, LinkedList<RowObject>> entry : map.entrySet()) {
+		for (Entry<String, List<RowObject>> entry : map.entrySet()) {
 			boolean empty = true;
 			StringBuffer buffer = new StringBuffer();
 			buffer.append(entry.getKey()).append(";");
@@ -52,13 +76,52 @@ public class SessionConverterCSVData {
 		return sessionLogs;
 	}
 
+	private List<RowObject> updateRowsFromApplication(List<RowObject> dataList, Application application) {
+		RequestUriMapper mapper = new RequestUriMapper(application);
+		List<RowObject> updatedData = new ArrayList<>();
+
+		for (RowObject row : dataList) {
+			String path = row.getRequestURL();
+
+			if (path.startsWith("http")) {
+				int pathStart = path.indexOf("/", 8);
+				path = path.substring(pathStart);
+			}
+
+			HttpEndpoint endpoint = mapper.map(path, row.getMethod());
+
+			if (endpoint != null) {
+				row.setBusinessTransaction(endpoint.getId());
+				row.setRequestURL(endpoint.getPath());
+
+				updatedData.add(row);
+			}
+		}
+
+		return updatedData;
+	}
+
+	protected Application retrieveApplicationModel(String tag) {
+		if (tag == null) {
+			LOGGER.warn("Cannot retrieve the application model for naming the Session Logs. The tag is null!");
+			return null;
+		}
+
+		try {
+			return restTemplate.getForObject(IdpaApplication.Application.GET.requestUrl(tag).get(), Application.class);
+		} catch (HttpStatusCodeException e) {
+			LOGGER.warn("Received error status code when asking for system model with tag " + tag, e);
+			return null;
+		}
+	}
+
 	/**
 	 * Creates sessions from the available data in RowObjects.
-	 * 
+	 *
 	 * @return
 	 */
-	public LinkedHashMap<String, LinkedList<RowObject>> processSessions(ArrayList<RowObject> dataList) {
-		LinkedHashMap<String, LinkedList<RowObject>> sessions = null;
+	public LinkedHashMap<String, List<RowObject>> processSessions(List<RowObject> dataList) {
+		LinkedHashMap<String, List<RowObject>> sessions = null;
 		if(!(dataList.get(0).getSessionID() == null)) {
 			sessions = extractSessions(dataList);
 		} else {
@@ -77,35 +140,35 @@ public class SessionConverterCSVData {
 	 * @param dataList
 	 * @return
 	 */
-	private LinkedHashMap<String, LinkedList<RowObject>> extractSessions(ArrayList<RowObject> dataList) {
-		LinkedHashMap<String, LinkedList<RowObject>> sessions = new LinkedHashMap<String, LinkedList<RowObject>>();
-		
+	private LinkedHashMap<String, List<RowObject>> extractSessions(List<RowObject> dataList) {
+		LinkedHashMap<String, List<RowObject>> sessions = new LinkedHashMap<>();
+
 		for(int i = 0; i < dataList.size(); i++) {
 			String sessionID = dataList.get(i).getSessionID();
 			if (sessions.containsKey(sessionID)) {
-				LinkedList<RowObject> existingList = sessions.get(sessionID);
+				List<RowObject> existingList = sessions.get(sessionID);
 				existingList.add(dataList.get(i));
 				sessions.put(sessionID, existingList);
 			} else {
-				LinkedList<RowObject> newList = new LinkedList<RowObject>();
+				List<RowObject> newList = new LinkedList<RowObject>();
 				newList.add(dataList.get(i));
 				sessions.put(sessionID, newList);
 			}
 		}
-		for (Entry<String, LinkedList<RowObject>> entry : sessions.entrySet()) {
+		for (Entry<String, List<RowObject>> entry : sessions.entrySet()) {
 			String sessionID = entry.getKey();
-			LinkedList<RowObject> rowObjectList = entry.getValue();
+			List<RowObject> rowObjectList = entry.getValue();
 			sortRowObjects(rowObjectList);
 			sessions.put(sessionID, rowObjectList);
-		}		
+		}
 		return sessions;
 	}
-	
+
 	/**
 	 * Sorts RowObjects in list.
 	 * @param rowObjects
 	 */
-	private void sortRowObjects(LinkedList<RowObject> rowObjects) {
+	private void sortRowObjects(List<RowObject> rowObjects) {
 		rowObjects.sort((RowObject ro1, RowObject ro2) -> {
 			long startTimeRo1 = Long.parseLong(ro1.getRequestStartTime());
 			long startTimeRo2 = Long.parseLong(ro2.getRequestStartTime());
@@ -125,24 +188,24 @@ public class SessionConverterCSVData {
 	 * @param dataList
 	 * @return
 	 */
-	private LinkedHashMap<String, LinkedList<RowObject>> calculateSessionsWithUserNames(ArrayList<RowObject> dataList) {
-		LinkedHashMap<String, LinkedList<RowObject>> sessions = new LinkedHashMap<String, LinkedList<RowObject>>();
-		
-		DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+	private LinkedHashMap<String, List<RowObject>> calculateSessionsWithUserNames(List<RowObject> dataList) {
+		LinkedHashMap<String, List<RowObject>> sessions = new LinkedHashMap<>();
+
+		DateFormat dateFormat = ApiFormats.DATE_FORMAT;
 
 		String currentUserName = "";
 
 		String currentSession = "";
-		
+
 		long startOfRandomNumber = 1000000000000000L;
-		
+
 		ArrayList<Long> listOfRandomNumbers = new ArrayList<Long>();
 		for(long i = 0; i < dataList.size(); i++) {
 			listOfRandomNumbers.add(startOfRandomNumber);
 			startOfRandomNumber++;
 		}
 		Collections.shuffle(listOfRandomNumbers);
-		
+
 		for (int i = 0; i < dataList.size(); i++) {
 			String userName = dataList.get(i).getUserName();
 			if (userName.equals(currentUserName)) {
@@ -165,7 +228,7 @@ public class SessionConverterCSVData {
 					newList.add(dataList.get(i));
 					sessions.put(newSession, newList);
 				} else {
-					LinkedList<RowObject> currentList = sessions.get(currentSession);
+					List<RowObject> currentList = sessions.get(currentSession);
 					currentList.add(dataList.get(i));
 					sessions.put(currentSession, currentList);
 				}
@@ -179,23 +242,23 @@ public class SessionConverterCSVData {
 			}
 		}
 		return sessions;
-		
+
 	}
-	
+
 	/**
 	 * If dataset has no session identifiers, calculate them with the help of request start times.
 	 * @param dataList
 	 * @return
 	 */
-	private LinkedHashMap<String, LinkedList<RowObject>> calculateSessions(ArrayList<RowObject> dataList) {
-		LinkedHashMap<String, LinkedList<RowObject>> sessions = new LinkedHashMap<String, LinkedList<RowObject>>();
-		
-		DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+	private LinkedHashMap<String, List<RowObject>> calculateSessions(List<RowObject> dataList) {
+		LinkedHashMap<String, List<RowObject>> sessions = new LinkedHashMap<>();
+
+		DateFormat dateFormat = ApiFormats.DATE_FORMAT;
 
 		String currentSession = "";
-		
+
 		long startOfRandomNumber = 1000000000000000L;
-		
+
 		ArrayList<Long> listOfRandomNumbers = new ArrayList<Long>();
 		for(long i = 0; i < dataList.size(); i++) {
 			listOfRandomNumbers.add(startOfRandomNumber);
@@ -230,7 +293,7 @@ public class SessionConverterCSVData {
 					newList.add(dataList.get(i));
 					sessions.put(newSession, newList);
 				} else {
-					LinkedList<RowObject> currentList = sessions.get(currentSession);
+					List<RowObject> currentList = sessions.get(currentSession);
 					currentList.add(dataList.get(i));
 					sessions.put(currentSession, currentList);
 				}
@@ -241,12 +304,12 @@ public class SessionConverterCSVData {
 
 	/**
 	 * Appends RowObject infos to the String buffer.
-	 * 
+	 *
 	 * @param buffer
 	 * @param rowObject
 	 */
 	private void appendRowObjectInfo(StringBuffer buffer, RowObject rowObject) {
-		DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+		DateFormat dateFormat = ApiFormats.DATE_FORMAT;
 
 		Date startDate = null;
 		Date endDate = null;
@@ -263,6 +326,7 @@ public class SessionConverterCSVData {
 		long startTime = startDate.getTime();
 		long startMicros = TimeUnit.MILLISECONDS.toNanos(startTime);
 		long endMicros = TimeUnit.MILLISECONDS.toNanos(endTime);
+
 
 		if (!(rowObject.getBusinessTransaction() == null)) {
 			buffer.append("\"").append(rowObject.getBusinessTransaction()).append("\":");
@@ -281,10 +345,10 @@ public class SessionConverterCSVData {
 
 	/**
 	 * Appends HTTP infos to the String buffer.
-	 * 
+	 *
 	 * Sets dummy values when required information is not available in the data
 	 * point.
-	 * 
+	 *
 	 * @param buffer
 	 * @param rowObject
 	 */

@@ -1,10 +1,10 @@
 package org.continuity.session.logs.managers;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import org.continuity.api.entities.links.MeasurementDataLinkType;
 import org.continuity.api.entities.links.LinkExchangeModel;
+import org.continuity.api.entities.links.MeasurementDataLinkType;
 import org.continuity.rest.InspectITRestClient;
 import org.continuity.session.logs.converter.SessionConverterCSVData;
 import org.continuity.session.logs.csv.ReadCSV;
@@ -61,29 +61,29 @@ public class SessionLogsPipelineManager {
 			source.getMeasurementDataLinks().setLink(link);
 			return new OPENxtraceSessionLogsExtractor(tag, eurekaRestTemplate).getSessionLogs(OPENxtraceUtils.getOPENxtraces(source, plainRestTemplate));
 		case CSV:
-			return getSessionLogsFromCSV(this.link);
+			return getSessionLogsFromCSV();
 		default:
 			throw new RuntimeException("The given measurement cannot be resolved!");
 		}
 	}
-	
+
 	/**
 	 * Generates session logs from CSV file.
 	 * @param link
 	 * @return
 	 */
-	private String getSessionLogsFromCSV(String link) {	
+	private String getSessionLogsFromCSV() {
 		ReadCSV rcsv = new ReadCSV();
-		ArrayList<RowObject> dataList = rcsv.readDataFromCSV(link);
-		SessionConverterCSVData csvsc = new SessionConverterCSVData();
-		String sessionLogs = csvsc.createSessionLogsFromCSV(dataList);
+		List<RowObject> dataList = rcsv.readDataFromCSV(link);
+		SessionConverterCSVData csvsc = new SessionConverterCSVData(eurekaRestTemplate);
+		String sessionLogs = csvsc.createSessionLogsFromCSV(dataList, tag);
 		return sessionLogs;
 	}
 
 	/**
 	 * Runs the pipeline using the session logs modularization. Based on the environment variable,
 	 * different input data is used.
-	 * 
+	 *
 	 *
 	 * @return
 	 */

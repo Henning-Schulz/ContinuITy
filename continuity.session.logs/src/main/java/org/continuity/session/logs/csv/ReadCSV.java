@@ -3,7 +3,6 @@ package org.continuity.session.logs.csv;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.continuity.session.logs.entities.RowObject;
@@ -13,18 +12,18 @@ import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
 /**
- * 
+ *
  * @author Alper Hidiroglu
  *
  */
 public class ReadCSV {
 	/**
 	 * Reads data from CSV and saves the data into list of RowObjects.
-	 * 
+	 *
 	 * @return
 	 */
 	@SuppressWarnings("deprecation")
-	public ArrayList<RowObject> readDataFromCSV(String link) {	
+	public List<RowObject> readDataFromCSV(String link) {
 		BeanListProcessor<RowObject> rowProcessor = new BeanListProcessor<RowObject>(RowObject.class);
 
 		CsvParserSettings parserSettings = new CsvParserSettings();
@@ -40,7 +39,7 @@ public class ReadCSV {
 		}
 
 		List<RowObject> beans = rowProcessor.getBeans();
-		
-		return (ArrayList<RowObject>) beans;
+
+		return beans;
 	}
 }
