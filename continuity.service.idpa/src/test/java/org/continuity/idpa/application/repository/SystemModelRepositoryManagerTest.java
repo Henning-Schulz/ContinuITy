@@ -14,6 +14,8 @@ import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.idpa.application.Parameter;
 import org.continuity.idpa.application.SystemModelTestInstance;
+import org.continuity.idpa.storage.ApplicationModelRepository;
+import org.continuity.idpa.storage.ApplicationModelRepositoryManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
