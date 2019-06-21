@@ -26,7 +26,7 @@ import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.idpa.entities.ApplicationModelLink;
 import org.continuity.idpa.entities.EndpointAsRegex;
 import org.continuity.idpa.serialization.yaml.IdpaYamlSerializer;
-import org.continuity.idpa.storage.ApplicationModelRepositoryManager;
+import org.continuity.idpa.storage.ApplicationStorageManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -67,10 +67,10 @@ public class ApplicationController {
 	@Value("${spring.application.name}")
 	private String applicationName;
 
-	private final ApplicationModelRepositoryManager manager;
+	private final ApplicationStorageManager manager;
 
 	@Autowired
-	public ApplicationController(ApplicationModelRepositoryManager manager, RestTemplate restTemplate, AmqpTemplate amqpTemplate) {
+	public ApplicationController(ApplicationStorageManager manager, RestTemplate restTemplate, AmqpTemplate amqpTemplate) {
 		this.manager = manager;
 		this.restTemplate = restTemplate;
 		this.amqpTemplate = amqpTemplate;

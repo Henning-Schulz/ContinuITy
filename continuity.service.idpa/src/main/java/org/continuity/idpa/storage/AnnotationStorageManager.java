@@ -1,45 +1,34 @@
 package org.continuity.idpa.storage;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.Iterator;
 
 import org.continuity.api.entities.report.AnnotationValidityReport;
 import org.continuity.commons.idpa.AnnotationValidityChecker;
+import org.continuity.idpa.Idpa;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
-import org.continuity.idpa.annotation.validation.AnnotationFixer;
-import org.continuity.idpa.application.Application;
-import org.continuity.idpa.legacy.IdpaFromOldAnnotationConverter;
+import org.continuity.idpa.storage.IdpaStorage.IdpaEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
+ * Manages the annotations stored in an {@link IdpaStorage}.
+ *
  * @author Henning Schulz
  *
  */
-public class AnnotationStorageManager {
+public class AnnotationStorageManager implements IdpaStorageListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AnnotationStorageManager.class);
 
-	private static final String SUFFIX_BASE = "base";
-
-	private final AnnotationStorage storage;
+	private final IdpaStorage storage;
 
 	@Autowired
-	public AnnotationStorageManager(AnnotationStorage storage) {
+	public AnnotationStorageManager(IdpaStorage storage) {
 		this.storage = storage;
-	}
-
-	/**
-	 * Retrieves the specified application model if present.
-	 *
-	 * @param tag
-	 *            The tag of the application model.
-	 * @return A {@link Application}. If there is no application model for the tag, {@code null} will be
-	 *         returned.
-	 * @throws IOException
-	 */
-	public Application getApplication(String tag) throws IOException {
-		return storage.readApplication(tag);
+		this.storage.registerListener(this);
 	}
 
 	/**
@@ -51,82 +40,23 @@ public class AnnotationStorageManager {
 	 *         be returned.
 	 * @throws IOException
 	 */
-	public ApplicationAnnotation getAnnotation(String tag) throws IOException {
-		return storage.readAnnotation(tag);
+	public ApplicationAnnotation read(String tag) throws IOException {
+		return storage.readLatest(tag).getAnnotation();
 	}
 
 	/**
-	 * Retrieves the base of the specified annotation if present.
+	 * Retrieves the specified annotation for a given timestamp if present.
 	 *
 	 * @param tag
 	 *            The tag of the annotation.
-	 * @return A {@link ApplicationAnnotation}. If there is no base annotation for the tag, {@code null}
+	 * @param timestamp
+	 *            The timestamp for which an application model is searched.
+	 * @return A {@link ApplicationAnnotation}. If there is no annotation for the tag, {@code null}
 	 *         will be returned.
 	 * @throws IOException
 	 */
-	public ApplicationAnnotation getBaseAnnotation(String tag) throws IOException {
-		return storage.readAnnotation(tag, SUFFIX_BASE);
-	}
-
-	/**
-	 * Updates the application model stored with the specified tag. If the application model breaks
-	 * the stored annotation, the annotation is tried to be fixed if possible.
-	 *
-	 * @param tag
-	 * @param annotation
-	 * @param applicationChangeReport
-	 *            Report holding the application changes.
-	 * @return A report holding information about the changes and if the current state is broken.
-	 * @throws IOException
-	 */
-	public AnnotationValidityReport updateApplication(String tag, Application application, AnnotationValidityReport applicationChangeReport) throws IOException {
-		if ((applicationChangeReport.getApplicationChanges() == null) || applicationChangeReport.getApplicationChanges().isEmpty()) {
-			return AnnotationValidityReport.empty();
-		}
-
-		storage.unmarkAsBroken(tag);
-
-		Application oldSystemModel = storage.readApplication(tag);
-		ApplicationAnnotation annotation = storage.readAnnotation(tag);
-
-		storage.saveOrUpdate(tag, application);
-
-		AnnotationValidityReport report = checkEverything(application, annotation, applicationChangeReport);
-
-		if (report.isBreaking()) {
-			AnnotationFixer fixer = new AnnotationFixer();
-			ApplicationAnnotation fixedAnnotation = fixer.createFixedAnnotation(annotation, report);
-
-			AnnotationValidityReport newReport = checkEverything(application, fixedAnnotation, applicationChangeReport);
-			newReport.setViolationsBeforeFix(report.getViolations());
-			report = newReport;
-
-			if (!newReport.isBreaking()) {
-				storage.saveOrUpdate(tag, fixedAnnotation);
-				LOGGER.info("Fixed annotation for tag {}.", tag);
-			} else {
-				storage.removeAnnotationIfPresent(tag, null);
-				storage.markAsBroken(tag);
-				LOGGER.warn("The annotation for tag {} is now in a broken state!", tag);
-			}
-
-			storage.saveIfNotPresent(tag, annotation, SUFFIX_BASE);
-			storage.saveIfNotPresent(tag, oldSystemModel, SUFFIX_BASE);
-			LOGGER.info("Created or updated base models for tag {}.", tag);
-		}
-
-		return report;
-	}
-
-	private AnnotationValidityReport checkEverything(Application newApplicationModel, ApplicationAnnotation annotation, AnnotationValidityReport applicationChangeReport) {
-		AnnotationValidityChecker checker = new AnnotationValidityChecker(newApplicationModel);
-		checker.registerApplicationChanges(applicationChangeReport);
-
-		if (annotation != null) {
-			checker.checkAnnotation(annotation);
-		}
-
-		return checker.getReport();
+	public ApplicationAnnotation read(String tag, Date timestamp) throws IOException {
+		return storage.readLatestBefore(tag, timestamp).getAnnotation();
 	}
 
 	/**
@@ -134,61 +64,31 @@ public class AnnotationStorageManager {
 	 * respect to the application model, it is rejected. It does <b>not</b> try to fix it. If you
 	 * want to store an annotation that covers application parts that are not part of the current
 	 * application model, please update the application model first.<br>
-	 * Assumes the corresponding application model to be present.
+	 * Assumes a corresponding application model to be present.
 	 *
 	 * @param tag
 	 * @param annotation
 	 * @return A report holding information about the changes and if the new annotation is broken.
 	 * @throws IOException
 	 */
-	public AnnotationValidityReport updateAnnotation(String tag, ApplicationAnnotation annotation) throws IOException {
-		Application systemModel = storage.readApplication(tag);
+	public AnnotationValidityReport saveOrUpdate(String tag, Date timestamp, ApplicationAnnotation annotation) throws IOException {
+		Idpa latest = storage.readLatestBefore(tag, timestamp);
 
-		if (systemModel == null) {
+		if (latest == null) {
 			throw new IllegalStateException("There is no application model with tag " + tag);
 		}
 
-		AnnotationValidityChecker checker = new AnnotationValidityChecker(systemModel);
+		AnnotationValidityChecker checker = new AnnotationValidityChecker(latest.getApplication());
 		checker.checkAnnotation(annotation);
 		AnnotationValidityReport report = checker.getReport();
 
 		if (!report.isBreaking()) {
-			storage.saveOrUpdate(tag, annotation);
+			storage.save(tag, timestamp, annotation);
 
-			storage.unmarkAsBroken(tag);
-			deleteBaseAndLog(tag);
+			storage.unmarkAsBroken(tag, timestamp);
 		}
 
 		return report;
-	}
-
-	/**
-	 * Stores the annotation if there is not yet one for the specified tag.
-	 *
-	 * @param tag
-	 * @param annotation
-	 * @return true if and only if the annotation was stored.
-	 * @throws IOException
-	 */
-	public boolean saveAnnotationIfNotPresent(String tag, ApplicationAnnotation annotation) throws IOException {
-		return storage.saveIfNotPresent(tag, annotation);
-	}
-
-	/**
-	 * Creates or updates a application model and an annotation with the specified tag and creates a
-	 * validity report. Existing annotations are not overwritten.
-	 *
-	 * @param tag
-	 * @param application
-	 * @param annotation
-	 * @param applicationChangeReport
-	 *            Report holding the application changes.
-	 * @return
-	 * @throws IOException
-	 */
-	public AnnotationValidityReport createOrUpdate(String tag, Application application, ApplicationAnnotation annotation, AnnotationValidityReport applicationChangeReport) throws IOException {
-		storage.saveIfNotPresent(tag, annotation);
-		return updateApplication(tag, application, applicationChangeReport);
 	}
 
 	/**
@@ -198,55 +98,61 @@ public class AnnotationStorageManager {
 	 * @return {@code true} if it is broken or {@code false} otherwise.
 	 */
 	public boolean isBroken(String tag) {
-		return storage.isMarkedAsBroken(tag);
+		return storage.readLatest(tag).checkAdditionalFlag(IdpaStorage.FLAG_BROKEN);
 	}
 
 	/**
-	 * Updates the legacy application and annotation for versions lower than 1.0.
+	 * {@inheritDoc} <br>
 	 *
-	 * @param tag
-	 *            The tag of the IDPA.
-	 * @return Whether the application or the annotation was updated.
-	 * @throws IOException
-	 *             If errors during reading the IDPA occur.
+	 * Checks whether the annotations affected by the change are broken and marks them accordingly.
 	 */
-	public boolean updateLegacyIdpa(String tag) throws IOException {
-		String legacyApplication = storage.readLegacyApplication(tag);
-		String legacyAnnotation = storage.readLegacyAnnotation(tag);
+	@Override
+	public void onApplicationChanged(String tag, Date timestamp) {
+		Iterator<IdpaEntry> it = storage.iterate(tag).iterator();
 
-		IdpaFromOldAnnotationConverter converter = new IdpaFromOldAnnotationConverter();
-		boolean updated = false;
+		IdpaEntry curr = null;
 
-		if (legacyApplication == null) {
-			LOGGER.info("There is no legacy application for tag {} to be updated.", tag);
-		} else {
-			Application application = converter.convertFromSystemModel(legacyApplication);
-			storage.saveOrUpdate(tag, application);
-			updated = true;
-			LOGGER.info("Updated the legacy application for tag {}.", tag);
+		while (it.hasNext() && ((curr == null) || curr.getApplication().getTimestamp().after(timestamp))) {
+			curr = it.next();
 		}
 
-		if (legacyAnnotation == null) {
-			LOGGER.info("There is no legacy annotation for tag {} to be updated.", tag);
-		} else {
-			ApplicationAnnotation annotation = converter.convertFromAnnotation(legacyAnnotation);
-			storage.saveOrUpdate(tag, annotation);
-			updated = true;
-			LOGGER.info("Updated the legacy annotation for tag {}.", tag);
+		if ((curr != null)) {
+			adjustBrokenMark(tag, curr);
 		}
 
-		return updated;
+		while (it.hasNext() && (curr != null) && curr.getApplication().getTimestamp().equals(timestamp)) {
+			curr = it.next();
+			adjustBrokenMark(tag, curr);
+		}
 	}
 
-	private void deleteBaseAndLog(String tag) {
-		boolean deleted = storage.removeAnnotationIfPresent(tag, SUFFIX_BASE);
-		deleted &= storage.removeApplicationIfPresent(tag, SUFFIX_BASE);
+	private boolean isBroken(Idpa idpa) {
+		AnnotationValidityChecker checker = new AnnotationValidityChecker(idpa.getApplication());
+		checker.checkAnnotation(idpa.getAnnotation());
+		AnnotationValidityReport report = checker.getReport();
 
-		if (deleted) {
-			LOGGER.info("Deleted base application model and annotation with tag {}.", tag);
+		return report.isBreaking();
+	}
+
+	private void adjustBrokenMark(String tag, Idpa idpa) {
+		if (isBroken(idpa)) {
+			try {
+				storage.markAsBroken(tag, idpa.getTimestamp());
+			} catch (IOException e) {
+				LOGGER.error("Could not mark annotation " + tag + " (" + idpa.getTimestamp() + ") as broken!", e);
+			}
 		} else {
-			LOGGER.debug("Did not delete base application model and annotation with tag {}. Potentially, there was no base.", tag);
+			try {
+				storage.unmarkAsBroken(tag, idpa.getTimestamp());
+			} catch (IOException e) {
+				LOGGER.error("Could not unmark annotation " + tag + " (" + idpa.getTimestamp() + ") as broken!", e);
+			}
 		}
+	}
+
+	@Override
+	public void onAnnotationChanged(String tag, Date timestamp) {
+		// do nothing
 	}
 
 }

@@ -1,6 +1,7 @@
 package org.continuity.idpa.config;
 
-import org.continuity.idpa.storage.ApplicationModelRepositoryManager;
+import org.continuity.idpa.storage.AnnotationStorageManager;
+import org.continuity.idpa.storage.ApplicationStorageManager;
 import org.continuity.idpa.storage.IdpaStorage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -19,8 +20,13 @@ public class StorageConfig {
 	}
 
 	@Bean
-	ApplicationModelRepositoryManager systemModelRepositoryManager(IdpaStorage repositoy) {
-		return new ApplicationModelRepositoryManager(repositoy);
+	ApplicationStorageManager applicationStorageManager(IdpaStorage repositoy) {
+		return new ApplicationStorageManager(repositoy);
+	}
+
+	@Bean
+	AnnotationStorageManager annotationStorageManager(IdpaStorage storage) {
+		return new AnnotationStorageManager(storage);
 	}
 
 }

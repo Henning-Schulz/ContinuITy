@@ -22,7 +22,7 @@ public class SwaggerConfig {
 
 	@Bean
 	public Docket api() {
-		return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.basePackage("org.continuity.idpa.application.controllers")).build().apiInfo(apiInfo());
+		return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.basePackage("org.continuity.idpa.controllers")).build().apiInfo(apiInfo());
 	}
 
 	private ApiInfo apiInfo() {

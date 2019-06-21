@@ -2,8 +2,6 @@ package org.continuity.idpa.controllers;
 
 import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.ROOT;
 import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.GET;
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.GET_BASE;
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.LEGACY_UPDATE;
 import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.UPDATE;
 import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.UPLOAD;
 
@@ -65,7 +63,7 @@ public class AnnotationController {
 		ApplicationAnnotation annotation;
 
 		try {
-			annotation = storageManager.getAnnotation(tag);
+			annotation = storageManager.read(tag);
 		} catch (IOException e) {
 			LOGGER.error("Error during getting annotation with tag {}!", tag);
 			e.printStackTrace();
@@ -85,34 +83,6 @@ public class AnnotationController {
 	}
 
 	/**
-	 * Retrieves the base of the specified annotation if present.
-	 *
-	 * @param tag
-	 *            The tag of the annotation.
-	 * @returnA {@link ResponseEntity} holding the annotation or specifying the error if one
-	 *          occurred. If there is no base annotation for the tag, the status 404 (Not Found)
-	 *          will be returned.
-	 */
-	@RequestMapping(path = GET_BASE, method = RequestMethod.GET)
-	public ResponseEntity<ApplicationAnnotation> getBaseAnnotation(@PathVariable("tag") String tag) {
-		ApplicationAnnotation annotation;
-
-		try {
-			annotation = storageManager.getBaseAnnotation(tag);
-		} catch (IOException e) {
-			LOGGER.error("Error during getting base annotation with tag {}!", tag);
-			LOGGER.error("Exception:", e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-
-		if (annotation == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-
-		return new ResponseEntity<>(annotation, HttpStatus.OK);
-	}
-
-	/**
 	 * Updates the annotation stored with the specified tag. If the annotation is invalid with
 	 * respect to the system model, it is rejected.
 	 *
@@ -125,7 +95,7 @@ public class AnnotationController {
 		AnnotationValidityReport report = null;
 
 		try {
-			report = storageManager.updateAnnotation(tag, annotation);
+			report = storageManager.saveOrUpdate(tag, annotation);
 		} catch (IOException e) {
 			LOGGER.error("Error during updating annotation with tag {}!", tag);
 			e.printStackTrace();
@@ -165,7 +135,7 @@ public class AnnotationController {
 		}
 		
 		try {
-			report = storageManager.updateAnnotation(tag, idpaAnnotation);
+			report = storageManager.saveOrUpdate(tag, idpaAnnotation);
 		} catch (IOException e) {
 			LOGGER.error("Error during updating annotation with tag {}!", tag);
 			LOGGER.error("Exception: " , e);
@@ -177,36 +147,6 @@ public class AnnotationController {
 		} else {
 			return new ResponseEntity<>(report.toString(), HttpStatus.CREATED);
 		}
-	}
-	
-	/**
-	 * Updates a legacy IDPA.
-	 *
-	 * @param tag
-	 *            The tag of the IDPA.
-	 * @return A response entity providing a message whether the update was successful.
-	 */
-	@RequestMapping(path = LEGACY_UPDATE, method = RequestMethod.GET)
-	public ResponseEntity<String> updateLegacyIdpa(@PathVariable("tag") String tag) {
-		boolean updated;
-
-		try {
-			updated = storageManager.updateLegacyIdpa(tag);
-		} catch (IOException e) {
-			LOGGER.error("Exception when updating the legacy IDPA with tag {}!", tag);
-			LOGGER.error("Exception:", e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-
-		String message;
-
-		if (updated) {
-			message = "The IDPA has been updated to the current version.";
-		} else {
-			message = "There was no need to update the IDPA.";
-		}
-
-		return ResponseEntity.ok(message);
 	}
 
 }

@@ -4,35 +4,28 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.EnumSet;
 
-import javax.ws.rs.NotSupportedException;
-
-import org.continuity.api.entities.report.ApplicationChange;
 import org.continuity.api.entities.report.ApplicationChangeReport;
 import org.continuity.api.entities.report.ApplicationChangeType;
 import org.continuity.commons.idpa.ApplicationChangeDetector;
 import org.continuity.commons.idpa.ApplicationUpdater;
-import org.continuity.commons.utils.DataHolder;
+import org.continuity.idpa.Idpa;
 import org.continuity.idpa.application.Application;
-import org.continuity.idpa.application.Endpoint;
-import org.continuity.idpa.application.Parameter;
-import org.continuity.idpa.visitor.FindBy;
-import org.continuity.idpa.visitor.IdpaByClassSearcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manages the {@link ApplicationModelRepository}.
+ * Manages the applications stored in an {@link IdpaStorage}.
  *
  * @author Henning Schulz
  *
  */
-public class ApplicationModelRepositoryManager {
+public class ApplicationStorageManager {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationModelRepositoryManager.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationStorageManager.class);
 
 	private final IdpaStorage repository;
 
-	public ApplicationModelRepositoryManager(IdpaStorage repository) {
+	public ApplicationStorageManager(IdpaStorage repository) {
 		this.repository = repository;
 	}
 
@@ -52,8 +45,6 @@ public class ApplicationModelRepositoryManager {
 	/**
 	 * Saves the passed application model if something changed - ignoring a set of change types.
 	 *
-	 * TODO: Use {@link ApplicationUpdater}.
-	 *
 	 * @param tag
 	 *            The tag of the model.
 	 * @param application
@@ -67,17 +58,17 @@ public class ApplicationModelRepositoryManager {
 		ApplicationChangeDetector detector = new ApplicationChangeDetector(application, ignoredChanges);
 		ApplicationChangeReport report = ApplicationChangeReport.empty(application.getTimestamp());
 
-		Application before = repository.readLatestBefore(tag, application.getTimestamp()).getApplication();
+		Idpa before = repository.readLatestBefore(tag, application.getTimestamp());
 
 		if (before != null) {
-			detector.compareTo(before);
+			detector.compareTo(before.getApplication());
 			report = detector.getReport();
 		} else {
 			report = ApplicationChangeReport.allOf(application);
 		}
 
 		if (report.changed()) {
-			Application oldestAfter = repository.readOldestAfter(tag, application.getTimestamp());
+			Idpa oldestAfter = repository.readOldestAfter(tag, application.getTimestamp());
 
 			boolean changed = false;
 
@@ -85,17 +76,19 @@ public class ApplicationModelRepositoryManager {
 				changed = true;
 			} else {
 				detector = new ApplicationChangeDetector(application, ignoredChanges);
-				detector.compareTo(oldestAfter);
+				detector.compareTo(oldestAfter.getApplication());
 				changed = detector.getReport().changed();
 			}
 
 			if (changed) {
-				if (!ignoredChanges.isEmpty()) {
-					application = mergeIgnoredChanges(before, application, report);
-				}
+				EnumSet<ApplicationChangeType> consideredChangeTypes = EnumSet.allOf(ApplicationChangeType.class);
+				consideredChangeTypes.removeAll(ignoredChanges);
+
+				ApplicationUpdater updater = new ApplicationUpdater();
+				report = updater.updateApplication(before.getApplication(), application, consideredChangeTypes);
 
 				try {
-					repository.save(tag, application);
+					repository.save(tag, report.getUpdatedApplication());
 					LOGGER.info("Stored a new application model with tag {} and date {}.", tag, application.getTimestamp());
 				} catch (IOException e) {
 					LOGGER.error("Could not save the application model with tag {} and date {}!", tag, application.getTimestamp());
@@ -115,62 +108,6 @@ public class ApplicationModelRepositoryManager {
 		return report;
 	}
 
-	private Application mergeIgnoredChanges(Application oldModel, Application newModel, ApplicationChangeReport report) {
-		for (ApplicationChange change : report.getIgnoredApplicationChanges()) {
-			switch (change.getType()) {
-			case ENDPOINT_ADDED:
-				newModel.getEndpoints().removeIf(interf -> interf.getId().equals(change.getChangedElement().getId()));
-				break;
-			case ENDPOINT_CHANGED:
-				Endpoint<?> oldInterf = FindBy.findById(change.getChangedElement().getId(), Endpoint.GENERIC_TYPE).in(oldModel).getFound();
-				Endpoint<?> newInterf = FindBy.findById(change.getChangedElement().getId(), Endpoint.GENERIC_TYPE).in(newModel).getFound();
-
-				if ((oldInterf == null) || (newInterf == null)) {
-					LOGGER.error("There is a change {}, but I could not find the interface in both application versions! Ignoring the change.", change);
-				} else {
-					newInterf.clonePropertyFrom(change.getChangedProperty(), oldInterf);
-				}
-				break;
-			case ENDPOINT_REMOVED:
-				newModel.addEndpoint(oldModel.getEndpoints().stream().filter(interf -> interf.getId().equals(change.getChangedElement().getId())).findFirst().get());
-				break;
-			case PARAMETER_CHANGED:
-				throw new NotSupportedException("Ignoring PARAMETER_CHANGED is currently not supported!");
-			case PARAMETER_ADDED:
-				throw new NotSupportedException("Ignoring PARAMETER_ADDED is currently not supported!");
-			case PARAMETER_REMOVED:
-				final DataHolder<String> idHolder = new DataHolder<>();
-				final DataHolder<Parameter> paramHolder = new DataHolder<>();
-
-				new IdpaByClassSearcher<>(Endpoint.GENERIC_TYPE, interf -> {
-					final Parameter param = FindBy.findById(change.getChangedElement().getId(), Parameter.class).in(interf).getFound();
-
-					if (param != null) {
-						idHolder.set(interf.getId());
-						paramHolder.set(param);
-					}
-				}).visit(oldModel);
-
-				Endpoint<?> newInterface = FindBy.findById(idHolder.get(), Endpoint.GENERIC_TYPE).in(newModel).getFound();
-
-				if (newInterface != null) {
-					addParameter(paramHolder.get(), newInterface);
-				}
-
-				break;
-			default:
-				break;
-			}
-		}
-
-		return newModel;
-	}
-
-	@SuppressWarnings("unchecked")
-	private <P extends Parameter> void addParameter(Parameter param, Endpoint<P> interf) {
-		interf.addParameter((P) param);
-	}
-
 	/**
 	 * Reads the current application model.
 	 *
@@ -182,6 +119,21 @@ public class ApplicationModelRepositoryManager {
 	 */
 	public Application read(String tag) throws IOException {
 		return repository.readLatest(tag).getApplication();
+	}
+
+	/**
+	 * Reads the application model that is stored for the given timestamp.
+	 *
+	 * @param tag
+	 *            The tag of the application model.
+	 * @param timestamp
+	 *            The timestamp for which an application model is searched.
+	 * @return The current application model with the tag.
+	 * @throws IOException
+	 *             If an error occurs during reading.
+	 */
+	public Application read(String tag, Date timestamp) throws IOException {
+		return repository.readLatestBefore(tag, timestamp).getApplication();
 	}
 
 	/**

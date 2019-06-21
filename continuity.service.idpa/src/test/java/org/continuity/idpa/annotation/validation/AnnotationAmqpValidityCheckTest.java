@@ -164,19 +164,19 @@ public class AnnotationAmqpValidityCheckTest {
 		report = reportCaptor.getValue();
 		Assert.assertFalse(report.isOk());
 		Assert.assertFalse(report.isBreaking());
-		Assert.assertTrue(storageManager.getAnnotation(TAG).getEndpointAnnotations().isEmpty());
+		Assert.assertTrue(storageManager.read(TAG).getEndpointAnnotations().isEmpty());
 
 		Mockito.reset(amqpMock);
 
 		firstMode = FIRST_BEFORE_FIRST;
 		callSystemModelCreated(AnnotationValidityTestInstance.FIRST);
 		Mockito.verifyZeroInteractions(amqpMock);
-		Assert.assertTrue(storageManager.getAnnotation(TAG).getEndpointAnnotations().isEmpty());
+		Assert.assertTrue(storageManager.read(TAG).getEndpointAnnotations().isEmpty());
 
 		// Reset annotation (has been fixed until it was empty)
-		storageManager.updateAnnotation(TAG, AnnotationValidityTestInstance.FIRST.getAnnotation());
+		storageManager.saveOrUpdate(TAG, AnnotationValidityTestInstance.FIRST.getAnnotation());
 		Mockito.verifyZeroInteractions(amqpMock);
-		Assert.assertFalse(storageManager.getAnnotation(TAG).getEndpointAnnotations().isEmpty());
+		Assert.assertFalse(storageManager.read(TAG).getEndpointAnnotations().isEmpty());
 	}
 
 	@Test

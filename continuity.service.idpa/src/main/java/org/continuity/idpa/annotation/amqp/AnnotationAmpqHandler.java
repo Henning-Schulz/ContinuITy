@@ -55,7 +55,7 @@ public class AnnotationAmpqHandler {
 		}
 
 		try {
-			storageManager.saveAnnotationIfNotPresent(link.getTag(), annResponse.getBody());
+			storageManager.saveIfNotPresent(link.getTag(), annResponse.getBody());
 		} catch (IOException e) {
 			LOGGER.error("Error during storing the new annotation with tag {}!", link.getTag());
 			LOGGER.error("Exception: ", e);

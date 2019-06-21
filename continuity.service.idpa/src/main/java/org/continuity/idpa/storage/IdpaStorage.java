@@ -2,16 +2,21 @@ package org.continuity.idpa.storage;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.continuity.api.entities.ApiFormats;
@@ -33,8 +38,13 @@ public class IdpaStorage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(IdpaStorage.class);
 
+	public static final String FLAG_BROKEN = "IdpaStorage.BROKEN";
+
 	private static final String APPLICATION_FILE_NAME = "application.yml";
 	private static final String ANNOTATION_FILE_NAME = "application.yml";
+
+	private static final String BROKEN_FILE_NAME = "broken.txt";
+	private static final String BROKEN_CONTENT = "This annotation is broken";
 
 	private static final DateFormat DATE_FORMAT = ApiFormats.DATE_FORMAT;
 
@@ -42,6 +52,8 @@ public class IdpaStorage {
 	private final IdpaYamlSerializer<ApplicationAnnotation> annSerializer;
 
 	private final Path storagePath;
+
+	private final List<IdpaStorageListener> listeners = new ArrayList<>();
 
 	public IdpaStorage(String storagePath) {
 		this(Paths.get(storagePath));
@@ -60,6 +72,24 @@ public class IdpaStorage {
 	}
 
 	/**
+	 * Adds a listener that will be notified whenever an application or annotation has been changed.
+	 *
+	 * @param listener
+	 *            An {@link IdpaStorageListener}.
+	 */
+	public void registerListener(IdpaStorageListener listener) {
+		this.listeners.add(listener);
+	}
+
+	private void onApplicationChanged(String tag, Date timestamp) {
+		listeners.forEach(l -> l.onApplicationChanged(tag, timestamp));
+	}
+
+	private void onAnnotationChanged(String tag, Date timestamp) {
+		listeners.forEach(l -> l.onAnnotationChanged(tag, timestamp));
+	}
+
+	/**
 	 * Stores the specified application model with the specified tag.
 	 *
 	 * @param tag
@@ -74,6 +104,7 @@ public class IdpaStorage {
 		appSerializer.writeToYaml(application, path);
 
 		LOGGER.debug("Wrote application model to {}.", path);
+		onApplicationChanged(tag, application.getTimestamp());
 	}
 
 	/**
@@ -90,7 +121,45 @@ public class IdpaStorage {
 		Path path = getDirPath(tag, timestamp).resolve(APPLICATION_FILE_NAME);
 		annSerializer.writeToYaml(annotation, path);
 
-		LOGGER.debug("Wrote application model to {}.", path);
+		LOGGER.debug("Wrote annotation model to {}.", path);
+		onAnnotationChanged(tag, timestamp);
+	}
+
+	/**
+	 * Marks the annotation with the passed tag and timestamp to be broken.
+	 *
+	 * @param tag
+	 * @param timestamp
+	 * @throws IOException
+	 */
+	public void markAsBroken(String tag, Date timestamp) throws IOException {
+		Path path = getDirPath(tag, timestamp).resolve(BROKEN_FILE_NAME);
+		Files.write(path, Collections.singletonList(BROKEN_CONTENT), StandardOpenOption.CREATE);
+	}
+
+	/**
+	 * Removes a potentially existing mark of the annotation with the passed tag and timestamp to be
+	 * broken.
+	 *
+	 * @param tag
+	 * @param timestamp
+	 * @return {@code true} if there was a mark or {@code false} otherwise.
+	 * @throws IOException
+	 */
+	public boolean unmarkAsBroken(String tag, Date timestamp) throws IOException {
+		Path path = getDirPath(tag, timestamp).resolve(BROKEN_FILE_NAME);
+		return Files.deleteIfExists(path);
+	}
+
+	/**
+	 * Returns whether the annotation with the passed tag and timestamp is marked as broken.
+	 *
+	 * @param tag
+	 * @return
+	 * @throws NotDirectoryException
+	 */
+	public boolean isBroken(String tag, Date timestamp) throws NotDirectoryException {
+		return readLatestBefore(tag, timestamp).checkAdditionalFlag(FLAG_BROKEN);
 	}
 
 	/**
@@ -98,14 +167,10 @@ public class IdpaStorage {
 	 *
 	 * @param tag
 	 *            The tag of the IDPA.
-	 * @return The latest IDPA.
+	 * @return An <b>immutable</b> IDPA.
 	 */
 	public Idpa readLatest(String tag) {
-		for (IdpaEntry entry : iterate(tag)) {
-			return entry;
-		}
-
-		return null;
+		return readLatestBefore(tag, new Date(Long.MAX_VALUE));
 	}
 
 	/**
@@ -115,7 +180,7 @@ public class IdpaStorage {
 	 *            The tag of the IDPA.
 	 * @param date
 	 *            The date to compare with.
-	 * @return An IDPA.
+	 * @return An <b>immutable</b> IDPA.
 	 * @throws IOException
 	 *             If an error during reading the IDPA occurs.
 	 */
@@ -130,25 +195,25 @@ public class IdpaStorage {
 	}
 
 	/**
-	 * Reads the oldest application model that is newer than the specified date.
+	 * Reads the oldest IDPA that is newer than the specified date.
 	 *
 	 * @param tag
-	 *            The tag of the application model.
+	 *            The tag of the IDPA.
 	 * @param date
 	 *            The date to compare with.
-	 * @return A application model.
+	 * @return An <b>immutable</b> IDPA.
 	 * @throws IOException
-	 *             If an error during reading the application model occurs.
+	 *             If an error during reading the IDPA occurs.
 	 */
-	public Application readOldestAfter(String tag, Date date) {
-		Application next = null;
+	public Idpa readOldestAfter(String tag, Date date) {
+		IdpaEntry next = null;
 
 		for (IdpaEntry entry : iterate(tag)) {
 			if (!date.before(entry.getDate())) {
 				return next;
 			}
 
-			next = entry.getApplication();
+			next = entry;
 		}
 
 		return next;
@@ -195,17 +260,21 @@ public class IdpaStorage {
 
 	private Path getDirPath(String tag) throws NotDirectoryException {
 		Path dirPath = storagePath.resolve(tag);
-		checkAndCreateDirs(dirPath);
+		checkAndCreateDirs(dirPath, true);
 		return dirPath;
 	}
 
 	private Path getDirPath(String tag, Date timestamp) throws NotDirectoryException {
+		return getDirPath(tag, timestamp, true);
+	}
+
+	private Path getDirPath(String tag, Date timestamp, boolean createDirs) throws NotDirectoryException {
 		Path dirPath = getDirPath(tag).resolve(DATE_FORMAT.format(timestamp));
-		checkAndCreateDirs(dirPath);
+		checkAndCreateDirs(dirPath, createDirs);
 		return dirPath;
 	}
 
-	private void checkAndCreateDirs(Path dirPath) throws NotDirectoryException {
+	private void checkAndCreateDirs(Path dirPath, boolean create) throws NotDirectoryException {
 		File dir = dirPath.toFile();
 
 		if (dir.exists() && !dir.isDirectory()) {
@@ -213,13 +282,15 @@ public class IdpaStorage {
 			throw new NotDirectoryException(dir.getAbsolutePath());
 		}
 
-		dir.mkdirs();
+		if (create) {
+			dir.mkdirs();
+		}
 	}
 
 	/**
-	 * Returns an {@link Iterable} allowing to iterate over all IDPAs in combination
-	 * with the created date. The models are traversed in ascending order. That is, the newest model
-	 * comes first.
+	 * Returns an {@link Iterable} allowing to iterate over all IDPAs in combination with the
+	 * created date. The models are traversed in descending order. That is, the newest model comes
+	 * first.
 	 *
 	 * @param tag
 	 *            The tag of the application models to be iterated.
@@ -255,14 +326,18 @@ public class IdpaStorage {
 	private class ApplicationIterator implements Iterator<IdpaEntry> {
 
 		private final String tag;
-		private final List<Date> dates;
 		private final Iterator<Date> datesIterator;
+		private final Map<Date, Path> appPerDate;
 
 		public ApplicationIterator(String tag) throws NotDirectoryException {
 			this.tag = tag;
+
 			Path dir = getDirPath(tag);
-			this.dates = Arrays.stream(dir.toFile().list()).map(this::extractDate).collect(Collectors.toList());
-			Collections.sort(this.dates, Collections.reverseOrder());
+			List<Date> dates = Arrays.stream(dir.toFile().list()).map(this::extractDate).collect(Collectors.toList());
+			Collections.sort(dates);
+			this.appPerDate = findApplicationPerDate(dir, dates);
+
+			Collections.reverse(dates);
 			this.datesIterator = dates.iterator();
 		}
 
@@ -275,6 +350,21 @@ public class IdpaStorage {
 			}
 
 			return new Date(0);
+		}
+
+		private Map<Date, Path> findApplicationPerDate(Path dir, List<Date> dates) {
+			Map<Date, Path> appPerDate = new HashMap<>();
+			Date dateOfLastApp = null;
+
+			for (Date d : dates) {
+				if (dir.resolve(DATE_FORMAT.format(d)).resolve(APPLICATION_FILE_NAME).toFile().exists()) {
+					dateOfLastApp = d;
+				}
+
+				appPerDate.put(d, dir.resolve(DATE_FORMAT.format(dateOfLastApp)));
+			}
+
+			return appPerDate;
 		}
 
 		/**
@@ -293,13 +383,19 @@ public class IdpaStorage {
 			Date date = datesIterator.next();
 			String folder = DATE_FORMAT.format(date);
 
+			Path path;
 			try {
-				return IdpaEntry.of(IdpaStorage.this, date, getDirPath(tag).resolve(folder));
+				path = getDirPath(tag).resolve(folder);
 			} catch (NotDirectoryException e) {
 				LOGGER.error("Could not read application {} for tag {}! Returning null.", folder, tag);
-				LOGGER.error("Expetion: ", e);
-				return IdpaEntry.of(IdpaStorage.this, date, null);
+				LOGGER.error("Exception: ", e);
+				return null;
 			}
+
+			IdpaEntry entry = IdpaEntry.of(IdpaStorage.this, date, path);
+			entry.setAppPath(appPerDate.get(entry.getTimestamp()));
+
+			return entry;
 		}
 
 	}
@@ -316,11 +412,13 @@ public class IdpaStorage {
 
 		private final IdpaYamlSerializer<ApplicationAnnotation> annSerializer;
 
-		private final Path path;
+		private Path appPath;
+		private Path annPath;
 		private final Date date;
 
 		private IdpaEntry(IdpaStorage storage, Date date, Path path) {
-			this.path = path;
+			this.appPath = path;
+			this.annPath = path;
 			this.date = date;
 
 			this.appSerializer = storage.appSerializer;
@@ -337,14 +435,14 @@ public class IdpaStorage {
 
 		@Override
 		public Application getApplication() {
-			if (path == null) {
+			if (appPath == null) {
 				return null;
 			}
 
 			try {
-				return appSerializer.readFromYaml(path.resolve(APPLICATION_FILE_NAME));
+				return appSerializer.readFromYaml(appPath.resolve(APPLICATION_FILE_NAME));
 			} catch (IOException e) {
-				LOGGER.error("Could not read application model from {}! Returning null.", path);
+				LOGGER.error("Could not read application model from {}! Returning null.", appPath);
 				e.printStackTrace();
 				return null;
 			}
@@ -352,17 +450,60 @@ public class IdpaStorage {
 
 		@Override
 		public ApplicationAnnotation getAnnotation() {
-			if ((path == null) || !path.resolve(ANNOTATION_FILE_NAME).toFile().exists()) {
+			if (!hasAnnotation()) {
 				return null;
 			}
 
 			try {
-				return annSerializer.readFromYaml(path.resolve(ANNOTATION_FILE_NAME));
+				return annSerializer.readFromYaml(annPath.resolve(ANNOTATION_FILE_NAME));
 			} catch (IOException e) {
-				LOGGER.error("Could not read annotation from {}! Returning null.", path);
+				LOGGER.error("Could not read annotation from {}! Returning null.", annPath);
 				e.printStackTrace();
 				return null;
 			}
+		}
+
+		public boolean hasAnnotation() {
+			return (annPath != null) && annPath.resolve(ANNOTATION_FILE_NAME).toFile().exists();
+		}
+
+		public Path getAppPath() {
+			return appPath;
+		}
+
+		public Path getAnnPath() {
+			return annPath;
+		}
+
+		public void setAppPath(Path path) {
+			this.appPath = path;
+		}
+
+		public void setAnnPath(Path path) {
+			this.annPath = path;
+		}
+
+		public boolean isBroken() {
+			return Files.exists(annPath.resolve(BROKEN_FILE_NAME));
+		}
+
+		@Override
+		public boolean checkAdditionalFlag(String key) {
+			if (FLAG_BROKEN.equals(key)) {
+				return isBroken();
+			}
+
+			return super.checkAdditionalFlag(key);
+		}
+
+		@Override
+		public void setApplication(Application application) {
+			throw new UnsupportedOperationException("Cannot set the application of an IdpaStorage.IdpaEntry!");
+		}
+
+		@Override
+		public void setAnnotation(ApplicationAnnotation annotation) {
+			throw new UnsupportedOperationException("Cannot set the annotation of an IdpaStorage.IdpaEntry!");
 		}
 
 	}
