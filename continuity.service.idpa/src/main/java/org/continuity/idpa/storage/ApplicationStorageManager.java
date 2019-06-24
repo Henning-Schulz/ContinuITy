@@ -81,14 +81,21 @@ public class ApplicationStorageManager {
 			}
 
 			if (changed) {
-				EnumSet<ApplicationChangeType> consideredChangeTypes = EnumSet.allOf(ApplicationChangeType.class);
-				consideredChangeTypes.removeAll(ignoredChanges);
+				Application updatedApplication;
 
-				ApplicationUpdater updater = new ApplicationUpdater();
-				report = updater.updateApplication(before.getApplication(), application, consideredChangeTypes);
+				if (before == null) {
+					updatedApplication = application;
+				} else {
+					EnumSet<ApplicationChangeType> consideredChangeTypes = EnumSet.allOf(ApplicationChangeType.class);
+					consideredChangeTypes.removeAll(ignoredChanges);
+
+					ApplicationUpdater updater = new ApplicationUpdater();
+					report = updater.updateApplication(before.getApplication(), application, consideredChangeTypes);
+					updatedApplication = report.getUpdatedApplication();
+				}
 
 				try {
-					repository.save(tag, report.getUpdatedApplication());
+					repository.save(tag, updatedApplication);
 					LOGGER.info("Stored a new application model with tag {} and date {}.", tag, application.getTimestamp());
 				} catch (IOException e) {
 					LOGGER.error("Could not save the application model with tag {} and date {}!", tag, application.getTimestamp());
@@ -103,6 +110,8 @@ public class ApplicationStorageManager {
 					LOGGER.error("Exception: ", e);
 				}
 			}
+		} else {
+			LOGGER.info("Nothing changed for tag {} and timestamp {} compared to {}.", tag, application.getTimestamp(), (before == null ? "(none)" : before.getApplication().getTimestamp()));
 		}
 
 		return report;

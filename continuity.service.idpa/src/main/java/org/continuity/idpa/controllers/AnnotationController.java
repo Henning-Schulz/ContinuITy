@@ -8,12 +8,10 @@ import static org.continuity.api.rest.RestApi.Idpa.Annotation.Paths.UPLOAD;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.continuity.api.entities.ApiFormats;
 import org.continuity.api.entities.report.AnnotationValidityReport;
-import org.continuity.api.rest.RestApi;
+import org.continuity.api.rest.CustomHeaders;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.serialization.yaml.IdpaYamlSerializer;
 import org.continuity.idpa.storage.AnnotationStorageManager;
@@ -60,10 +58,8 @@ public class AnnotationController {
 	 *            The tag of the annotation.
 	 * @param timestamp
 	 *            The timestamp for which the application model is searched (optional).
-	 * @return {@link ResponseEntity} holding the annotation or specifying the error if one
-	 *         occurred. If there is no annotation for the tag, the status 404 (Not Found) will be
-	 *         returned. If the annotation is broken, a 423 (Locked) will be returned with a link to
-	 *         retrieve the annotation, anyway.
+	 * @return {@link ResponseEntity} holding the annotation. It will hold a header
+	 *         {@link CustomHeaders#BROKEN} indicating whether the IDPA is broken.
 	 */
 	@RequestMapping(path = GET, method = RequestMethod.GET)
 	public ResponseEntity<?> getAnnotation(@PathVariable("tag") String tag, @RequestParam(required = false) String timestamp) {
@@ -94,14 +90,10 @@ public class AnnotationController {
 
 		if (annotation == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} else if (((date == null) && storageManager.isBroken(tag)) || ((date != null) && storageManager.isBroken(tag, date))) {
-			Map<String, String> message = new HashMap<>();
-			message.put("message", "The requested annotation is broken. Get the base via the redirect.");
-			message.put("redirect", applicationName + RestApi.Idpa.Annotation.GET_BASE.path(tag));
-			return new ResponseEntity<>(message, HttpStatus.LOCKED);
+		} else {
+			boolean broken = ((date == null) && storageManager.isBroken(tag)) || ((date != null) && storageManager.isBroken(tag, date));
+			return ResponseEntity.ok().header(CustomHeaders.BROKEN, Boolean.toString(broken)).body(annotation);
 		}
-
-		return new ResponseEntity<>(annotation, HttpStatus.OK);
 	}
 
 	/**

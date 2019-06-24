@@ -17,8 +17,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.continuity.api.entities.ApiFormats;
 import org.continuity.idpa.Idpa;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
@@ -41,7 +43,7 @@ public class IdpaStorage {
 	public static final String FLAG_BROKEN = "IdpaStorage.BROKEN";
 
 	private static final String APPLICATION_FILE_NAME = "application.yml";
-	private static final String ANNOTATION_FILE_NAME = "application.yml";
+	private static final String ANNOTATION_FILE_NAME = "annotation.yml";
 
 	private static final String BROKEN_FILE_NAME = "broken.txt";
 	private static final String BROKEN_CONTENT = "This annotation is broken";
@@ -118,7 +120,7 @@ public class IdpaStorage {
 	 *             If errors during writing to files occur.
 	 */
 	public void save(String tag, Date timestamp, ApplicationAnnotation annotation) throws IOException {
-		Path path = getDirPath(tag, timestamp).resolve(APPLICATION_FILE_NAME);
+		Path path = getDirPath(tag, timestamp).resolve(ANNOTATION_FILE_NAME);
 		annSerializer.writeToYaml(annotation, path);
 
 		LOGGER.debug("Wrote annotation model to {}.", path);
@@ -186,7 +188,7 @@ public class IdpaStorage {
 	 */
 	public Idpa readLatestBefore(String tag, Date date) {
 		for (IdpaEntry entry : iterate(tag)) {
-			if (!date.before(entry.getDate())) {
+			if (!date.before(entry.getTimestamp())) {
 				return entry;
 			}
 		}
@@ -209,7 +211,7 @@ public class IdpaStorage {
 		IdpaEntry next = null;
 
 		for (IdpaEntry entry : iterate(tag)) {
-			if (!date.before(entry.getDate())) {
+			if (!date.before(entry.getTimestamp())) {
 				return next;
 			}
 
@@ -250,12 +252,16 @@ public class IdpaStorage {
 
 		application.setTimestamp(newTimestamp);
 		save(tag, application);
-		save(tag, newTimestamp, idpa.getAnnotation());
+
+		if (idpa.getAnnotation() != null) {
+			save(tag, newTimestamp, idpa.getAnnotation());
+		}
+
 		delete(tag, oldTimestamp);
 	}
 
-	private boolean delete(String tag, Date date) throws NotDirectoryException {
-		return getDirPath(tag).resolve(DATE_FORMAT.format(date)).resolve(APPLICATION_FILE_NAME).toFile().delete();
+	private void delete(String tag, Date date) throws IOException {
+		FileUtils.deleteDirectory(getDirPath(tag).resolve(DATE_FORMAT.format(date)).toFile());
 	}
 
 	private Path getDirPath(String tag) throws NotDirectoryException {
@@ -333,7 +339,7 @@ public class IdpaStorage {
 			this.tag = tag;
 
 			Path dir = getDirPath(tag);
-			List<Date> dates = Arrays.stream(dir.toFile().list()).map(this::extractDate).collect(Collectors.toList());
+			List<Date> dates = Arrays.stream(dir.toFile().list()).filter(d -> !d.startsWith(".")).map(this::extractDate).filter(Objects::nonNull).collect(Collectors.toList());
 			Collections.sort(dates);
 			this.appPerDate = findApplicationPerDate(dir, dates);
 
@@ -345,11 +351,10 @@ public class IdpaStorage {
 			try {
 				return DATE_FORMAT.parse(dateString);
 			} catch (ParseException e) {
-				LOGGER.error("Could not parse date {}! Returning 1990/01/01", dateString);
-				e.printStackTrace();
+				LOGGER.warn("Could not parse date {}! Ignoring the version.", dateString);
 			}
 
-			return new Date(0);
+			return null;
 		}
 
 		private Map<Date, Path> findApplicationPerDate(Path dir, List<Date> dates) {
@@ -414,23 +419,19 @@ public class IdpaStorage {
 
 		private Path appPath;
 		private Path annPath;
-		private final Date date;
 
 		private IdpaEntry(IdpaStorage storage, Date date, Path path) {
 			this.appPath = path;
 			this.annPath = path;
-			this.date = date;
 
 			this.appSerializer = storage.appSerializer;
 			this.annSerializer = storage.annSerializer;
+
+			this.setTimestamp(date);
 		}
 
 		private static IdpaEntry of(IdpaStorage storage, Date date, Path path) {
 			return new IdpaEntry(storage, date, path);
-		}
-
-		public Date getDate() {
-			return this.date;
 		}
 
 		@Override

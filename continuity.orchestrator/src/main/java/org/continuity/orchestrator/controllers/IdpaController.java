@@ -11,6 +11,7 @@ import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.UPDATE_APP
 import java.io.IOException;
 import java.util.Map;
 
+import org.continuity.api.rest.RequestBuilder;
 import org.continuity.api.rest.RestApi.Idpa;
 import org.continuity.commons.utils.WebUtils;
 import org.continuity.idpa.annotation.ApplicationAnnotation;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -49,11 +51,19 @@ public class IdpaController {
 	 *
 	 * @param tag
 	 *            The tag of the application.
+	 * @param timestamp
+	 *            The timestamp for which the application is requested.
 	 * @return The application model.
 	 */
 	@RequestMapping(path = GET_APPLICATION, method = RequestMethod.GET)
-	public ResponseEntity<Application> getApplication(@PathVariable("tag") String tag) {
-		return restTemplate.getForEntity(Idpa.Application.GET.requestUrl(tag).get(), Application.class);
+	public ResponseEntity<Application> getApplication(@PathVariable("tag") String tag, @RequestParam(required = false) String timestamp) {
+		RequestBuilder req = Idpa.Application.GET.requestUrl(tag);
+
+		if (timestamp != null) {
+			req = req.withQuery("timestamp", timestamp);
+		}
+
+		return restTemplate.getForEntity(req.get(), Application.class);
 	}
 
 	/**
@@ -61,12 +71,20 @@ public class IdpaController {
 	 *
 	 * @param tag
 	 *            The tag of the annotation.
+	 * @param timestamp
+	 *            The timestamp for which the annotation is requested.
 	 * @return The annotation.
 	 */
 	@RequestMapping(path = GET_ANNOTATION, method = RequestMethod.GET)
-	public ResponseEntity<ApplicationAnnotation> getAnnotation(@PathVariable("tag") String tag) {
+	public ResponseEntity<ApplicationAnnotation> getAnnotation(@PathVariable("tag") String tag, @RequestParam(required = false) String timestamp) {
 		try {
-			return restTemplate.getForEntity(Idpa.Annotation.GET.requestUrl(tag).get(), ApplicationAnnotation.class);
+			RequestBuilder req = Idpa.Annotation.GET.requestUrl(tag);
+
+			if (timestamp != null) {
+				req = req.withQuery("timestamp", timestamp);
+			}
+
+			return restTemplate.getForEntity(req.get(), ApplicationAnnotation.class);
 		} catch (HttpStatusCodeException e) {
 			if (e.getStatusCode() == HttpStatus.LOCKED) {
 				ObjectMapper mapper = new ObjectMapper();
@@ -161,9 +179,9 @@ public class IdpaController {
 	 *            The annotation.
 	 */
 	@RequestMapping(path = UPDATE_ANNOTATION, method = RequestMethod.POST)
-	public ResponseEntity<String> updateAnnotation(@PathVariable("tag") String tag, @RequestBody ApplicationAnnotation annotation) {
+	public ResponseEntity<String> updateAnnotation(@PathVariable("tag") String tag, @RequestParam String timestamp, @RequestBody ApplicationAnnotation annotation) {
 		try {
-			return restTemplate.postForEntity(Idpa.Annotation.UPDATE.requestUrl(tag).get(), annotation, String.class);
+			return restTemplate.postForEntity(Idpa.Annotation.UPDATE.requestUrl(tag).withQuery("timestamp", timestamp).get(), annotation, String.class);
 		} catch (HttpStatusCodeException e) {
 			LOGGER.warn("Updating the annotation with tag {} resulted in a {} - {} response!", tag, e.getStatusCode(), e.getStatusCode().getReasonPhrase());
 			return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
