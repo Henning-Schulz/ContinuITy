@@ -1,4 +1,4 @@
-package org.continuity.idpa.application;
+package org.continuity.idpa;
 
 import java.util.Date;
 

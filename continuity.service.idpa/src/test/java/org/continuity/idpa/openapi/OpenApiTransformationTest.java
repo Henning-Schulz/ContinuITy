@@ -1,4 +1,4 @@
-package org.continuity.idpa.application.openapi;
+package org.continuity.idpa.openapi;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

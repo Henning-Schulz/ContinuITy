@@ -1,11 +1,11 @@
 package org.continuity.idpa.controllers;
 
-import static org.continuity.api.rest.RestApi.IdpaApplication.Application.ROOT;
-import static org.continuity.api.rest.RestApi.IdpaApplication.Application.Paths.GET;
-import static org.continuity.api.rest.RestApi.IdpaApplication.Application.Paths.GET_AS_REGEX;
-import static org.continuity.api.rest.RestApi.IdpaApplication.Application.Paths.GET_DELTA;
-import static org.continuity.api.rest.RestApi.IdpaApplication.Application.Paths.UPDATE;
-import static org.continuity.api.rest.RestApi.IdpaApplication.Application.Paths.UPDATE_FROM_WORKLOAD_MODEL;
+import static org.continuity.api.rest.RestApi.Idpa.Application.ROOT;
+import static org.continuity.api.rest.RestApi.Idpa.Application.Paths.GET;
+import static org.continuity.api.rest.RestApi.Idpa.Application.Paths.GET_AS_REGEX;
+import static org.continuity.api.rest.RestApi.Idpa.Application.Paths.GET_DELTA;
+import static org.continuity.api.rest.RestApi.Idpa.Application.Paths.UPDATE;
+import static org.continuity.api.rest.RestApi.Idpa.Application.Paths.UPDATE_FROM_WORKLOAD_MODEL;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -222,10 +222,10 @@ public class ApplicationController {
 
 		if (report.changed()) {
 			try {
-				amqpTemplate.convertAndSend(AmqpApi.IdpaApplication.EVENT_CHANGED.name(), AmqpApi.IdpaApplication.EVENT_CHANGED.formatRoutingKey().of(tag),
+				amqpTemplate.convertAndSend(AmqpApi.Idpa.EVENT_CHANGED.name(), AmqpApi.Idpa.EVENT_CHANGED.formatRoutingKey().of(tag),
 						new ApplicationModelLink(applicationName, tag, report.getBeforeChange()));
 			} catch (AmqpException e) {
-				LOGGER.error("Could not send the system model with tag {} to the {} exchange!", tag, AmqpApi.IdpaApplication.EVENT_CHANGED.name());
+				LOGGER.error("Could not send the system model with tag {} to the {} exchange!", tag, AmqpApi.Idpa.EVENT_CHANGED.name());
 				LOGGER.error("Exception:", e);
 			}
 		}
@@ -340,10 +340,10 @@ public class ApplicationController {
 
 		if (report.changed()) {
 			try {
-				amqpTemplate.convertAndSend(AmqpApi.IdpaApplication.EVENT_CHANGED.name(), AmqpApi.IdpaApplication.EVENT_CHANGED.formatRoutingKey().of(tag),
+				amqpTemplate.convertAndSend(AmqpApi.Idpa.EVENT_CHANGED.name(), AmqpApi.Idpa.EVENT_CHANGED.formatRoutingKey().of(tag),
 						new ApplicationModelLink(applicationName, tag, report.getBeforeChange()));
 			} catch (AmqpException e) {
-				LOGGER.error("Could not send the system model with tag {} to the {} exchange!", tag, AmqpApi.IdpaApplication.EVENT_CHANGED.name());
+				LOGGER.error("Could not send the system model with tag {} to the {} exchange!", tag, AmqpApi.Idpa.EVENT_CHANGED.name());
 				LOGGER.error("Exception: ", e);
 			}
 		}

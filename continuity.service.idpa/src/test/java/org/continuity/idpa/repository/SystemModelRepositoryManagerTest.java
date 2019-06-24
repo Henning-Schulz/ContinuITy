@@ -1,4 +1,4 @@
-package org.continuity.idpa.application.repository;
+package org.continuity.idpa.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,11 +10,11 @@ import org.continuity.api.entities.report.ApplicationChangeReport;
 import org.continuity.api.entities.report.ApplicationChangeType;
 import org.continuity.api.entities.report.ModelElementReference;
 import org.continuity.idpa.Idpa;
+import org.continuity.idpa.SystemModelTestInstance;
 import org.continuity.idpa.application.Application;
 import org.continuity.idpa.application.Endpoint;
 import org.continuity.idpa.application.HttpEndpoint;
 import org.continuity.idpa.application.Parameter;
-import org.continuity.idpa.application.SystemModelTestInstance;
 import org.continuity.idpa.storage.ApplicationStorageManager;
 import org.continuity.idpa.storage.IdpaStorage;
 import org.junit.Before;

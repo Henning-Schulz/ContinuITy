@@ -98,9 +98,6 @@ public class RestApi {
 			/** {@value #ROOT}/{tag}/annotation */
 			public static final RestEndpoint UPDATE_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE_ANNOTATION, RequestMethod.POST);
 
-			/** {@value #ROOT}/report */
-			public static final RestEndpoint REPORT = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.REPORT, RequestMethod.GET);
-
 			private Idpa() {
 			}
 
@@ -220,102 +217,20 @@ public class RestApi {
 	}
 
 	/**
-	 * REST API of the IDPA annotation service.
+	 * REST API of the IDPA service.
 	 *
 	 * @author Henning Schulz
 	 *
 	 */
-	public static class IdpaAnnotation {
+	public static class Idpa {
 
-		public static final String SERVICE_NAME = "idpa-annotation";
+		public static final String SERVICE_NAME = "idpa";
 
-		private IdpaAnnotation() {
+		private Idpa() {
 		}
 
 		/**
-		 * Annotation API of the IDPA annotation service.
-		 *
-		 * @author Henning Schulz
-		 *
-		 */
-		public static class Annotation {
-
-			public static final String ROOT = "/annotation";
-
-			/** {@value #ROOT}/{tag} */
-			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
-
-			/** {@value #ROOT}/{tag}/base */
-			public static final RestEndpoint GET_BASE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_BASE, RequestMethod.GET);
-
-			/** {@value #ROOT}/{tag} */
-			public static final RestEndpoint UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE, RequestMethod.POST);
-
-			/** {@value #ROOT}/legacy/{tag}/update */
-			public static final RestEndpoint LEGACY_UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.LEGACY_UPDATE, RequestMethod.GET);
-
-			private Annotation() {
-			}
-
-			public static class Paths {
-
-				public static final String GET = "/{tag}";
-				public static final String GET_BASE = "/{tag}/base";
-				public static final String UPDATE = "/{tag}";
-				public static final String UPLOAD = "/{tag}";
-				public static final String LEGACY_UPDATE = "/legacy/{tag}/update";
-
-				private Paths() {
-				}
-			}
-		}
-
-		/**
-		 * Dummy API of the IDPA annotation service.
-		 *
-		 * @author Henning Schulz
-		 *
-		 */
-		public static class Dummy {
-
-			public static final String ROOT = "/dummy/dvdstore";
-
-			/** {@value #ROOT}/annotation */
-			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_APPLICATION, RequestMethod.GET);
-
-			/** {@value #ROOT}/application */
-			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_ANNOTATION, RequestMethod.GET);
-
-			private Dummy() {
-			}
-
-			public static class Paths {
-
-				public static final String GET_APPLICATION = "/annotation";
-				public static final String GET_ANNOTATION = "/application";
-
-				private Paths() {
-				}
-			}
-		}
-
-	}
-
-	/**
-	 * REST API of the IDPA application service.
-	 *
-	 * @author Henning Schulz
-	 *
-	 */
-	public static class IdpaApplication {
-
-		public static final String SERVICE_NAME = "idpa-application";
-
-		private IdpaApplication() {
-		}
-
-		/**
-		 * Application API of the IDPA application service.
+		 * Application API of the IDPA service.
 		 *
 		 * @author Henning Schulz
 		 *
@@ -360,7 +275,7 @@ public class RestApi {
 		}
 
 		/**
-		 * OpenAPI API of the IDPA application service.
+		 * OpenAPI API of the IDPA service.
 		 *
 		 * @author Henning Schulz
 		 *
@@ -382,6 +297,73 @@ public class RestApi {
 
 				public static final String UPDATE_FROM_JSON = "/{tag}/{version}/json";
 				public static final String UPDATE_FROM_URL = "/{tag}/{version}/url";
+
+				private Paths() {
+				}
+			}
+		}
+
+		/**
+		 * Annotation API of the IDPA service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
+		public static class Annotation {
+
+			public static final String ROOT = "/annotation";
+
+			/** {@value #ROOT}/{tag} */
+			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
+
+			/** {@value #ROOT}/{tag}/base */
+			public static final RestEndpoint GET_BASE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_BASE, RequestMethod.GET);
+
+			/** {@value #ROOT}/{tag} */
+			public static final RestEndpoint UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE, RequestMethod.POST);
+
+			/** {@value #ROOT}/legacy/{tag}/update */
+			public static final RestEndpoint LEGACY_UPDATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.LEGACY_UPDATE, RequestMethod.GET);
+
+			private Annotation() {
+			}
+
+			public static class Paths {
+
+				public static final String GET = "/{tag}";
+				public static final String GET_BASE = "/{tag}/base";
+				public static final String UPDATE = "/{tag}";
+				public static final String UPLOAD = "/{tag}";
+				public static final String LEGACY_UPDATE = "/legacy/{tag}/update";
+
+				private Paths() {
+				}
+			}
+		}
+
+		/**
+		 * Dummy API of the IDPA service.
+		 *
+		 * @author Henning Schulz
+		 *
+		 */
+		public static class Dummy {
+
+			public static final String ROOT = "/dummy/dvdstore";
+
+			/** {@value #ROOT}/annotation */
+			public static final RestEndpoint GET_APPLICATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_APPLICATION, RequestMethod.GET);
+
+			/** {@value #ROOT}/application */
+			public static final RestEndpoint GET_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_ANNOTATION, RequestMethod.GET);
+
+			private Dummy() {
+			}
+
+			public static class Paths {
+
+				public static final String GET_APPLICATION = "/annotation";
+				public static final String GET_ANNOTATION = "/application";
 
 				private Paths() {
 				}

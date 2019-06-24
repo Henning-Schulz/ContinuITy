@@ -1,8 +1,8 @@
 package org.continuity.idpa.controllers;
 
-import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.ROOT;
-import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.Paths.UPDATE_FROM_JSON;
-import static org.continuity.api.rest.RestApi.IdpaApplication.OpenApi.Paths.UPDATE_FROM_URL;
+import static org.continuity.api.rest.RestApi.Idpa.OpenApi.ROOT;
+import static org.continuity.api.rest.RestApi.Idpa.OpenApi.Paths.UPDATE_FROM_JSON;
+import static org.continuity.api.rest.RestApi.Idpa.OpenApi.Paths.UPDATE_FROM_URL;
 
 import java.net.MalformedURLException;
 import java.net.URL;

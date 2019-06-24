@@ -1,4 +1,4 @@
-package org.continuity.idpa.application.repository;
+package org.continuity.idpa.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,8 +10,8 @@ import java.util.Date;
 
 import org.continuity.api.entities.ApiFormats;
 import org.continuity.idpa.Idpa;
+import org.continuity.idpa.SystemModelTestInstance;
 import org.continuity.idpa.application.Application;
-import org.continuity.idpa.application.SystemModelTestInstance;
 import org.continuity.idpa.serialization.yaml.IdpaYamlSerializer;
 import org.continuity.idpa.storage.IdpaStorage;
 import org.junit.Before;

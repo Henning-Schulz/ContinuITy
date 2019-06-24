@@ -1,4 +1,4 @@
-package org.continuity.idpa.annotation.validation;
+package org.continuity.commons.idpa;
 
 import java.util.HashSet;
 import java.util.Set;

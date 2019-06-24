@@ -2,10 +2,7 @@ package org.continuity.idpa.config;
 
 import org.continuity.api.amqp.AmqpApi;
 import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.MessagePostProcessor;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -23,9 +20,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMqConfig {
 
-	public static final String SERVICE_NAME = "idpaapplication";
-
-	public static final String DEAD_LETTER_QUEUE_NAME = AmqpApi.DEAD_LETTER_EXCHANGE.deriveQueueName(SERVICE_NAME);
+	public static final String SERVICE_NAME = "idpa";
 
 	@Bean
 	MessagePostProcessor typeRemovingProcessor() {
@@ -37,7 +32,7 @@ public class RabbitMqConfig {
 
 	@Bean
 	TopicExchange idpaApplicationChangedExchange() {
-		return AmqpApi.IdpaApplication.EVENT_CHANGED.create();
+		return AmqpApi.Idpa.EVENT_CHANGED.create();
 	}
 
 	@Bean
@@ -61,23 +56,6 @@ public class RabbitMqConfig {
 		rabbitTemplate.setBeforePublishPostProcessors(typeRemovingProcessor());
 
 		return rabbitTemplate;
-	}
-
-	// Dead letter exchange and queue
-
-	@Bean
-	TopicExchange deadLetterExchange() {
-		return AmqpApi.DEAD_LETTER_EXCHANGE.create();
-	}
-
-	@Bean
-	Queue deadLetterQueue() {
-		return new Queue(DEAD_LETTER_QUEUE_NAME, true);
-	}
-
-	@Bean
-	Binding deadLetterBinding() {
-		return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange()).with(SERVICE_NAME);
 	}
 
 }

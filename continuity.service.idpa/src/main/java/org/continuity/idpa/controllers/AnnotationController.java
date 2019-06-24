@@ -1,9 +1,9 @@
 package org.continuity.idpa.controllers;
 
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.ROOT;
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.GET;
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.UPDATE;
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Annotation.Paths.UPLOAD;
+import static org.continuity.api.rest.RestApi.Idpa.Annotation.ROOT;
+import static org.continuity.api.rest.RestApi.Idpa.Annotation.Paths.GET;
+import static org.continuity.api.rest.RestApi.Idpa.Annotation.Paths.UPDATE;
+import static org.continuity.api.rest.RestApi.Idpa.Annotation.Paths.UPLOAD;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -97,7 +97,7 @@ public class AnnotationController {
 		} else if (((date == null) && storageManager.isBroken(tag)) || ((date != null) && storageManager.isBroken(tag, date))) {
 			Map<String, String> message = new HashMap<>();
 			message.put("message", "The requested annotation is broken. Get the base via the redirect.");
-			message.put("redirect", applicationName + RestApi.IdpaAnnotation.Annotation.GET_BASE.path(tag));
+			message.put("redirect", applicationName + RestApi.Idpa.Annotation.GET_BASE.path(tag));
 			return new ResponseEntity<>(message, HttpStatus.LOCKED);
 		}
 

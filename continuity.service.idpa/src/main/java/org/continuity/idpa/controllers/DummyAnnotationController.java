@@ -1,8 +1,8 @@
 package org.continuity.idpa.controllers;
 
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Dummy.ROOT;
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Dummy.Paths.GET_ANNOTATION;
-import static org.continuity.api.rest.RestApi.IdpaAnnotation.Dummy.Paths.GET_APPLICATION;
+import static org.continuity.api.rest.RestApi.Idpa.Dummy.ROOT;
+import static org.continuity.api.rest.RestApi.Idpa.Dummy.Paths.GET_ANNOTATION;
+import static org.continuity.api.rest.RestApi.Idpa.Dummy.Paths.GET_APPLICATION;
 
 import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.application.Application;
