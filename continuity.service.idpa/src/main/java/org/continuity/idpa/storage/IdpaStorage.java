@@ -158,7 +158,7 @@ public class IdpaStorage {
 	 * @return
 	 * @throws NotDirectoryException
 	 */
-	public boolean isBroken(String tag, Date timestamp) throws NotDirectoryException {
+	public boolean isBroken(String tag, Date timestamp) {
 		return readLatestBefore(tag, timestamp).checkAdditionalFlag(FLAG_BROKEN);
 	}
 

@@ -77,19 +77,40 @@ public class ApplicationController {
 	}
 
 	/**
-	 * Retrieves the current application model.
+	 * Retrieves the current application model. If the timestamp is {@code null}, the latest version
+	 * will be returned.
 	 *
 	 * @param tag
 	 *            The tag of the application.
+	 * @param timestamp
+	 *            The timestamp for which the application model is searched (optional).
 	 * @return The current application model.
 	 */
 	@RequestMapping(path = GET, method = RequestMethod.GET)
-	public ResponseEntity<Application> getApplication(@PathVariable String tag) {
-		try {
-			return ResponseEntity.ok(manager.read(tag));
-		} catch (IOException e) {
-			LOGGER.error("An exception occured during reading!", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	public ResponseEntity<Application> getApplication(@PathVariable String tag, @RequestParam(required = false) String timestamp) {
+		if (timestamp == null) {
+			try {
+				return ResponseEntity.ok(manager.read(tag));
+			} catch (IOException e) {
+				LOGGER.error("An exception occured during reading!", e);
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			}
+		} else {
+			Date date;
+			try {
+				date = DATE_FORMAT.parse(timestamp);
+			} catch (ParseException e) {
+				LOGGER.error("Could not parse timestamp {}.", timestamp);
+				LOGGER.error("Exception:", e);
+				return ResponseEntity.badRequest().build();
+			}
+
+			try {
+				return ResponseEntity.ok(manager.read(tag, date));
+			} catch (IOException e) {
+				LOGGER.error("An exception occured during reading!", e);
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			}
 		}
 	}
 
@@ -293,7 +314,7 @@ public class ApplicationController {
 	 * @return A report holding the differences between the passed model and the next older one.
 	 */
 	@RequestMapping(path = UPDATE, method = RequestMethod.PUT)
-	public ResponseEntity<String> updateApplication(@PathVariable String tag,
+	public ResponseEntity<String> updateApplicationYaml(@PathVariable String tag,
 			@ApiParam(value = "The application model in YAML format.", required = true) @RequestBody String application,
 			@RequestParam(name = "ignore-interface-changed", defaultValue = "false") boolean ignoreInterfaceChanged,
 			@RequestParam(name = "ignore-interface-removed", defaultValue = "false") boolean ignoreInterfaceRemoved,

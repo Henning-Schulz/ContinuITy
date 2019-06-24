@@ -92,13 +92,24 @@ public class AnnotationStorageManager implements IdpaStorageListener {
 	}
 
 	/**
-	 * Returns whether the annotation with the specified tag is broken.
+	 * Returns whether the latest annotation with the specified tag is broken.
 	 *
 	 * @param tag
 	 * @return {@code true} if it is broken or {@code false} otherwise.
 	 */
 	public boolean isBroken(String tag) {
 		return storage.readLatest(tag).checkAdditionalFlag(IdpaStorage.FLAG_BROKEN);
+	}
+
+	/**
+	 * Returns whether the annotation for the specified tag and timestamp is broken.
+	 *
+	 * @param tag
+	 * @param timestamp
+	 * @return {@code true} if it is broken or {@code false} otherwise.
+	 */
+	public boolean isBroken(String tag, Date timestamp) {
+		return storage.isBroken(tag, timestamp);
 	}
 
 	/**
