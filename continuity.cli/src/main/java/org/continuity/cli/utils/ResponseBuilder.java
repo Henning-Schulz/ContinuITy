@@ -64,6 +64,10 @@ public class ResponseBuilder {
 		return append(string, AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
 	}
 
+	public ResponseBuilder boldError(Object string) {
+		return append(string, AttributedStyle.BOLD.foreground(AttributedStyle.RED));
+	}
+
 	public ResponseBuilder newline() {
 		return append("\n", AttributedStyle.DEFAULT);
 	}

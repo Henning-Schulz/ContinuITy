@@ -24,6 +24,7 @@ import org.continuity.api.entities.ApiFormats;
 import org.continuity.api.entities.report.AnnotationValidityReport;
 import org.continuity.api.entities.report.ApplicationChangeReport;
 import org.continuity.api.entities.report.ApplicationChangeType;
+import org.continuity.api.rest.CustomHeaders;
 import org.continuity.api.rest.RestApi.Orchestrator.Idpa;
 import org.continuity.cli.config.PropertiesProvider;
 import org.continuity.cli.manage.CliContext;
@@ -133,38 +134,56 @@ public class IdpaCommands {
 	}
 
 	@ShellMethod(key = { "idpa download" }, value = "Downloads and opens the IDPA with the specified tag.")
-	public String downloadIdpa(@ShellOption(defaultValue = Shorthand.DEFAULT_VALUE) String tag) throws JsonGenerationException, JsonMappingException, IOException {
+	public AttributedString downloadIdpa(@ShellOption(defaultValue = Shorthand.DEFAULT_VALUE) String tag) throws JsonGenerationException, JsonMappingException, IOException {
 		tag = contextManager.getTagOrFail(tag);
 
 		String url = WebUtils.addProtocolIfMissing(propertiesProvider.get().getProperty(PropertiesProvider.KEY_URL));
 
-		ResponseEntity<Application> applicationResponse = restTemplate
-				.getForEntity(Idpa.GET_APPLICATION.requestUrl(tag).withHost(url).withQueryIfNotEmpty(PARAM_TIMESTAMP, contextManager.getCurrentVersion()).get(), Application.class);
-		ResponseEntity<ApplicationAnnotation> annotationResponse = restTemplate
-				.getForEntity(Idpa.GET_ANNOTATION.requestUrl(tag).withHost(url).withQueryIfNotEmpty(PARAM_TIMESTAMP, contextManager.getCurrentVersion()).get(), ApplicationAnnotation.class);
-
-		if (!applicationResponse.getStatusCode().is2xxSuccessful()) {
-			return "Could not get application model: " + applicationResponse;
+		ResponseEntity<Application> applicationResponse;
+		try {
+			applicationResponse = restTemplate.getForEntity(Idpa.GET_APPLICATION.requestUrl(tag).withHost(url).withQueryIfNotEmpty(PARAM_TIMESTAMP, contextManager.getCurrentVersion()).get(),
+					Application.class);
+		} catch (HttpStatusCodeException e) {
+			applicationResponse = ResponseEntity.status(e.getStatusCode()).body(null);
 		}
 
-		if (!annotationResponse.getStatusCode().is2xxSuccessful()) {
-			return "Could not get annotation: " + annotationResponse;
+		ResponseEntity<ApplicationAnnotation> annotationResponse;
+		try {
+			annotationResponse = restTemplate.getForEntity(Idpa.GET_ANNOTATION.requestUrl(tag).withHost(url).withQueryIfNotEmpty(PARAM_TIMESTAMP, contextManager.getCurrentVersion()).get(),
+					ApplicationAnnotation.class);
+		} catch (HttpStatusCodeException e) {
+			annotationResponse = ResponseEntity.status(e.getStatusCode()).body(null);
 		}
 
-		saveApplicationModel(applicationResponse.getBody(), tag);
-		saveAnnotation(annotationResponse.getBody(), tag);
+		ResponseBuilder response = new ResponseBuilder();
 
-		// TODO:
-		// List<String> brokenValues = response.getHeaders().get(CustomHeaders.BROKEN);
-		//
-		// if (brokenValues != null && brokenValues.contains("true")) {
-		// responses.error("The annotation is broken!");
-		// }
+		if (applicationResponse.getStatusCode().is2xxSuccessful()) {
+			saveApplicationModel(applicationResponse.getBody(), tag);
+			openApplicationModel(tag);
+		} else if (applicationResponse.getStatusCode().is4xxClientError()) {
+			response.bold("There is no such application model!").newline();
+		} else {
+			response.error("Unknown error when downloading the application model: ").error(applicationResponse.getStatusCode().toString()).error(" (")
+					.error(applicationResponse.getStatusCode().getReasonPhrase()).error(")").newline();
+		}
 
-		openApplicationModel(tag);
-		openAnnotation(tag);
+		if (annotationResponse.getStatusCode().is2xxSuccessful()) {
+			saveAnnotation(annotationResponse.getBody(), tag);
+			openAnnotation(tag);
 
-		return "Downloaded and opened the IDPA with tag " + tag;
+			List<String> brokenValues = annotationResponse.getHeaders().get(CustomHeaders.BROKEN);
+
+			if ((brokenValues != null) && brokenValues.contains("true")) {
+				response.error("The annotation is broken! Please use ").boldError("ann check").error(" for details.").newline();
+			}
+		} else if (annotationResponse.getStatusCode().is4xxClientError()) {
+			response.bold("There is no such annotation model!").newline();
+		} else {
+			response.error("Unknown error when downloading the annotation: ").error(annotationResponse.getStatusCode().toString()).error(" (")
+					.error(annotationResponse.getStatusCode().getReasonPhrase()).error(")").newline();
+		}
+
+		return response.normal("Downloaded and opened the IDPA with tag ").normal(tag).normal(" and timestamp/version ").normal(contextManager.getCurrentVersionOrLatest()).normal(".").build();
 	}
 
 	@ShellMethod(key = { "idpa open" }, value = "Opens an already downloaded IDPA with the specified tag.")
@@ -329,9 +348,22 @@ public class IdpaCommands {
 				response = new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
 			}
 
-			responses.newline().bold(tag).newline();
+			responses.newline().bold(tag);
 
-			// TODO: check and warn if annotation is broken
+			if (!response.getStatusCode().is2xxSuccessful()) {
+				responses.error(" [ERROR]");
+			}
+
+			responses.newline();
+
+			@SuppressWarnings("unchecked")
+			List<String> broken = restTemplate.getForObject(Idpa.GET_BROKEN.requestUrl(tag).withQuery("timestamp", ApiFormats.DATE_FORMAT.format(application.getTimestamp())).withHost(url).get(),
+					List.class);
+
+			if ((broken != null) && (broken.size() > 0)) {
+				responses.error("The new application version broke the following annotations: ");
+				responses.error(broken.stream().collect(Collectors.joining(", "))).newline();
+			}
 
 			if (response.getStatusCode().is2xxSuccessful()) {
 				responses.jsonAsYamlNormal(response.getBody());
@@ -359,6 +391,8 @@ public class IdpaCommands {
 			throws JsonParseException, JsonMappingException, IOException {
 		pattern = contextManager.getTagOrFail(pattern);
 
+		ResponseBuilder resp = new ResponseBuilder();
+
 		String workingDir = propertiesProvider.get().getProperty(PropertiesProvider.KEY_WORKING_DIR);
 		List<String> tags = new ArrayList<String>();
 		ResponseBuilder responses = new ResponseBuilder();
@@ -367,7 +401,8 @@ public class IdpaCommands {
 		String timestamp = contextManager.getCurrentVersion();
 
 		if (timestamp == null) {
-			ApiFormats.DATE_FORMAT.format(new Date());
+			timestamp = ApiFormats.DATE_FORMAT.format(new Date());
+			resp.bold("No timestamp set! Using the current time: ").bold(timestamp).newline();
 		}
 
 		for (File file : getAllFilesMatchingWildcards(workingDir + "/annotation-" + pattern + ".yml")) {
@@ -377,26 +412,25 @@ public class IdpaCommands {
 			tags.add(tag);
 			ResponseEntity<String> response;
 			try {
-				response = restTemplate.postForEntity(Idpa.UPDATE_ANNOTATION.requestUrl(tag).withHost(url).withQuery(PARAM_TIMESTAMP, timestamp).get(), annotation,
-						String.class);
+				response = restTemplate.postForEntity(Idpa.UPDATE_ANNOTATION.requestUrl(tag).withHost(url).withQuery(PARAM_TIMESTAMP, timestamp).get(), annotation, String.class);
 			} catch (HttpStatusCodeException e) {
 				response = new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
 			}
 
-			responses.newline().bold(tag).newline();
+			responses.newline().bold(tag);
 
 			if (response.getStatusCode().is2xxSuccessful()) {
-				responses.jsonAsYamlNormal(response.getBody());
+				responses.newline().jsonAsYamlNormal(response.getBody());
 			} else {
-				responses.jsonAsYamlError(response.getBody());
+				responses.error(" [ERROR]").newline().jsonAsYamlError(response.getBody());
 				error = true;
 			}
 		}
 
 		if (error) {
-			return new ResponseBuilder().normal("Uploaded annotations for tags ").normal(tags).normal(". ").error("Some of them resulted in errors:").newline().append(responses).build();
+			return resp.normal("Uploaded annotations for tags ").normal(tags).normal(". ").error("Some of them resulted in errors:").newline().append(responses).build();
 		} else {
-			return new ResponseBuilder().normal("Successfully uploaded annotations for tags ").normal(tags).normal(":").newline().append(responses).build();
+			return resp.normal("Successfully uploaded annotations for tags ").normal(tags).normal(":").newline().append(responses).build();
 		}
 	}
 

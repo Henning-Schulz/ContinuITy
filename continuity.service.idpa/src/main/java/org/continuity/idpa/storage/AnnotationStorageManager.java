@@ -1,8 +1,11 @@
 package org.continuity.idpa.storage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.function.BiConsumer;
 
 import org.continuity.api.entities.report.AnnotationValidityReport;
 import org.continuity.commons.idpa.AnnotationValidityChecker;
@@ -11,7 +14,6 @@ import org.continuity.idpa.annotation.ApplicationAnnotation;
 import org.continuity.idpa.storage.IdpaStorage.IdpaEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Manages the annotations stored in an {@link IdpaStorage}.
@@ -25,7 +27,6 @@ public class AnnotationStorageManager implements IdpaStorageListener {
 
 	private final IdpaStorage storage;
 
-	@Autowired
 	public AnnotationStorageManager(IdpaStorage storage) {
 		this.storage = storage;
 		this.storage.registerListener(this);
@@ -113,12 +114,37 @@ public class AnnotationStorageManager implements IdpaStorageListener {
 	}
 
 	/**
+	 * Determines all annotations that belong to a certain application model and are broken.
+	 *
+	 * @param tag
+	 *            The tag.
+	 * @param timestamp
+	 *            The timestamp of the application model.
+	 * @return A list of all timestamps of annotations that are broken.
+	 */
+	public List<Date> getBrokenForApplication(String tag, Date timestamp) {
+		List<Date> broken = new ArrayList<>();
+
+		applyForApplication(tag, timestamp, (t, idpa) -> {
+			if (isBroken(tag, idpa.getTimestamp())) {
+				broken.add(idpa.getTimestamp());
+			}
+		});
+
+		return broken;
+	}
+
+	/**
 	 * {@inheritDoc} <br>
 	 *
 	 * Checks whether the annotations affected by the change are broken and marks them accordingly.
 	 */
 	@Override
 	public void onApplicationChanged(String tag, Date timestamp) {
+		applyForApplication(tag, timestamp, this::adjustBrokenMark);
+	}
+
+	private void applyForApplication(String tag, Date timestamp, BiConsumer<String, Idpa> consumer) {
 		Iterator<IdpaEntry> it = storage.iterate(tag).iterator();
 
 		IdpaEntry curr = null;
@@ -128,16 +154,20 @@ public class AnnotationStorageManager implements IdpaStorageListener {
 		}
 
 		if ((curr != null)) {
-			adjustBrokenMark(tag, curr);
+			consumer.accept(tag, curr);
 		}
 
 		while (it.hasNext() && (curr != null) && curr.getApplication().getTimestamp().equals(timestamp)) {
 			curr = it.next();
-			adjustBrokenMark(tag, curr);
+			consumer.accept(tag, curr);
 		}
 	}
 
 	private boolean isBroken(Idpa idpa) {
+		if (idpa.getAnnotation() == null) {
+			return false;
+		}
+
 		AnnotationValidityChecker checker = new AnnotationValidityChecker(idpa.getApplication());
 		checker.checkAnnotation(idpa.getAnnotation());
 		AnnotationValidityReport report = checker.getReport();

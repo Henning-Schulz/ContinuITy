@@ -2,12 +2,16 @@ package org.continuity.idpa.controllers;
 
 import static org.continuity.api.rest.RestApi.Idpa.Annotation.ROOT;
 import static org.continuity.api.rest.RestApi.Idpa.Annotation.Paths.GET;
+import static org.continuity.api.rest.RestApi.Idpa.Annotation.Paths.GET_BROKEN;
 import static org.continuity.api.rest.RestApi.Idpa.Annotation.Paths.UPDATE;
 import static org.continuity.api.rest.RestApi.Idpa.Annotation.Paths.UPLOAD;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.continuity.api.entities.ApiFormats;
 import org.continuity.api.entities.report.AnnotationValidityReport;
@@ -113,7 +117,7 @@ public class AnnotationController {
 		} catch (ParseException e) {
 			LOGGER.error("Could not parse timestamp {}.", timestamp);
 			LOGGER.error("Exception:", e);
-			return ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest().body("Illegal timestamp '" + timestamp + "'!");
 		}
 
 		AnnotationValidityReport report = null;
@@ -181,6 +185,29 @@ public class AnnotationController {
 		} else {
 			return new ResponseEntity<>(report.toString(), HttpStatus.CREATED);
 		}
+	}
+
+	/**
+	 * Returns the timestamps of all annotations that are broken due to a certain application.
+	 *
+	 * @param tag
+	 *            The tag.
+	 * @param timestamp
+	 *            The timestamp of the application.
+	 * @return A list with the timestamps of all broken annotations.
+	 */
+	@RequestMapping(path = GET_BROKEN, method = RequestMethod.GET)
+	public ResponseEntity<List<String>> getBroken(@PathVariable("tag") String tag, @RequestParam String timestamp) {
+		List<String> broken;
+		try {
+			broken = storageManager.getBrokenForApplication(tag, ApiFormats.DATE_FORMAT.parse(timestamp)).stream().map(ApiFormats.DATE_FORMAT::format).collect(Collectors.toList());
+		} catch (ParseException e) {
+			LOGGER.error("Could not parse timestamp!", e);
+
+			return ResponseEntity.badRequest().body(Arrays.asList("Illegally formatted timestamp: " + timestamp));
+		}
+
+		return ResponseEntity.ok(broken);
 	}
 
 }

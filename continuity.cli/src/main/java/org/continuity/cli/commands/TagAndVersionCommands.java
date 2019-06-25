@@ -34,8 +34,13 @@ public class TagAndVersionCommands {
 	}
 
 	@ShellMethod(key = { "version" }, value = "Sets the global version or timestamp to be used.")
-	public void setVersion(String version) {
-		contextManager.setCurrentVersion(version);
+	public String setVersion(@ShellOption(defaultValue = Shorthand.DEFAULT_VALUE) String version) {
+		if (Shorthand.DEFAULT_VALUE.equals(version)) {
+			return contextManager.getCurrentVersion();
+		} else {
+			contextManager.setCurrentVersion(version);
+			return null;
+		}
 	}
 
 	@ShellMethod(key = { "version reset" }, value = "Resets the global version or timestamp.")

@@ -56,6 +56,10 @@ public class CliContextManager implements PromptProvider {
 		return currentVersion;
 	}
 
+	public String getCurrentVersionOrLatest() {
+		return currentVersion == null ? DEFAULT_VERSION : currentVersion;
+	}
+
 	/**
 	 * Gets a tag out of the input or throws an {@link IllegalArgumentException} if no tag can be
 	 * determined.
@@ -160,7 +164,7 @@ public class CliContextManager implements PromptProvider {
 		if (currentTag != null) {
 			builder.append(" (");
 			builder.append(currentTag);
-			builder.append("@").append(currentVersion == null ? DEFAULT_VERSION : currentVersion);
+			builder.append("@").append(getCurrentVersionOrLatest());
 			builder.append(")");
 		} else if (currentVersion != null) {
 			builder.append(" (???").append("@").append(currentVersion).append(")");

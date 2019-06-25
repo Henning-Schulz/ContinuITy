@@ -98,6 +98,9 @@ public class RestApi {
 			/** {@value #ROOT}/{tag}/annotation */
 			public static final RestEndpoint UPDATE_ANNOTATION = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPDATE_ANNOTATION, RequestMethod.POST);
 
+			/** {@value #ROOT}/{tag}/broken */
+			public static final RestEndpoint GET_BROKEN = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_BROKEN, RequestMethod.GET);
+
 			private Idpa() {
 			}
 
@@ -109,7 +112,7 @@ public class RestApi {
 				public static final String UPDATE_APP_FROM_OPEN_API_JSON = "/{tag}/openapi/{version}/json";
 				public static final String UPDATE_APP_FROM_OPEN_API_URL = "/{tag}/openapi/{version}/url";
 				public static final String UPDATE_ANNOTATION = "/{tag}/annotation";
-				public static final String REPORT = "/report";
+				public static final String GET_BROKEN = "/{tag}/broken";
 
 				private Paths() {
 				}
@@ -318,6 +321,9 @@ public class RestApi {
 			/** {@value #ROOT}/{tag} */
 			public static final RestEndpoint UPLOAD = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.UPLOAD, RequestMethod.PUT);
 
+			/** {@value #ROOT}/{tag}/broken */
+			public static final RestEndpoint GET_BROKEN = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_BROKEN, RequestMethod.GET);
+
 			private Annotation() {
 			}
 
@@ -326,6 +332,7 @@ public class RestApi {
 				public static final String GET = "/{tag}";
 				public static final String UPDATE = "/{tag}";
 				public static final String UPLOAD = "/{tag}";
+				public static final String GET_BROKEN = "/{tag}/broken";
 
 				private Paths() {
 				}

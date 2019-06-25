@@ -3,6 +3,7 @@ package org.continuity.orchestrator.controllers;
 import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.ROOT;
 import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.GET_ANNOTATION;
 import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.GET_APPLICATION;
+import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.GET_BROKEN;
 import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.UPDATE_ANNOTATION;
 import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.UPDATE_APPLICATION;
 import static org.continuity.api.rest.RestApi.Orchestrator.Idpa.Paths.UPDATE_APP_FROM_OPEN_API_JSON;
@@ -184,6 +185,26 @@ public class IdpaController {
 			return restTemplate.postForEntity(Idpa.Annotation.UPDATE.requestUrl(tag).withQuery("timestamp", timestamp).get(), annotation, String.class);
 		} catch (HttpStatusCodeException e) {
 			LOGGER.warn("Updating the annotation with tag {} resulted in a {} - {} response!", tag, e.getStatusCode(), e.getStatusCode().getReasonPhrase());
+			return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+		}
+	}
+
+	/**
+	 * Returns the timestamps of all annotations that are broken due to a certain application.
+	 *
+	 * @param tag
+	 *            The tag.
+	 * @param timestamp
+	 *            The timestamp of the application.
+	 * @return A list with the timestamps of all broken annotations - formatted as JSON string.
+	 */
+	@RequestMapping(path = GET_BROKEN, method = RequestMethod.GET)
+	public ResponseEntity<String> getBroken(@PathVariable("tag") String tag, @RequestParam String timestamp) {
+		try {
+			return restTemplate.getForEntity(Idpa.Annotation.GET_BROKEN.requestUrl(tag).withQuery("timestamp", timestamp).get(), String.class);
+		} catch (HttpStatusCodeException e) {
+			LOGGER.warn("Getting the broken states for the application with tag {} and timestamp {} resulted in a {} - {} response!", tag, timestamp, e.getStatusCode(),
+					e.getStatusCode().getReasonPhrase());
 			return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
 		}
 	}
