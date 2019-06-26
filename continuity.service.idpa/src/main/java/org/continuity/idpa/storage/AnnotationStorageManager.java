@@ -179,12 +179,14 @@ public class AnnotationStorageManager implements IdpaStorageListener {
 		if (isBroken(idpa)) {
 			try {
 				storage.markAsBroken(tag, idpa.getTimestamp());
+				LOGGER.warn("Annotation of tag {} for timestamp {} is now broken.", tag, idpa.getTimestamp());
 			} catch (IOException e) {
 				LOGGER.error("Could not mark annotation " + tag + " (" + idpa.getTimestamp() + ") as broken!", e);
 			}
 		} else {
 			try {
 				storage.unmarkAsBroken(tag, idpa.getTimestamp());
+				LOGGER.info("Annotation of tag {} for timestamp {} is not broken (anymore).", tag, idpa.getTimestamp());
 			} catch (IOException e) {
 				LOGGER.error("Could not unmark annotation " + tag + " (" + idpa.getTimestamp() + ") as broken!", e);
 			}
