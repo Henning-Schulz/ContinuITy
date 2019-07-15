@@ -74,7 +74,7 @@ public class SessionLogsAmqpHandler {
 		}
 
 		String id = storage.put(new SessionLogs(version, sessionLog), aid);
-		String sessionLink = RestApi.SessionLogs.Sessions.GET.requestUrl(id).withoutProtocol().get();
+		String sessionLink = RestApi.SessionLogs.Sessions.GET.requestUrl(id).withoutProtocol().get(); // TODO
 
 		report = TaskReport.successful(task.getTaskId(), new LinkExchangeModel().getSessionLogsLinks().setLink(sessionLink).parent());
 

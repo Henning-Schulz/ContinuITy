@@ -5,6 +5,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonView;
 
 /**
  * Represents a request within a session.
@@ -14,6 +15,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonPropertyOrder({ "id", "endpoint", "start-micros", "end-micros" })
 public class SessionRequest implements Comparable<SessionRequest> {
+
+	private static final String DELIM = ":";
 
 	private String id;
 
@@ -27,6 +30,10 @@ public class SessionRequest implements Comparable<SessionRequest> {
 
 	@JsonIgnore
 	private String sessionId;
+
+	@JsonProperty("extended-information")
+	@JsonView(ExtendedView.class)
+	private ExtendedRequestInformation extendedInformation;
 
 	public String getId() {
 		return id;
@@ -66,6 +73,38 @@ public class SessionRequest implements Comparable<SessionRequest> {
 
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
+	}
+
+	public ExtendedRequestInformation getExtendedInformation() {
+		return extendedInformation;
+	}
+
+	public void setExtendedInformation(ExtendedRequestInformation extendedInformation) {
+		this.extendedInformation = extendedInformation;
+	}
+
+	@JsonIgnore
+	public String toSimpleLog() {
+		return new StringBuilder().append("\"").append(endpoint).append("\"").append(DELIM).append(startMicros * 1000).append(DELIM).append(endMicros).toString();
+	}
+
+	@JsonIgnore
+	public String toExtensiveLog() {
+		if (extendedInformation == null) {
+			throw new IllegalStateException("Cannot generate extensive log! There is no extended information present!");
+		}
+
+		StringBuilder log = new StringBuilder().append("\"").append(endpoint).append("\"").append(DELIM).append(startMicros * 1000).append(DELIM).append(endMicros);
+
+		log.append(DELIM).append(extendedInformation.getUri());
+		log.append(DELIM).append(extendedInformation.getPort());
+		log.append(DELIM).append(extendedInformation.getHost());
+		log.append(DELIM).append(extendedInformation.getProtocol());
+		log.append(DELIM).append(extendedInformation.getMethod());
+		log.append(DELIM).append(extendedInformation.getParameters());
+		log.append(DELIM).append(extendedInformation.getEncoding());
+
+		return log.toString();
 	}
 
 	@Override
@@ -110,6 +149,10 @@ public class SessionRequest implements Comparable<SessionRequest> {
 	@Override
 	public String toString() {
 		return new StringBuilder().append(endpoint).append(" [").append(id).append("] (").append(startMicros).append(" - ").append(endMicros).append(")").toString();
+	}
+
+	public static class ExtendedView {
+
 	}
 
 }

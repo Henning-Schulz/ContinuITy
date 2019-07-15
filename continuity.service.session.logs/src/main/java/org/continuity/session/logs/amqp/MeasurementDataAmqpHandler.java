@@ -81,10 +81,10 @@ public class MeasurementDataAmqpHandler {
 		LOGGER.info("{}@{}: Storing done.", aid, version);
 
 		if (configProvider.getOrDefault(aid).isOmitSessionClustering()) {
-			LOGGER.info("{}@{}: Clustering is omitted by configuration.", aid, version);
+			LOGGER.info("{}@{}: Session grouping and clustering is omitted by configuration.", aid, version);
 		} else {
-			LOGGER.info("{}@{}: Clustering and updating the corresponding sessions...", aid, version);
-			clusterSessions(aid, version, traces);
+			LOGGER.info("{}@{}: Grouping and updating the corresponding sessions...", aid, version);
+			groupSessions(aid, version, traces);
 		}
 
 		long endMillis = System.currentTimeMillis();
@@ -111,7 +111,7 @@ public class MeasurementDataAmqpHandler {
 		LOGGER.info("{}@{}: Traces range from {} to {}.", aid, version, from, to);
 	}
 
-	private void clusterSessions(AppId aid, VersionOrTimestamp version, List<Trace> traces) throws IOException, TimeoutException {
+	private void groupSessions(AppId aid, VersionOrTimestamp version, List<Trace> traces) throws IOException, TimeoutException {
 		RequestTailorer tailorer = new RequestTailorer(aid, version, restTemplate);
 		SessionLogsConfiguration config = configProvider.getOrDefault(aid);
 

@@ -3,16 +3,18 @@ package org.continuity.api.entities.artifact.session;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.continuity.api.entities.artifact.session.SessionRequest.ExtendedView;
 import org.continuity.idpa.VersionOrTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,6 +33,8 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  */
 @JsonPropertyOrder({ "id", "version", "start-micros", "end-micros", "finished", "tailoring", "requests" })
 public class Session {
+
+	private static final String DELIM = ";";
 
 	private String id;
 
@@ -51,7 +55,8 @@ public class Session {
 	@JsonDeserialize(using = TailoringDeserializer.class)
 	private List<String> tailoring;
 
-	private Set<SessionRequest> requests = new TreeSet<>();
+	@JsonView(ExtendedView.class)
+	private NavigableSet<SessionRequest> requests = new TreeSet<>();
 
 	public String getId() {
 		return id;
@@ -109,7 +114,7 @@ public class Session {
 		this.tailoring = tailoring;
 	}
 
-	public Set<SessionRequest> getRequests() {
+	public NavigableSet<SessionRequest> getRequests() {
 		return requests;
 	}
 
@@ -123,14 +128,23 @@ public class Session {
 		this.endMicros = Math.max(this.endMicros, request.getEndMicros());
 	}
 
-	@JsonDeserialize(as = TreeSet.class)
-	public void setRequests(Set<SessionRequest> requests) {
+	public void setRequests(NavigableSet<SessionRequest> requests) {
 		this.requests = requests;
 	}
 
 	@JsonIgnore
 	public String getTailoringAsString() {
 		return convertTailoringToString(tailoring);
+	}
+
+	@JsonIgnore
+	public String toSimpleLog() {
+		return requests.stream().map(SessionRequest::toSimpleLog).collect(Collectors.joining(DELIM));
+	}
+
+	@JsonIgnore
+	public String toExtensiveLog() {
+		return requests.stream().map(SessionRequest::toExtensiveLog).collect(Collectors.joining(DELIM));
 	}
 
 	@Override

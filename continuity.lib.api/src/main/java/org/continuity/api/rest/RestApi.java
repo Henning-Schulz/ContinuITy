@@ -761,7 +761,7 @@ public class RestApi {
 
 			public static final String ROOT = "/sessions";
 
-			/** {@value #ROOT}/{id} */
+			/** {@value #ROOT}/{app-id}/{tailoring} */
 			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
 
 			/** {@value #ROOT}/create */
@@ -772,7 +772,7 @@ public class RestApi {
 
 			public static class Paths {
 
-				public static final String GET = "/{id}";
+				public static final String GET = "/{app-id}/{tailoring}";
 
 				public static final String CREATE = "/create";
 

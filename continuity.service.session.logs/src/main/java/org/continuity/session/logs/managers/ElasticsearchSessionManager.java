@@ -13,6 +13,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.continuity.api.entities.ApiFormats;
 import org.continuity.api.entities.artifact.session.Session;
+import org.continuity.api.entities.artifact.session.SessionRequest;
 import org.continuity.idpa.AppId;
 import org.continuity.idpa.VersionOrTimestamp;
 import org.elasticsearch.ElasticsearchStatusException;
@@ -83,7 +84,7 @@ public class ElasticsearchSessionManager extends ElasticsearchScrollingManager {
 
 	private Pair<String, String> serializeSession(Session session) {
 		try {
-			return Pair.of(mapper.writeValueAsString(session), session.getId() + "_" + session.getStartMicros());
+			return Pair.of(mapper.writerWithView(SessionRequest.ExtendedView.class).writeValueAsString(session), session.getId() + "_" + session.getStartMicros());
 		} catch (JsonProcessingException e) {
 			LOGGER.error("Could not write TraceRecord to JSON string!", e);
 			return null;
@@ -226,7 +227,7 @@ public class ElasticsearchSessionManager extends ElasticsearchScrollingManager {
 
 	private Session readFromString(String json) {
 		try {
-			return mapper.readValue(json, Session.class);
+			return mapper.readerWithView(SessionRequest.ExtendedView.class).forType(Session.class).readValue(json);
 		} catch (IOException e) {
 			LOGGER.error("Could not read Session from JSON string!", e);
 			return null;
@@ -234,7 +235,7 @@ public class ElasticsearchSessionManager extends ElasticsearchScrollingManager {
 	}
 
 	private String toSessionIndex(AppId aid) {
-		return aid + ".sessions";
+		return aid.dropService() + ".sessions";
 	}
 
 }

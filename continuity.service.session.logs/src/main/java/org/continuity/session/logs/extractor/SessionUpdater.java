@@ -81,6 +81,10 @@ public class SessionUpdater {
 					continue;
 				}
 
+				if ((session.getRequests().size() > 0) && isRedirect(session.getRequests().floor(req))) {
+					continue;
+				}
+
 				session.addRequest(req);
 
 				newSessions.add(session);
@@ -100,6 +104,10 @@ public class SessionUpdater {
 		LOGGER.info("Session clustering done. old: {}, updated: {}, new: {}, finished: {}", numOld, numUpdated, numNew, numFinished);
 
 		return newSessions;
+	}
+
+	private boolean isRedirect(SessionRequest request) {
+		return (request.getExtendedInformation() != null) && ((request.getExtendedInformation().getResponseCode() / 100) == 3);
 	}
 
 	private Session createFreshSession(String sessionId) {
