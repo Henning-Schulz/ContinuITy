@@ -266,15 +266,20 @@ public class RestApi {
 
 			public static final String ROOT = "/sessions";
 
-			/** {@value #ROOT}/{id} */
-			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
+			/** {@value #ROOT}/{app-id:.+}/{tailoring}/simple */
+			public static final RestEndpoint GET_SIMPLE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_SIMPLE, RequestMethod.GET);
+
+			/** {@value #ROOT}/{app-id:.+}/{tailoring}/extended */
+			public static final RestEndpoint GET_EXTENDED = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_EXTENDED, RequestMethod.GET);
 
 			private SessionLogs() {
 			}
 
 			public static class Paths {
 
-				public static final String GET = "/{id}";
+				public static final String GET_SIMPLE = "/{app-id:.+}/{tailoring}/simple";
+
+				public static final String GET_EXTENDED = "/{app-id:.+}/{tailoring}/extended";
 
 				private Paths() {
 				}
@@ -432,6 +437,27 @@ public class RestApi {
 				private Paths() {
 				}
 			}
+		}
+
+		public static class Version {
+
+			public static final String ROOT = "/version";
+
+			/** {@value #ROOT}/{app-id:.+}/latest */
+			public static final RestEndpoint GET_LATEST = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_LATEST, RequestMethod.GET);
+
+			private Version() {
+			}
+
+			public static class Paths {
+
+				public static final String GET_LATEST = "/{app-id:.+}/latest";
+
+				private Paths() {
+				}
+
+			}
+
 		}
 
 		/**
@@ -752,7 +778,7 @@ public class RestApi {
 	 */
 	public static class SessionLogs {
 
-		public static final String SERVICE_NAME = "sessions";
+		public static final String SERVICE_NAME = "session-logs";
 
 		private SessionLogs() {
 		}
@@ -761,10 +787,10 @@ public class RestApi {
 
 			public static final String ROOT = "/sessions";
 
-			/** {@value #ROOT}/{app-id}/{tailoring}/simple */
+			/** {@value #ROOT}/{app-id:.+}/{tailoring}/simple */
 			public static final RestEndpoint GET_SIMPLE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_SIMPLE, RequestMethod.GET);
 
-			/** {@value #ROOT}/{app-id}/{tailoring}/extended */
+			/** {@value #ROOT}/{app-id:.+}/{tailoring}/extended */
 			public static final RestEndpoint GET_EXTENDED = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_SIMPLE, RequestMethod.GET);
 
 			/** {@value #ROOT}/create */
@@ -775,9 +801,9 @@ public class RestApi {
 
 			public static class Paths {
 
-				public static final String GET_SIMPLE = "/{app-id}/{tailoring}/simple";
+				public static final String GET_SIMPLE = "/{app-id:.+}/{tailoring}/simple";
 
-				public static final String GET_EXTENDED = "/{app-id}/{tailoring}/extended";
+				public static final String GET_EXTENDED = "/{app-id:.+}/{tailoring}/extended";
 
 				public static final String CREATE = "/create";
 

@@ -222,6 +222,8 @@ public class SessionLogsController {
 	@RequestMapping(value = CREATE, method = RequestMethod.POST)
 	public ResponseEntity<SessionLogs> getModularizedSessionLogs(@RequestBody SessionLogsInput sessionLogsInput,
 			@RequestParam(name = ADD_PRE_POST_PROCESSING, defaultValue = "false") boolean addPrePostProcessing) {
+		// TODO: use new API
+
 		ModularizedOPENxtraceSessionLogsExtractor extractor = new ModularizedOPENxtraceSessionLogsExtractor(AppId.fromString(""), eurekaRestTemplate, sessionLogsInput.getServices(),
 				addPrePostProcessing);
 		List<Trace> traces = OPENxtraceUtils.deserializeIntoTraceList(sessionLogsInput.getSerializedTraces());

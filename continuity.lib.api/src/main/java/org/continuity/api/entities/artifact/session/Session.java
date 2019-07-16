@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.continuity.idpa.AppId;
 import org.continuity.idpa.VersionOrTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -183,7 +184,7 @@ public class Session {
 
 	public static String convertTailoringToString(List<String> tailoring) {
 		if ((tailoring == null) || tailoring.isEmpty()) {
-			return "all";
+			return AppId.SERVICE_ALL;
 		}
 
 		Collections.sort(tailoring);
