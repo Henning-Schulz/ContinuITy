@@ -3,6 +3,7 @@ package org.continuity.api.entities.artifact.session;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -14,6 +15,8 @@ import com.fasterxml.jackson.annotation.JsonView;
  *
  */
 @JsonPropertyOrder({ "id", "endpoint", "start-micros", "end-micros" })
+@JsonView(SessionView.Simple.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SessionRequest implements Comparable<SessionRequest> {
 
 	private static final String DELIM = ":";
@@ -32,7 +35,7 @@ public class SessionRequest implements Comparable<SessionRequest> {
 	private String sessionId;
 
 	@JsonProperty("extended-information")
-	@JsonView(ExtendedView.class)
+	@JsonView(SessionView.Extended.class)
 	private ExtendedRequestInformation extendedInformation;
 
 	public String getId() {
@@ -149,10 +152,6 @@ public class SessionRequest implements Comparable<SessionRequest> {
 	@Override
 	public String toString() {
 		return new StringBuilder().append(endpoint).append(" [").append(id).append("] (").append(startMicros).append(" - ").append(endMicros).append(")").toString();
-	}
-
-	public static class ExtendedView {
-
 	}
 
 }

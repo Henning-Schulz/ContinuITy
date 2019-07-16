@@ -2,16 +2,17 @@ package org.continuity.api.entities.artifact.session;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.continuity.api.entities.artifact.session.SessionRequest.ExtendedView;
 import org.continuity.idpa.VersionOrTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -32,6 +33,8 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  *
  */
 @JsonPropertyOrder({ "id", "version", "start-micros", "end-micros", "finished", "tailoring", "requests" })
+@JsonView(SessionView.Simple.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Session {
 
 	private static final String DELIM = ";";
@@ -53,9 +56,10 @@ public class Session {
 
 	@JsonSerialize(using = TailoringSerializer.class)
 	@JsonDeserialize(using = TailoringDeserializer.class)
+	@JsonView(SessionView.Simple.class)
 	private List<String> tailoring;
 
-	@JsonView(ExtendedView.class)
+	@JsonView(SessionView.Simple.class)
 	private NavigableSet<SessionRequest> requests = new TreeSet<>();
 
 	public String getId() {
@@ -139,12 +143,12 @@ public class Session {
 
 	@JsonIgnore
 	public String toSimpleLog() {
-		return requests.stream().map(SessionRequest::toSimpleLog).collect(Collectors.joining(DELIM));
+		return id + DELIM + requests.stream().map(SessionRequest::toSimpleLog).collect(Collectors.joining(DELIM));
 	}
 
 	@JsonIgnore
 	public String toExtensiveLog() {
-		return requests.stream().map(SessionRequest::toExtensiveLog).collect(Collectors.joining(DELIM));
+		return id + DELIM + requests.stream().map(SessionRequest::toExtensiveLog).collect(Collectors.joining(DELIM));
 	}
 
 	@Override
@@ -173,11 +177,16 @@ public class Session {
 	}
 
 	public static String convertTailoringToString(List<String> tailoring) {
+		Collections.sort(tailoring);
+
 		return tailoring.stream().collect(Collectors.joining("."));
 	}
 
 	public static List<String> convertStringToTailoring(String tailoring) {
-		return Arrays.asList(tailoring.split("\\."));
+		List<String> list = Arrays.asList(tailoring.split("\\."));
+		Collections.sort(list);
+
+		return list;
 	}
 
 	public static class TailoringSerializer extends StdSerializer<List<String>> {

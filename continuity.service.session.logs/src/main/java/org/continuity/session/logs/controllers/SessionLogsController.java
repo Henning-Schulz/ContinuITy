@@ -1,7 +1,8 @@
 package org.continuity.session.logs.controllers;
 
 import static org.continuity.api.rest.RestApi.SessionLogs.Sessions.Paths.CREATE;
-import static org.continuity.api.rest.RestApi.SessionLogs.Sessions.Paths.GET;
+import static org.continuity.api.rest.RestApi.SessionLogs.Sessions.Paths.GET_EXTENDED;
+import static org.continuity.api.rest.RestApi.SessionLogs.Sessions.Paths.GET_SIMPLE;
 import static org.continuity.api.rest.RestApi.SessionLogs.Sessions.QueryParameters.ADD_PRE_POST_PROCESSING;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import org.continuity.api.entities.artifact.SessionLogsInput;
 import org.continuity.api.entities.artifact.session.ExtendedRequestInformation;
 import org.continuity.api.entities.artifact.session.Session;
 import org.continuity.api.entities.artifact.session.SessionRequest;
+import org.continuity.api.entities.artifact.session.SessionView;
 import org.continuity.api.rest.RestApi;
 import org.continuity.idpa.AppId;
 import org.continuity.idpa.VersionOrTimestamp;
@@ -38,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -68,12 +71,12 @@ public class SessionLogsController {
 	private ObjectMapper mapper;
 
 	/**
-	 * Provides session logs stored in the database.
+	 * Provides session logs stored in the database in simple formatting.
 	 *
 	 * @param aid
 	 *            The app-id.
 	 * @param tailoring
-	 *            The services to which the logs are to be tailored, separated by ','.
+	 *            The services to which the logs are to be tailored, separated by '.'.
 	 * @param from
 	 *            The start date of the sessions.
 	 * @param to
@@ -82,10 +85,36 @@ public class SessionLogsController {
 	 * @throws TimeoutException
 	 * @throws IOException
 	 */
-	@RequestMapping(value = GET, method = RequestMethod.GET, produces = { "text/plain" })
+	@RequestMapping(value = GET_SIMPLE, method = RequestMethod.GET, produces = { "text/plain" })
 	@ApiImplicitParams({ @ApiImplicitParam(name = "app-id", required = true, dataType = "string", paramType = "path") })
-	public ResponseEntity<String> getSessionLogs(@ApiIgnore @PathVariable("app-id") AppId aid, @PathVariable String tailoring, @RequestParam(required = false) String from,
-			@RequestParam(required = false) String to, @RequestParam(defaultValue = "false") boolean simple) throws IOException, TimeoutException {
+	public ResponseEntity<String> getSimpleSessionLogs(@ApiIgnore @PathVariable("app-id") AppId aid, @PathVariable String tailoring, @RequestParam(required = false) String from,
+			@RequestParam(required = false) String to) throws IOException, TimeoutException {
+		return getSessionLogs(aid, tailoring, from, to, true);
+	}
+
+	/**
+	 * Provides session logs stored in the database in extended formatting.
+	 *
+	 * @param aid
+	 *            The app-id.
+	 * @param tailoring
+	 *            The services to which the logs are to be tailored, separated by '.'.
+	 * @param from
+	 *            The start date of the sessions.
+	 * @param to
+	 *            The end date of the sessions.
+	 * @return The session logs as string.
+	 * @throws TimeoutException
+	 * @throws IOException
+	 */
+	@RequestMapping(value = GET_EXTENDED, method = RequestMethod.GET, produces = { "text/plain" })
+	@ApiImplicitParams({ @ApiImplicitParam(name = "app-id", required = true, dataType = "string", paramType = "path") })
+	public ResponseEntity<String> getExtendedSessionLogs(@ApiIgnore @PathVariable("app-id") AppId aid, @PathVariable String tailoring, @RequestParam(required = false) String from,
+			@RequestParam(required = false) String to) throws IOException, TimeoutException {
+		return getSessionLogs(aid, tailoring, from, to, false);
+	}
+
+	private ResponseEntity<String> getSessionLogs(AppId aid, String tailoring, String from, String to, boolean simple) throws IOException, TimeoutException {
 		Triple<ResponseEntity<String>, Date, Date> check = checkDates(from, to);
 
 		if (check.getLeft() != null) {
@@ -104,12 +133,12 @@ public class SessionLogsController {
 	}
 
 	/**
-	 * Provides sessions stored in the database.
+	 * Provides simple sessions stored in the database.
 	 *
 	 * @param aid
 	 *            The app-id.
 	 * @param tailoring
-	 *            The services to which the logs are to be tailored, separated by ','.
+	 *            The services to which the logs are to be tailored, separated by '.'.
 	 * @param from
 	 *            The start date of the sessions.
 	 * @param to
@@ -118,10 +147,38 @@ public class SessionLogsController {
 	 * @throws TimeoutException
 	 * @throws IOException
 	 */
-	@RequestMapping(value = GET, method = RequestMethod.GET, produces = { "application/json" })
+	@RequestMapping(value = GET_SIMPLE, method = RequestMethod.GET, produces = { "application/json" })
 	@ApiImplicitParams({ @ApiImplicitParam(name = "app-id", required = true, dataType = "string", paramType = "path") })
-	public ResponseEntity<String> getSessionsAsJson(@ApiIgnore @PathVariable("app-id") AppId aid, @PathVariable String tailoring, @RequestParam(required = false) String from,
-			@RequestParam(required = false) String to, @RequestParam(defaultValue = "false") boolean simple) throws IOException, TimeoutException {
+	@JsonView(SessionView.Simple.class)
+	public ResponseEntity<?> getSessionsAsSimpleJson(@ApiIgnore @PathVariable("app-id") AppId aid, @PathVariable String tailoring, @RequestParam(required = false) String from,
+			@RequestParam(required = false) String to) throws IOException, TimeoutException {
+		return getSessionsAsJson(aid, tailoring, from, to, true);
+	}
+
+	/**
+	 * Provides extended sessions stored in the database.
+	 *
+	 * @param aid
+	 *            The app-id.
+	 * @param tailoring
+	 *            The services to which the logs are to be tailored, separated by '.'.
+	 * @param from
+	 *            The start date of the sessions.
+	 * @param to
+	 *            The end date of the sessions.
+	 * @return {@link Session}
+	 * @throws TimeoutException
+	 * @throws IOException
+	 */
+	@RequestMapping(value = GET_EXTENDED, method = RequestMethod.GET, produces = { "application/json" })
+	@ApiImplicitParams({ @ApiImplicitParam(name = "app-id", required = true, dataType = "string", paramType = "path") })
+	@JsonView(SessionView.Extended.class)
+	public ResponseEntity<?> getSessionsAsExtendedJson(@ApiIgnore @PathVariable("app-id") AppId aid, @PathVariable String tailoring, @RequestParam(required = false) String from,
+			@RequestParam(required = false) String to) throws IOException, TimeoutException {
+		return getSessionsAsJson(aid, tailoring, from, to, false);
+	}
+
+	public ResponseEntity<?> getSessionsAsJson(AppId aid, String tailoring, String from, String to, boolean simple) throws IOException, TimeoutException {
 		Triple<ResponseEntity<String>, Date, Date> check = checkDates(from, to);
 
 		if (check.getLeft() != null) {
@@ -134,15 +191,7 @@ public class SessionLogsController {
 			return ResponseEntity.notFound().build();
 		}
 
-		String json;
-
-		if (simple) {
-			json = mapper.writeValueAsString(sessions);
-		} else {
-			json = mapper.writerWithView(SessionRequest.ExtendedView.class).writeValueAsString(sessions);
-		}
-
-		return ResponseEntity.ok(json);
+		return ResponseEntity.ok(sessions);
 	}
 
 	@RequestMapping(value = "/test", method = RequestMethod.GET)
@@ -156,10 +205,43 @@ public class SessionLogsController {
 		session.addRequest(req);
 
 		if (simple) {
-			return mapper.writeValueAsString(Collections.singletonList(session));
+			return mapper.writerWithView(SessionView.Simple.class).writeValueAsString(Collections.singletonList(session));
 		} else {
-			return mapper.writerWithView(SessionRequest.ExtendedView.class).writeValueAsString(session);
+			return mapper.writerWithView(SessionView.Extended.class).writeValueAsString(session);
 		}
+	}
+
+	@RequestMapping(value = "/test", method = RequestMethod.POST)
+	public String testPost(@RequestBody Session session) throws JsonProcessingException {
+		return mapper.writerWithView(SessionView.Extended.class).writeValueAsString(session);
+	}
+
+	@RequestMapping(value = "/test2", method = RequestMethod.GET)
+	@JsonView(SessionView.Simple.class)
+	public Session test2(boolean simple) throws JsonProcessingException {
+		Session session = new Session();
+		session.setId("sdfhs");
+		SessionRequest req = new SessionRequest();
+		req.setId("12345");
+		req.setExtendedInformation(new ExtendedRequestInformation());
+		req.getExtendedInformation().setHost("myhost");
+		session.addRequest(req);
+
+		return session;
+	}
+
+	@RequestMapping(value = "/test3", method = RequestMethod.GET)
+	@JsonView(SessionView.Extended.class)
+	public Session test3(boolean simple) throws JsonProcessingException {
+		Session session = new Session();
+		session.setId("sdfhs");
+		SessionRequest req = new SessionRequest();
+		req.setId("12345");
+		req.setExtendedInformation(new ExtendedRequestInformation());
+		req.getExtendedInformation().setHost("myhost");
+		session.addRequest(req);
+
+		return session;
 	}
 
 	private Triple<ResponseEntity<String>, Date, Date> checkDates(String from, String to) {

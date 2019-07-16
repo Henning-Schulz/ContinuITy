@@ -1,7 +1,6 @@
 package org.continuity.api.entities.artifact.session;
 
-import org.continuity.api.entities.artifact.session.SessionRequest.ExtendedView;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 
 /**
@@ -12,7 +11,8 @@ import com.fasterxml.jackson.annotation.JsonView;
  * @author Henning Schulz
  *
  */
-@JsonView(ExtendedView.class)
+@JsonView(SessionView.Extended.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ExtendedRequestInformation {
 
 	private static final String DEFAULT_PARAMETERS = "<no-query-string>";

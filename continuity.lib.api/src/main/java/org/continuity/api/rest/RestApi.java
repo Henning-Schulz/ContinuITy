@@ -761,8 +761,11 @@ public class RestApi {
 
 			public static final String ROOT = "/sessions";
 
-			/** {@value #ROOT}/{app-id}/{tailoring} */
-			public static final RestEndpoint GET = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET, RequestMethod.GET);
+			/** {@value #ROOT}/{app-id}/{tailoring}/simple */
+			public static final RestEndpoint GET_SIMPLE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_SIMPLE, RequestMethod.GET);
+
+			/** {@value #ROOT}/{app-id}/{tailoring}/extended */
+			public static final RestEndpoint GET_EXTENDED = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_SIMPLE, RequestMethod.GET);
 
 			/** {@value #ROOT}/create */
 			public static final RestEndpoint CREATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE, RequestMethod.POST);
@@ -772,7 +775,9 @@ public class RestApi {
 
 			public static class Paths {
 
-				public static final String GET = "/{app-id}/{tailoring}";
+				public static final String GET_SIMPLE = "/{app-id}/{tailoring}/simple";
+
+				public static final String GET_EXTENDED = "/{app-id}/{tailoring}/extended";
 
 				public static final String CREATE = "/create";
 

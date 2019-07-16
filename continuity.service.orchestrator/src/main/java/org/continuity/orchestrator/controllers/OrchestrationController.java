@@ -386,7 +386,7 @@ public class OrchestrationController {
 		LinkExchangeModel external = new LinkExchangeModel();
 
 		if (internal.getSessionLogsLinks().getLink() != null) {
-			List<String> params = RestApi.SessionLogs.Sessions.GET.parsePathParameters(internal.getSessionLogsLinks().getLink());
+			List<String> params = RestApi.SessionLogs.Sessions.GET_EXTENDED.parsePathParameters(internal.getSessionLogsLinks().getLink());
 
 			if (params != null) {
 				external.getSessionLogsLinks().setLink(RestApi.Orchestrator.SessionLogs.GET.requestUrl(params.get(0)).withHost(host).get());
