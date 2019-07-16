@@ -84,7 +84,7 @@ public class ElasticsearchSessionManager extends ElasticsearchScrollingManager {
 
 	private Pair<String, String> serializeSession(Session session) {
 		try {
-			return Pair.of(mapper.writerWithView(SessionView.Extended.class).writeValueAsString(session), session.getId() + "_" + session.getStartMicros());
+			return Pair.of(mapper.writerWithView(SessionView.Extended.class).writeValueAsString(session), session.getUniqueId());
 		} catch (JsonProcessingException e) {
 			LOGGER.error("Could not write TraceRecord to JSON string!", e);
 			return null;

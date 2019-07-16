@@ -7,8 +7,6 @@ import static org.continuity.api.rest.RestApi.SessionLogs.Sessions.QueryParamete
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -18,9 +16,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.continuity.api.entities.ApiFormats;
 import org.continuity.api.entities.artifact.SessionLogs;
 import org.continuity.api.entities.artifact.SessionLogsInput;
-import org.continuity.api.entities.artifact.session.ExtendedRequestInformation;
 import org.continuity.api.entities.artifact.session.Session;
-import org.continuity.api.entities.artifact.session.SessionRequest;
 import org.continuity.api.entities.artifact.session.SessionView;
 import org.continuity.api.rest.RestApi;
 import org.continuity.idpa.AppId;
@@ -41,8 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -66,9 +60,6 @@ public class SessionLogsController {
 
 	@Autowired
 	private ElasticsearchSessionManager elasticManager;
-
-	@Autowired
-	private ObjectMapper mapper;
 
 	/**
 	 * Provides session logs stored in the database in simple formatting.
@@ -115,13 +106,13 @@ public class SessionLogsController {
 	}
 
 	private ResponseEntity<String> getSessionLogs(AppId aid, String tailoring, String from, String to, boolean simple) throws IOException, TimeoutException {
-		Triple<ResponseEntity<String>, Date, Date> check = checkDates(from, to);
+		Triple<BadRequestResponse, Date, Date> check = checkDates(from, to);
 
 		if (check.getLeft() != null) {
-			return check.getLeft();
+			return check.getLeft().toStringResponse();
 		}
 
-		List<Session> sessions = elasticManager.readSessionsInRange(aid, null, Arrays.asList(tailoring.split("\\.")), check.getMiddle(), check.getRight());
+		List<Session> sessions = elasticManager.readSessionsInRange(aid, null, Session.convertStringToTailoring(tailoring), check.getMiddle(), check.getRight());
 
 		if ((sessions == null) || sessions.isEmpty()) {
 			return ResponseEntity.notFound().build();
@@ -179,13 +170,13 @@ public class SessionLogsController {
 	}
 
 	public ResponseEntity<?> getSessionsAsJson(AppId aid, String tailoring, String from, String to, boolean simple) throws IOException, TimeoutException {
-		Triple<ResponseEntity<String>, Date, Date> check = checkDates(from, to);
+		Triple<BadRequestResponse, Date, Date> check = checkDates(from, to);
 
 		if (check.getLeft() != null) {
-			return check.getLeft();
+			return check.getLeft().toObjectResponse();
 		}
 
-		List<Session> sessions = elasticManager.readSessionsInRange(aid, null, Arrays.asList(tailoring.split("\\.")), check.getMiddle(), check.getRight());
+		List<Session> sessions = elasticManager.readSessionsInRange(aid, null, Session.convertStringToTailoring(tailoring), check.getMiddle(), check.getRight());
 
 		if ((sessions == null) || sessions.isEmpty()) {
 			return ResponseEntity.notFound().build();
@@ -194,65 +185,15 @@ public class SessionLogsController {
 		return ResponseEntity.ok(sessions);
 	}
 
-	@RequestMapping(value = "/test", method = RequestMethod.GET)
-	public String test(boolean simple) throws JsonProcessingException {
-		Session session = new Session();
-		session.setId("sdfhs");
-		SessionRequest req = new SessionRequest();
-		req.setId("12345");
-		req.setExtendedInformation(new ExtendedRequestInformation());
-		req.getExtendedInformation().setHost("myhost");
-		session.addRequest(req);
-
-		if (simple) {
-			return mapper.writerWithView(SessionView.Simple.class).writeValueAsString(Collections.singletonList(session));
-		} else {
-			return mapper.writerWithView(SessionView.Extended.class).writeValueAsString(session);
-		}
-	}
-
-	@RequestMapping(value = "/test", method = RequestMethod.POST)
-	public String testPost(@RequestBody Session session) throws JsonProcessingException {
-		return mapper.writerWithView(SessionView.Extended.class).writeValueAsString(session);
-	}
-
-	@RequestMapping(value = "/test2", method = RequestMethod.GET)
-	@JsonView(SessionView.Simple.class)
-	public Session test2(boolean simple) throws JsonProcessingException {
-		Session session = new Session();
-		session.setId("sdfhs");
-		SessionRequest req = new SessionRequest();
-		req.setId("12345");
-		req.setExtendedInformation(new ExtendedRequestInformation());
-		req.getExtendedInformation().setHost("myhost");
-		session.addRequest(req);
-
-		return session;
-	}
-
-	@RequestMapping(value = "/test3", method = RequestMethod.GET)
-	@JsonView(SessionView.Extended.class)
-	public Session test3(boolean simple) throws JsonProcessingException {
-		Session session = new Session();
-		session.setId("sdfhs");
-		SessionRequest req = new SessionRequest();
-		req.setId("12345");
-		req.setExtendedInformation(new ExtendedRequestInformation());
-		req.getExtendedInformation().setHost("myhost");
-		session.addRequest(req);
-
-		return session;
-	}
-
-	private Triple<ResponseEntity<String>, Date, Date> checkDates(String from, String to) {
+	private Triple<BadRequestResponse, Date, Date> checkDates(String from, String to) {
 		Date dFrom = null;
 
 		if (from != null) {
 			try {
 				dFrom = ApiFormats.DATE_FORMAT.parse(from);
 			} catch (ParseException e) {
-				LOGGER.error("Cannot parse from date!", e);
-				return Triple.of(ResponseEntity.badRequest().body("Illegal date format of 'from' date: " + from), null, null);
+				LOGGER.error("Cannot parse from date: {}", e.getMessage());
+				return Triple.of(new BadRequestResponse("Illegal date format of 'from' date: " + from), null, null);
 			}
 		}
 
@@ -262,8 +203,8 @@ public class SessionLogsController {
 			try {
 				dTo = ApiFormats.DATE_FORMAT.parse(to);
 			} catch (ParseException e) {
-				LOGGER.error("Cannot parse to date!", e);
-				return Triple.of(ResponseEntity.badRequest().body("Illegal date format of 'to' date: " + to), null, null);
+				LOGGER.error("Cannot parse to date: {}", e.getMessage());
+				return Triple.of(new BadRequestResponse("Illegal date format of 'to' date: " + to), null, null);
 			}
 		}
 
@@ -288,4 +229,29 @@ public class SessionLogsController {
 
 		return ResponseEntity.ok(new SessionLogs(VersionOrTimestamp.MIN_VALUE, sessionLogs));
 	}
+
+	@JsonView(SessionView.Simple.class)
+	private static class BadRequestResponse {
+
+		private String message;
+
+		public BadRequestResponse(String message) {
+			this.message = message;
+		}
+
+		@SuppressWarnings("unused")
+		public String getMessage() {
+			return message;
+		}
+
+		private ResponseEntity<String> toStringResponse() {
+			return ResponseEntity.badRequest().body(message);
+		}
+
+		private ResponseEntity<BadRequestResponse> toObjectResponse() {
+			return ResponseEntity.badRequest().body(this);
+		}
+
+	}
+
 }

@@ -70,6 +70,11 @@ public class Session {
 		this.id = id;
 	}
 
+	@JsonIgnore
+	public String getUniqueId() {
+		return new StringBuilder().append(id).append("_").append(startMicros).toString();
+	}
+
 	public VersionOrTimestamp getVersion() {
 		return version;
 	}
@@ -143,17 +148,17 @@ public class Session {
 
 	@JsonIgnore
 	public String toSimpleLog() {
-		return id + DELIM + requests.stream().map(SessionRequest::toSimpleLog).collect(Collectors.joining(DELIM));
+		return getUniqueId() + DELIM + requests.stream().map(SessionRequest::toSimpleLog).collect(Collectors.joining(DELIM));
 	}
 
 	@JsonIgnore
 	public String toExtensiveLog() {
-		return id + DELIM + requests.stream().map(SessionRequest::toExtensiveLog).collect(Collectors.joining(DELIM));
+		return getUniqueId() + DELIM + requests.stream().map(SessionRequest::toExtensiveLog).collect(Collectors.joining(DELIM));
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(endMicros, finished, id, requests, startMicros, tailoring, version);
+		return Objects.hash(id, tailoring, version, startMicros);
 	}
 
 	@Override
@@ -177,6 +182,10 @@ public class Session {
 	}
 
 	public static String convertTailoringToString(List<String> tailoring) {
+		if ((tailoring == null) || tailoring.isEmpty()) {
+			return "all";
+		}
+
 		Collections.sort(tailoring);
 
 		return tailoring.stream().collect(Collectors.joining("."));
