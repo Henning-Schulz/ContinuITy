@@ -19,6 +19,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SessionRequest implements Comparable<SessionRequest> {
 
+	public static final String PREFIX_PRE_PROCESSING = "PRE_PROCESSING#";
+
+	public static final String PREFIX_POST_PROCESSING = "POST_PROCESSING#";
+
 	private static final String DELIM = ":";
 
 	private String id;
@@ -37,6 +41,16 @@ public class SessionRequest implements Comparable<SessionRequest> {
 	@JsonProperty("extended-information")
 	@JsonView(SessionView.Extended.class)
 	private ExtendedRequestInformation extendedInformation;
+
+	@JsonIgnore
+	public static boolean isPrePostProcessing(String endpoint) {
+		return (endpoint != null) && (endpoint.startsWith(PREFIX_PRE_PROCESSING) || endpoint.startsWith(PREFIX_POST_PROCESSING));
+	}
+
+	@JsonIgnore
+	public boolean isPrePostProcessing() {
+		return isPrePostProcessing(endpoint);
+	}
 
 	public String getId() {
 		return id;

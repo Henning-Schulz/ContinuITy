@@ -7,8 +7,11 @@ import static org.continuity.api.rest.RestApi.SessionLogs.Sessions.QueryParamete
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
@@ -21,7 +24,8 @@ import org.continuity.api.entities.artifact.session.SessionView;
 import org.continuity.api.rest.RestApi;
 import org.continuity.idpa.AppId;
 import org.continuity.idpa.VersionOrTimestamp;
-import org.continuity.session.logs.extractor.ModularizedOPENxtraceSessionLogsExtractor;
+import org.continuity.session.logs.extractor.RequestTailorer;
+import org.continuity.session.logs.extractor.SessionUpdater;
 import org.continuity.session.logs.managers.ElasticsearchSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -220,16 +224,27 @@ public class SessionLogsController {
 	 * @return {@link SessionLogs}
 	 */
 	@RequestMapping(value = CREATE, method = RequestMethod.POST)
-	public ResponseEntity<SessionLogs> getModularizedSessionLogs(@RequestBody SessionLogsInput sessionLogsInput,
+	@ApiImplicitParams({ @ApiImplicitParam(name = "app-id", required = true, dataType = "string", paramType = "path"),
+			@ApiImplicitParam(name = "version", required = true, dataType = "string", paramType = "path") })
+	public ResponseEntity<String> getModularizedSessionLogs(@ApiIgnore @PathVariable("app-id") AppId aid, @ApiIgnore @PathVariable("version") VersionOrTimestamp version,
+			@RequestBody SessionLogsInput sessionLogsInput,
 			@RequestParam(name = ADD_PRE_POST_PROCESSING, defaultValue = "false") boolean addPrePostProcessing) {
-		// TODO: use new API
 
-		ModularizedOPENxtraceSessionLogsExtractor extractor = new ModularizedOPENxtraceSessionLogsExtractor(AppId.fromString(""), eurekaRestTemplate, sessionLogsInput.getServices(),
-				addPrePostProcessing);
+		List<String> services = new ArrayList<>();
+		LOGGER.info("Generating tailored session logs for app-id {}, version {}, and services {}...", aid, version, services);
+
 		List<Trace> traces = OPENxtraceUtils.deserializeIntoTraceList(sessionLogsInput.getSerializedTraces());
-		String sessionLogs = extractor.getSessionLogs(traces);
 
-		return ResponseEntity.ok(new SessionLogs(VersionOrTimestamp.MIN_VALUE, sessionLogs));
+		services.addAll(sessionLogsInput.getServices().values());
+
+		RequestTailorer tailorer = new RequestTailorer(aid, version, eurekaRestTemplate, addPrePostProcessing);
+		SessionUpdater updater = new SessionUpdater(version, services, Long.MAX_VALUE, true);
+
+		Set<Session> sessions = updater.updateSessions(Collections.emptyList(), tailorer.tailorTraces(services, traces));
+
+		LOGGER.info("Tailoring for app-id {}, version {}, and services {} done.", aid, version, services);
+
+		return ResponseEntity.ok(sessions.stream().map(Session::toExtensiveLog).collect(Collectors.joining("\n")));
 	}
 
 	@JsonView(SessionView.Simple.class)

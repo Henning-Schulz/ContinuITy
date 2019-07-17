@@ -805,7 +805,7 @@ public class RestApi {
 
 				public static final String GET_EXTENDED = "/{app-id:.+}/{tailoring}/extended";
 
-				public static final String CREATE = "/create";
+				public static final String CREATE = "/{app-id:.+}/{version:.+}/create";
 
 				private Paths() {
 				}

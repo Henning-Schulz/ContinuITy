@@ -151,7 +151,7 @@ public class WessbasPipelineManager {
 		SessionsBundlePack sessionsBundles = behaviorManager.runPipeline(sessionLogs);
 
 		// Apply Modularization
-		WorkloadModularizationManager modularizationManager = new WorkloadModularizationManager(restTemplate);
+		WorkloadModularizationManager modularizationManager = new WorkloadModularizationManager(restTemplate, task.getAppId(), task.getVersion());
 		BehaviorModelPack behaviorModelPack = new BehaviorModelPack(sessionsBundles, workingDir);
 		modularizationManager.runPipeline(task.getAppId(), task.getVersion(), task.getSource(), behaviorModelPack, task.getModularizationOptions().getServices());
 

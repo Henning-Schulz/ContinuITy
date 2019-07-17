@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.spec.research.open.xtrace.api.core.Location;
 import org.spec.research.open.xtrace.api.core.Trace;
 import org.spec.research.open.xtrace.api.core.callables.HTTPRequestProcessing;
+import org.spec.research.open.xtrace.dflt.impl.core.SubTraceImpl;
 import org.spec.research.open.xtrace.dflt.impl.core.callables.HTTPRequestProcessingImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -45,11 +46,55 @@ public class RequestTailorer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RequestTailorer.class);
 
+	private static final HttpEndpoint DEFAULT_ENDPOINT = new HttpEndpoint();
+
+	static {
+		DEFAULT_ENDPOINT.setId("");
+		DEFAULT_ENDPOINT.setDomain("");
+		DEFAULT_ENDPOINT.setPort("80");
+		DEFAULT_ENDPOINT.setMethod("GET");
+		DEFAULT_ENDPOINT.setPath("/");
+	}
+
 	private final AppId aid;
 
 	private final VersionOrTimestamp version;
 
 	private final RestTemplate restTemplate;
+
+	private final boolean addPrePostProcessing;
+
+	private final RequestUriMapper rootMapper;
+
+	/**
+	 *
+	 * @param aid
+	 *            The app-id (the service part will be ignored).
+	 * @param version
+	 *            The version of the services.
+	 * @param restTemplate
+	 *            {@link RestTemplate} to be used for retrieving the application models.
+	 * @param addPrePostProcessing
+	 *            Whether explicit entries for the pre and post processing should be added to the
+	 *            sessions.
+	 */
+	public RequestTailorer(AppId aid, VersionOrTimestamp version, RestTemplate restTemplate, boolean addPrePostProcessing) {
+		this.aid = aid;
+		this.version = version;
+		this.restTemplate = restTemplate;
+		this.addPrePostProcessing = addPrePostProcessing;
+
+		Application rootApp;
+		try {
+			rootApp = restTemplate.getForObject(RestApi.Idpa.Application.GET.requestUrl(aid).withQuery("version", version.toString()).get(), Application.class);
+		} catch (HttpStatusCodeException e) {
+			LOGGER.error("Could not get root application for app-id {} and version {}! {} ({}): {}", aid.dropService(), version, e.getStatusCode(), e.getStatusCode().getReasonPhrase(),
+					e.getResponseBodyAsString());
+			rootApp = null;
+		}
+
+		rootMapper = rootApp == null ? null : new RequestUriMapper(rootApp);
+	}
 
 	/**
 	 *
@@ -61,9 +106,7 @@ public class RequestTailorer {
 	 *            {@link RestTemplate} to be used for retrieving the application models.
 	 */
 	public RequestTailorer(AppId aid, VersionOrTimestamp version, RestTemplate restTemplate) {
-		this.aid = aid;
-		this.version = version;
-		this.restTemplate = restTemplate;
+		this(aid, version, restTemplate, false);
 	}
 
 	/**
@@ -112,7 +155,46 @@ public class RequestTailorer {
 	}
 
 	private List<HTTPRequestProcessingImpl> extractChildRequests(Trace trace, List<String> targetHostNames) {
-		return OpenXtraceTracer.forRootAndHosts(trace.getRoot().getRoot(), targetHostNames).extractSubtraces();
+		OpenXtraceTracer tracer;
+
+		if (targetHostNames.isEmpty()) {
+			tracer = OpenXtraceTracer.forRoot(trace.getRoot().getRoot());
+		} else {
+			tracer = OpenXtraceTracer.forRootAndHosts(trace.getRoot().getRoot(), targetHostNames);
+		}
+
+		List<HTTPRequestProcessingImpl> childCallables = tracer.extractSubtraces();
+
+		if (addPrePostProcessing && !targetHostNames.isEmpty() && (childCallables.size() > 0)) {
+			List<HTTPRequestProcessingImpl> rootCallables = OpenXtraceTracer.forRoot(trace.getRoot().getRoot()).extractSubtraces();
+
+			if (rootCallables.size() > 0) {
+				HTTPRequestProcessingImpl firstRoot = rootCallables.get(0);
+				HTTPRequestProcessingImpl lastRoot = rootCallables.get(rootCallables.size() - 1);
+
+				childCallables.add(0, toPrePostProcessing(firstRoot, true));
+				childCallables.add(toPrePostProcessing(lastRoot, false));
+			}
+		}
+
+		return childCallables;
+	}
+
+	private HTTPRequestProcessingImpl toPrePostProcessing(HTTPRequestProcessingImpl root, boolean pre) {
+		HTTPRequestProcessingImpl newRoot = new HTTPRequestProcessingImpl(null, new SubTraceImpl());
+		OPENxtraceUtils.setSessionId(newRoot, OPENxtraceUtils.extractSessionIdFromCookies(root));
+		newRoot.setResponseTime(0);
+
+		if (pre) {
+			newRoot.setTimestamp(root.getTimestamp());
+			OPENxtraceUtils.setBusinessTransaction(newRoot, SessionRequest.PREFIX_PRE_PROCESSING);
+		} else {
+			newRoot.setTimestamp(root.getExitTime());
+			OPENxtraceUtils.setBusinessTransaction(newRoot, SessionRequest.PREFIX_POST_PROCESSING);
+		}
+
+
+		return newRoot;
 	}
 
 	private SessionRequest mapToSession(Pair<HTTPRequestProcessingImpl, HttpEndpoint> cae) {
@@ -122,9 +204,9 @@ public class RequestTailorer {
 		SessionRequest request = new SessionRequest();
 
 		request.setSessionId(OPENxtraceUtils.extractSessionIdFromCookies(callable));
-		request.setEndpoint(endpoint.getId());
+		request.setEndpoint(getPrefix(callable).append(endpoint.getId()).toString());
 		request.setStartMicros(callable.getTimestamp() * 1000);
-		request.setEndMicros((callable.getTimestamp() * 1000) + (callable.getResponseTime() / 1000));
+		request.setEndMicros(callable.getExitTime() * 1000);
 
 		if (callable.getIdentifier().isPresent()) {
 			request.setId(callable.getIdentifier().get().toString());
@@ -135,6 +217,18 @@ public class RequestTailorer {
 		addExtendedInformation(request, callable, endpoint);
 
 		return request;
+	}
+
+	private StringBuilder getPrefix(HTTPRequestProcessingImpl callable) {
+		Optional<String> bt = OPENxtraceUtils.getBusinessTransaction(callable);
+
+		StringBuilder builder = new StringBuilder();
+
+		if (bt.isPresent() && SessionRequest.isPrePostProcessing(bt.get())) {
+			builder.append(bt.get());
+		}
+
+		return builder;
 	}
 
 	private void addExtendedInformation(SessionRequest request, HTTPRequestProcessing callable, HttpEndpoint endpoint) {
@@ -251,12 +345,26 @@ public class RequestTailorer {
 		}
 
 		private Pair<HTTPRequestProcessingImpl, HttpEndpoint> mapToEndpoint(HTTPRequestProcessingImpl callable) {
+			if (SessionRequest.isPrePostProcessing(OPENxtraceUtils.getBusinessTransaction(callable).orElse(null))) {
+				HttpEndpoint endpoint = null;
+
+				if (rootMapper != null) {
+					endpoint = rootMapper.map(callable.getUri(), callable.getRequestMethod().get().name());
+				}
+
+				if (endpoint == null) {
+					endpoint = DEFAULT_ENDPOINT;
+				}
+
+				return Pair.of(callable, endpoint);
+			}
+
 			for (RequestUriMapper uriMapper : mappers) {
 				HttpEndpoint endpoint = uriMapper.map(callable.getUri(), callable.getRequestMethod().get().name());
 
 				Location location = callable.getContainingSubTrace().getLocation();
 
-				if ((endpoint != null) && endpoint.getDomain().equals(location.getHost()) && endpoint.getPort().equals(Integer.toString(location.getPort()))) {
+				if ((endpoint != null) && areEqualOrNull(endpoint.getDomain(), location.getHost()) && areEqualOrNull(endpoint.getPort(), Integer.toString(location.getPort()))) {
 					return Pair.of(callable, endpoint);
 				}
 			}
@@ -264,6 +372,10 @@ public class RequestTailorer {
 			return null;
 		}
 
+	}
+
+	private boolean areEqualOrNull(Object expected, Object tested) {
+		return (expected == null) || expected.equals(tested);
 	}
 
 }
