@@ -48,8 +48,28 @@ public class SessionRequest implements Comparable<SessionRequest> {
 	}
 
 	@JsonIgnore
+	public static boolean isPreProcessing(String endpoint) {
+		return (endpoint != null) && endpoint.startsWith(PREFIX_PRE_PROCESSING);
+	}
+
+	@JsonIgnore
+	public static boolean isPostProcessing(String endpoint) {
+		return (endpoint != null) && endpoint.startsWith(PREFIX_POST_PROCESSING);
+	}
+
+	@JsonIgnore
 	public boolean isPrePostProcessing() {
 		return isPrePostProcessing(endpoint);
+	}
+
+	@JsonIgnore
+	public boolean isPreProcessing() {
+		return isPreProcessing(endpoint);
+	}
+
+	@JsonIgnore
+	public boolean isPostProcessing() {
+		return isPostProcessing(endpoint);
 	}
 
 	public String getId() {
@@ -102,7 +122,7 @@ public class SessionRequest implements Comparable<SessionRequest> {
 
 	@JsonIgnore
 	public String toSimpleLog() {
-		return new StringBuilder().append("\"").append(endpoint).append("\"").append(DELIM).append(startMicros * 1000).append(DELIM).append(endMicros).toString();
+		return new StringBuilder().append("\"").append(endpoint).append("\"").append(DELIM).append(startMicros * 1000).append(DELIM).append(endMicros * 1000).toString();
 	}
 
 	@JsonIgnore
@@ -111,7 +131,7 @@ public class SessionRequest implements Comparable<SessionRequest> {
 			throw new IllegalStateException("Cannot generate extensive log! There is no extended information present!");
 		}
 
-		StringBuilder log = new StringBuilder().append("\"").append(endpoint).append("\"").append(DELIM).append(startMicros * 1000).append(DELIM).append(endMicros);
+		StringBuilder log = new StringBuilder().append("\"").append(endpoint).append("\"").append(DELIM).append(startMicros * 1000).append(DELIM).append(endMicros * 1000);
 
 		log.append(DELIM).append(extendedInformation.getUri());
 		log.append(DELIM).append(extendedInformation.getPort());
@@ -128,10 +148,16 @@ public class SessionRequest implements Comparable<SessionRequest> {
 	public int compareTo(SessionRequest other) {
 		int startDiff = Long.signum(this.endMicros - other.endMicros);
 		int endDiff = Long.signum(this.startMicros - other.startMicros);
+		int prePostDiff = Integer.signum(this.prePostIndex() - other.prePostIndex());
 		int endpointDiff = Integer.signum(compareRespectingNull(this.endpoint, other.endpoint));
 		int idDiff = Long.signum(compareRespectingNull(this.id, other.id));
 
-		return (8 * startDiff) + (4 * endDiff) + (2 * endpointDiff) + idDiff;
+		return (16 * startDiff) + (8 * endDiff) + (4 * prePostDiff) + (2 * endpointDiff) + idDiff;
+	}
+
+	@JsonIgnore
+	private int prePostIndex() {
+		return isPrePostProcessing() ? -1 : (isPostProcessing() ? 1 : 0);
 	}
 
 	private <T> int compareRespectingNull(Comparable<T> first, T second) {

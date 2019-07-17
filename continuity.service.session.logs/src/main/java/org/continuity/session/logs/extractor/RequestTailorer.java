@@ -46,16 +46,6 @@ public class RequestTailorer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RequestTailorer.class);
 
-	private static final HttpEndpoint DEFAULT_ENDPOINT = new HttpEndpoint();
-
-	static {
-		DEFAULT_ENDPOINT.setId("");
-		DEFAULT_ENDPOINT.setDomain("");
-		DEFAULT_ENDPOINT.setPort("80");
-		DEFAULT_ENDPOINT.setMethod("GET");
-		DEFAULT_ENDPOINT.setPath("/");
-	}
-
 	private final AppId aid;
 
 	private final VersionOrTimestamp version;
@@ -184,15 +174,19 @@ public class RequestTailorer {
 		HTTPRequestProcessingImpl newRoot = new HTTPRequestProcessingImpl(null, new SubTraceImpl());
 		OPENxtraceUtils.setSessionId(newRoot, OPENxtraceUtils.extractSessionIdFromCookies(root));
 		newRoot.setResponseTime(0);
+		newRoot.setUri(root.getUri());
+
+		String prefix;
 
 		if (pre) {
 			newRoot.setTimestamp(root.getTimestamp());
-			OPENxtraceUtils.setBusinessTransaction(newRoot, SessionRequest.PREFIX_PRE_PROCESSING);
+			prefix = SessionRequest.PREFIX_PRE_PROCESSING;
 		} else {
 			newRoot.setTimestamp(root.getExitTime());
-			OPENxtraceUtils.setBusinessTransaction(newRoot, SessionRequest.PREFIX_POST_PROCESSING);
+			prefix = SessionRequest.PREFIX_POST_PROCESSING;
 		}
 
+		OPENxtraceUtils.setBusinessTransaction(newRoot, new StringBuilder().append(prefix).append(OPENxtraceUtils.getBusinessTransaction(root).orElse("")).toString());
 
 		return newRoot;
 	}
@@ -204,7 +198,7 @@ public class RequestTailorer {
 		SessionRequest request = new SessionRequest();
 
 		request.setSessionId(OPENxtraceUtils.extractSessionIdFromCookies(callable));
-		request.setEndpoint(getPrefix(callable).append(endpoint.getId()).toString());
+		request.setEndpoint(getPrePostEndpoint(callable).orElse(endpoint.getId()));
 		request.setStartMicros(callable.getTimestamp() * 1000);
 		request.setEndMicros(callable.getExitTime() * 1000);
 
@@ -219,16 +213,14 @@ public class RequestTailorer {
 		return request;
 	}
 
-	private StringBuilder getPrefix(HTTPRequestProcessingImpl callable) {
+	private Optional<String> getPrePostEndpoint(HTTPRequestProcessingImpl callable) {
 		Optional<String> bt = OPENxtraceUtils.getBusinessTransaction(callable);
 
-		StringBuilder builder = new StringBuilder();
-
 		if (bt.isPresent() && SessionRequest.isPrePostProcessing(bt.get())) {
-			builder.append(bt.get());
+			return bt;
+		} else {
+			return Optional.empty();
 		}
-
-		return builder;
 	}
 
 	private void addExtendedInformation(SessionRequest request, HTTPRequestProcessing callable, HttpEndpoint endpoint) {
@@ -286,6 +278,10 @@ public class RequestTailorer {
 	 * @return The extracted parameters in the form <code>[URL_PART_name -> value]</code>.
 	 */
 	private Map<String, String[]> extractUriParams(String uri, String urlPattern) {
+		if (uri == null) {
+			return Collections.emptyMap();
+		}
+
 		UrlPartParameterExtractor extractor = new UrlPartParameterExtractor(urlPattern, uri);
 		Map<String, String[]> params = new HashMap<>();
 
@@ -353,7 +349,7 @@ public class RequestTailorer {
 				}
 
 				if (endpoint == null) {
-					endpoint = DEFAULT_ENDPOINT;
+					endpoint = defaultEndpoint(OPENxtraceUtils.getBusinessTransaction(callable));
 				}
 
 				return Pair.of(callable, endpoint);
@@ -372,6 +368,18 @@ public class RequestTailorer {
 			return null;
 		}
 
+	}
+
+	private HttpEndpoint defaultEndpoint(Optional<String> bt) {
+		HttpEndpoint endpoint = new HttpEndpoint();
+
+		endpoint.setId(bt.orElse(""));
+		endpoint.setDomain("");
+		endpoint.setPort("80");
+		endpoint.setMethod("GET");
+		endpoint.setPath("/");
+
+		return endpoint;
 	}
 
 	private boolean areEqualOrNull(Object expected, Object tested) {

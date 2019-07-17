@@ -22,7 +22,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.continuity.api.entities.ApiFormats;
-import org.continuity.api.entities.artifact.SessionLogs;
 import org.continuity.api.entities.artifact.SessionLogsInput;
 import org.continuity.api.entities.artifact.SessionsBundle;
 import org.continuity.api.entities.artifact.SimplifiedSession;
@@ -292,7 +291,7 @@ public class WorkloadModularizationManager {
 	 *            the input traces
 	 * @param services
 	 *            the services, which are going to be targeted
-	 * @return {@link SessionLogs}
+	 * @return The session logs as string.
 	 */
 	private String getModularizedSessionLogs(List<Trace> traces, Map<AppId, String> services) {
 		OPENxtraceSerializer serializer = OPENxtraceSerializationFactory.getInstance().getSerializer(OPENxtraceSerializationFormat.JSON);

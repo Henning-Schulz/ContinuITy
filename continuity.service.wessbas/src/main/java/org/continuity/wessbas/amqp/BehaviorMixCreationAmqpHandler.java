@@ -66,7 +66,7 @@ public class BehaviorMixCreationAmqpHandler {
 			LOGGER.error("Task {}: Session logs link is missing for app-id {}!", task.getTaskId(), task.getAppId());
 			report = TaskReport.error(task.getTaskId(), TaskError.MISSING_SOURCE);
 		} else {
-			BehaviorMixManager behaviorManager = new BehaviorMixManager(restTemplate);
+			BehaviorMixManager behaviorManager = new BehaviorMixManager(restTemplate, task.getVersion());
 			SessionsBundlePack sessionsBundles = behaviorManager.runPipeline(task.getSource().getSessionLogsLinks().getExtendedLink());
 			BehaviorModelPack behaviorModelPack = new BehaviorModelPack(sessionsBundles, behaviorManager.getWorkingDir());
 

@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.continuity.api.entities.ApiFormats;
-import org.continuity.api.entities.artifact.SessionLogs;
 import org.continuity.api.entities.artifact.SessionLogsInput;
 import org.continuity.api.entities.artifact.session.Session;
 import org.continuity.api.entities.artifact.session.SessionView;
@@ -221,7 +220,7 @@ public class SessionLogsController {
 	 *
 	 * @param sessionLogsInput
 	 *            Provides the traces and the target services.
-	 * @return {@link SessionLogs}
+	 * @return Extended session logs formatted as string.
 	 */
 	@RequestMapping(value = CREATE, method = RequestMethod.POST)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "app-id", required = true, dataType = "string", paramType = "path"),

@@ -147,7 +147,7 @@ public class WessbasPipelineManager {
 		Properties intensityProps = createWorkloadIntensity(sessionLogs, interval);
 
 		//Apply Behavior Mix generation
-		BehaviorMixManager behaviorManager = new BehaviorMixManager(restTemplate, workingDir);
+		BehaviorMixManager behaviorManager = new BehaviorMixManager(restTemplate, task.getVersion(), workingDir);
 		SessionsBundlePack sessionsBundles = behaviorManager.runPipeline(sessionLogs);
 
 		// Apply Modularization
