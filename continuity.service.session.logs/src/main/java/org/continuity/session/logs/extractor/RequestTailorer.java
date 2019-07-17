@@ -27,7 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spec.research.open.xtrace.api.core.Location;
 import org.spec.research.open.xtrace.api.core.Trace;
+import org.spec.research.open.xtrace.api.core.callables.HTTPMethod;
 import org.spec.research.open.xtrace.api.core.callables.HTTPRequestProcessing;
+import org.spec.research.open.xtrace.dflt.impl.core.LocationImpl;
 import org.spec.research.open.xtrace.dflt.impl.core.SubTraceImpl;
 import org.spec.research.open.xtrace.dflt.impl.core.callables.HTTPRequestProcessingImpl;
 import org.springframework.http.ResponseEntity;
@@ -171,10 +173,13 @@ public class RequestTailorer {
 	}
 
 	private HTTPRequestProcessingImpl toPrePostProcessing(HTTPRequestProcessingImpl root, boolean pre) {
-		HTTPRequestProcessingImpl newRoot = new HTTPRequestProcessingImpl(null, new SubTraceImpl());
+		SubTraceImpl subTrace = new SubTraceImpl();
+		subTrace.setLocation(root.getContainingSubTrace() == null ? new LocationImpl() : root.getContainingSubTrace().getLocation());
+		HTTPRequestProcessingImpl newRoot = new HTTPRequestProcessingImpl(null, subTrace);
 		OPENxtraceUtils.setSessionId(newRoot, OPENxtraceUtils.extractSessionIdFromCookies(root));
 		newRoot.setResponseTime(0);
 		newRoot.setUri(root.getUri());
+		newRoot.setRequestMethod(root.getRequestMethod().orElse(HTTPMethod.GET));
 
 		String prefix;
 
@@ -186,7 +191,7 @@ public class RequestTailorer {
 			prefix = SessionRequest.PREFIX_POST_PROCESSING;
 		}
 
-		OPENxtraceUtils.setBusinessTransaction(newRoot, new StringBuilder().append(prefix).append(OPENxtraceUtils.getBusinessTransaction(root).orElse("")).toString());
+		newRoot.setIdentifier(prefix);
 
 		return newRoot;
 	}
@@ -198,7 +203,7 @@ public class RequestTailorer {
 		SessionRequest request = new SessionRequest();
 
 		request.setSessionId(OPENxtraceUtils.extractSessionIdFromCookies(callable));
-		request.setEndpoint(getPrePostEndpoint(callable).orElse(endpoint.getId()));
+		request.setEndpoint(getPrefix(callable).append(endpoint.getId()).toString());
 		request.setStartMicros(callable.getTimestamp() * 1000);
 		request.setEndMicros(callable.getExitTime() * 1000);
 
@@ -213,14 +218,16 @@ public class RequestTailorer {
 		return request;
 	}
 
-	private Optional<String> getPrePostEndpoint(HTTPRequestProcessingImpl callable) {
-		Optional<String> bt = OPENxtraceUtils.getBusinessTransaction(callable);
+	private StringBuilder getPrefix(HTTPRequestProcessingImpl callable) {
+		StringBuilder builder = new StringBuilder();
 
-		if (bt.isPresent() && SessionRequest.isPrePostProcessing(bt.get())) {
-			return bt;
-		} else {
-			return Optional.empty();
+		String identifier = callable.getIdentifier().orElse("").toString();
+
+		if (SessionRequest.isPrePostProcessing(identifier)) {
+			builder.append(identifier);
 		}
+
+		return builder;
 	}
 
 	private void addExtendedInformation(SessionRequest request, HTTPRequestProcessing callable, HttpEndpoint endpoint) {
@@ -341,7 +348,7 @@ public class RequestTailorer {
 		}
 
 		private Pair<HTTPRequestProcessingImpl, HttpEndpoint> mapToEndpoint(HTTPRequestProcessingImpl callable) {
-			if (SessionRequest.isPrePostProcessing(OPENxtraceUtils.getBusinessTransaction(callable).orElse(null))) {
+			if (SessionRequest.isPrePostProcessing(callable.getIdentifier().orElse("").toString())) {
 				HttpEndpoint endpoint = null;
 
 				if (rootMapper != null) {
