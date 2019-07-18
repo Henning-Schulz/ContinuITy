@@ -15,6 +15,10 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * Represents a Markov chain that is part of a {@link MarkovBehaviorModel}. It is especially
  * designed for operations such as replacing states by other Markov chains or removing states. Each
@@ -58,6 +62,8 @@ public class MarkovChain {
 
 	private double frequency;
 
+	@JsonDeserialize(as = TreeMap.class, contentAs = TreeMap.class)
+	@JsonProperty
 	private final Map<String, Map<String, MarkovTransition>> transitions = new TreeMap<>();
 
 	/**
@@ -203,12 +209,25 @@ public class MarkovChain {
 	}
 
 	/**
+	 * Gets the stored transitions. To be handled with care!
+	 *
+	 * @return The transitions. <b>Do not change!</b>
+	 *
+	 * @see #getTransition(String, String)
+	 * @see #setTransition(String, String, MarkovTransition)
+	 */
+	public Map<String, Map<String, MarkovTransition>> getTransitions() {
+		return transitions;
+	}
+
+	/**
 	 * Returns a list of all request states contained in the Markov chain, i.e., all requests that
 	 * are not {@value #INITIAL_STATE} or {@value #FINAL_STATE}. <br>
 	 * <i>Please note that changing the returned list will not have any effect.</i>
 	 *
 	 * @return The list of request states.
 	 */
+	@JsonIgnore
 	public List<String> getRequestStates() {
 		return transitions.keySet().stream().filter(s -> !INITIAL_STATE.equals(s) && !FINAL_STATE.equals(s)).collect(Collectors.toList());
 	}
@@ -219,6 +238,7 @@ public class MarkovChain {
 	 *
 	 * @return The number of request states.
 	 */
+	@JsonIgnore
 	public int getNumberOfRequestStates() {
 		return transitions.size() - 2;
 	}
