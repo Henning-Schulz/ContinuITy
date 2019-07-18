@@ -32,10 +32,10 @@ public class MarkovChainSerializationTest {
 	private void testWriteRead(MarkovChainTestInstance instance) throws IOException {
 		String[][] csv = instance.getCsv();
 
-		MarkovChain chain = MarkovChain.fromCsv(csv);
+		RelativeMarkovChain chain = RelativeMarkovChain.fromCsv(csv);
 		String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(chain);
 
-		MarkovChain parsed = mapper.readValue(json, MarkovChain.class);
+		RelativeMarkovChain parsed = mapper.readValue(json, RelativeMarkovChain.class);
 
 		assertThat(parsed.getTransitions().toString()).isEqualTo(chain.getTransitions().toString());
 		assertThat(parsed.getTransitions().getClass()).isEqualTo(chain.getTransitions().getClass()).as("The map type should be TreeMap.");

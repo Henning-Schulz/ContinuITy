@@ -26,7 +26,7 @@ import org.continuity.api.entities.artifact.SessionLogsInput;
 import org.continuity.api.entities.artifact.SessionsBundle;
 import org.continuity.api.entities.artifact.SimplifiedSession;
 import org.continuity.api.entities.artifact.markovbehavior.MarkovBehaviorModel;
-import org.continuity.api.entities.artifact.markovbehavior.MarkovChain;
+import org.continuity.api.entities.artifact.markovbehavior.RelativeMarkovChain;
 import org.continuity.api.entities.artifact.markovbehavior.NormalDistribution;
 import org.continuity.api.entities.links.LinkExchangeModel;
 import org.continuity.api.rest.RequestBuilder;
@@ -174,7 +174,7 @@ public class WorkloadModularizationManager {
 
 		behaviorModel.synchronizeMarkovChains();
 
-		for (MarkovChain chain : behaviorModel.getMarkovChains()) {
+		for (RelativeMarkovChain chain : behaviorModel.getMarkovChains()) {
 			String behaviorFile = behaviorModelPack.getPathToBehaviorModelFiles().resolve("behaviormodelextractor").resolve(chain.getId() + FILE_EXT).toFile().toString();
 			LOGGER.info("Storing the modularized behavior model to {}...", behaviorFile);
 
@@ -200,12 +200,12 @@ public class WorkloadModularizationManager {
 	 * @throws NullPointerException
 	 * @throws FileNotFoundException
 	 */
-	private MarkovChain modularizeUserGroup(Application application, SessionsBundle sessionBundle, BehaviorModelPack behaviorModelPack, Map<AppId, String> services,
+	private RelativeMarkovChain modularizeUserGroup(Application application, SessionsBundle sessionBundle, BehaviorModelPack behaviorModelPack, Map<AppId, String> services,
 			List<HTTPRequestProcessingImpl> httpCallables) throws FileNotFoundException, IOException {
 		LOGGER.info("Modularizing behavior model {} at path {}...", sessionBundle.getBehaviorId(), behaviorModelPack.getPathToBehaviorModelFiles());
 
 		String behaviorFile = behaviorModelPack.getPathToBehaviorModelFiles().resolve("behaviormodelextractor").resolve(FILENAME + sessionBundle.getBehaviorId() + FILE_EXT).toFile().toString();
-		MarkovChain markovChain = MarkovChain.fromCsv(csvHandler.readValues(behaviorFile));
+		RelativeMarkovChain markovChain = RelativeMarkovChain.fromCsv(csvHandler.readValues(behaviorFile));
 		markovChain.setId(FILENAME + sessionBundle.getBehaviorId());
 
 		Map<String, List<Trace>> tracesPerState = getTracesPerState(filterTraces(httpCallables, sessionBundle), application);
@@ -227,7 +227,7 @@ public class WorkloadModularizationManager {
 				.collect(Collectors.toList());
 	}
 
-	private void modularizeMarkovState(MarkovChain markovChain, String state, List<Trace> traces, Application application, Map<AppId, String> services) {
+	private void modularizeMarkovState(RelativeMarkovChain markovChain, String state, List<Trace> traces, Application application, Map<AppId, String> services) {
 		if ((traces == null) || traces.isEmpty()) {
 			LOGGER.info("Keeping state {}.", state);
 			return;
@@ -242,7 +242,7 @@ public class WorkloadModularizationManager {
 			markovChain.removeState(state, NormalDistribution.fromSample(responseTimeSample));
 		} else {
 			LOGGER.info("Replacing state {}.", state);
-			MarkovChain subChain = createSubMarkovChain(state, sessionLogs, markovChain.getId());
+			RelativeMarkovChain subChain = createSubMarkovChain(state, sessionLogs, markovChain.getId());
 
 			removePrePostProcessingState("PRE_PROCESSING#", subChain);
 			removePrePostProcessingState("POST_PROCESSING#", subChain);
@@ -251,7 +251,7 @@ public class WorkloadModularizationManager {
 		}
 	}
 
-	private void removePrePostProcessingState(String prefix, MarkovChain chain) {
+	private void removePrePostProcessingState(String prefix, RelativeMarkovChain chain) {
 		int removed = chain.removeStates(s -> s.startsWith(prefix), NormalDistribution.ZERO);
 
 		if (removed != 1) {
@@ -259,7 +259,7 @@ public class WorkloadModularizationManager {
 		}
 	}
 
-	private MarkovChain createSubMarkovChain(String rootState, String sessionLogs, String behaviorId) {
+	private RelativeMarkovChain createSubMarkovChain(String rootState, String sessionLogs, String behaviorId) {
 		if (sessionLogs.isEmpty()) {
 			return null;
 		}
@@ -281,7 +281,7 @@ public class WorkloadModularizationManager {
 			LOGGER.error("Could not create behavior model", e);
 		}
 
-		return MarkovChain.fromCsv(behaviorModel);
+		return RelativeMarkovChain.fromCsv(behaviorModel);
 	}
 
 	/**

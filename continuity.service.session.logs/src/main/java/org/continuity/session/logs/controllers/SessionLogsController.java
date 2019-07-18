@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Triple;
 import org.continuity.api.entities.ApiFormats;
 import org.continuity.api.entities.artifact.SessionLogsInput;
+import org.continuity.api.entities.artifact.markovbehavior.RelativeMarkovChain;
 import org.continuity.api.entities.artifact.session.Session;
 import org.continuity.api.entities.artifact.session.SessionView;
 import org.continuity.api.rest.RestApi;
@@ -25,6 +26,7 @@ import org.continuity.idpa.AppId;
 import org.continuity.idpa.VersionOrTimestamp;
 import org.continuity.session.logs.extractor.RequestTailorer;
 import org.continuity.session.logs.extractor.SessionUpdater;
+import org.continuity.session.logs.extractor.SessionsToMarkovChainAggregator;
 import org.continuity.session.logs.managers.ElasticsearchSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,7 +217,8 @@ public class SessionLogsController {
 	}
 
 	/**
-	 * Creates session logs based on the provided input data. The Session logs will be directly
+	 *
+	 * TODO Creates session logs based on the provided input data. The Session logs will be directly
 	 * passed and are not stored in the storage.
 	 *
 	 * @param sessionLogsInput
@@ -225,12 +228,12 @@ public class SessionLogsController {
 	@RequestMapping(value = CREATE, method = RequestMethod.POST)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "app-id", required = true, dataType = "string", paramType = "path"),
 			@ApiImplicitParam(name = "version", required = true, dataType = "string", paramType = "path") })
-	public ResponseEntity<String> getModularizedSessionLogs(@ApiIgnore @PathVariable("app-id") AppId aid, @ApiIgnore @PathVariable("version") VersionOrTimestamp version,
+	public ResponseEntity<RelativeMarkovChain> getTailoredMarkovChain(@ApiIgnore @PathVariable("app-id") AppId aid, @ApiIgnore @PathVariable("version") VersionOrTimestamp version,
 			@RequestBody SessionLogsInput sessionLogsInput,
 			@RequestParam(name = ADD_PRE_POST_PROCESSING, defaultValue = "false") boolean addPrePostProcessing) {
 
 		List<String> services = new ArrayList<>();
-		LOGGER.info("Generating tailored session logs for app-id {}, version {}, and services {}...", aid, version, services);
+		LOGGER.info("Generating tailored Markov chain for app-id {}, version {}, and services {}...", aid, version, services);
 
 		List<Trace> traces = OPENxtraceUtils.deserializeIntoTraceList(sessionLogsInput.getSerializedTraces());
 
@@ -238,12 +241,14 @@ public class SessionLogsController {
 
 		RequestTailorer tailorer = new RequestTailorer(aid, version, eurekaRestTemplate, addPrePostProcessing);
 		SessionUpdater updater = new SessionUpdater(version, services, Long.MAX_VALUE, true);
+		SessionsToMarkovChainAggregator aggregator = new SessionsToMarkovChainAggregator();
 
 		Set<Session> sessions = updater.updateSessions(Collections.emptyList(), tailorer.tailorTraces(services, traces));
+		RelativeMarkovChain chain = aggregator.aggregate(sessions);
 
 		LOGGER.info("Tailoring for app-id {}, version {}, and services {} done.", aid, version, services);
 
-		return ResponseEntity.ok(sessions.stream().map(Session::toExtensiveLog).collect(Collectors.joining("\n")));
+		return ResponseEntity.ok(chain);
 	}
 
 	@JsonView(SessionView.Simple.class)
