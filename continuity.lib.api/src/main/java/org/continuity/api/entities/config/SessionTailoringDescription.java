@@ -20,6 +20,9 @@ public class SessionTailoringDescription {
 
 	private VersionOrTimestamp version;
 
+	@JsonProperty("root-endpoint")
+	private String rootEndpoint;
+
 	@JsonProperty("include-pre-post-processing")
 	private boolean includePrePostProcessing;
 
@@ -42,6 +45,14 @@ public class SessionTailoringDescription {
 
 	public void setVersion(VersionOrTimestamp version) {
 		this.version = version;
+	}
+
+	public String getRootEndpoint() {
+		return rootEndpoint;
+	}
+
+	public void setRootEndpoint(String rootEndpoint) {
+		this.rootEndpoint = rootEndpoint;
 	}
 
 	public boolean isIncludePrePostProcessing() {

@@ -64,13 +64,14 @@ public class BehaviorModelController {
 
 	private RelativeMarkovChain getTailoredMarkovChain(SessionTailoringDescription description) throws IOException, TimeoutException {
 		AppId aid = description.getAid();
+		String rootEndpoint = description.getRootEndpoint();
 		VersionOrTimestamp version = description.getVersion();
 		boolean includePrePost = description.isIncludePrePostProcessing();
 		List<String> services = description.getTailoring();
 
-		LOGGER.info("Generating tailored Markov chain for app-id {}, version {}, and services {}...", aid, version, services);
+		LOGGER.info("Generating tailored Markov chain for app-id {}, root endpoint {}, version {}, and services {}...", aid, rootEndpoint, version, services);
 
-		List<TraceRecord> traces = elasticManager.readTraceRecords(aid, description.getSessionIds());
+		List<TraceRecord> traces = elasticManager.readTraceRecords(aid, rootEndpoint, description.getSessionIds());
 
 		RequestTailorer tailorer = new RequestTailorer(aid, version, restTemplate, includePrePost);
 		SessionUpdater updater = new SessionUpdater(version, description.getTailoring(), Long.MAX_VALUE, true);
@@ -84,7 +85,7 @@ public class BehaviorModelController {
 			removePrePostProcessingState(SessionRequest.PREFIX_POST_PROCESSING, chain);
 		}
 
-		LOGGER.info("Tailoring for app-id {}, version {}, and services {} done.", aid, version, services);
+		LOGGER.info("Tailoring for app-id {}, version {}, root endpoint {}, and services {} done.", aid, rootEndpoint, version, services);
 
 		return chain;
 	}

@@ -172,19 +172,27 @@ public class ElasticsearchTraceManager extends ElasticsearchScrollingManager {
 	/**
 	 * Reads all traces having one of the defined unique session IDs.
 	 *
+	 * @param aid
+	 * @param rootEndpoint
+	 *            The root endpoint to filter for. Can be {@code null}. In this case, it will be
+	 *            ignored.
 	 * @param uniqueSessionIds
 	 *            The unique (!) session IDs.
 	 * @return The found traces as {@link TraceRecord}.
 	 * @throws IOException
 	 * @throws TimeoutException
 	 */
-	public List<TraceRecord> readTraceRecords(AppId aid, List<String> uniqueSessionIds) throws IOException, TimeoutException {
+	public List<TraceRecord> readTraceRecords(AppId aid, String rootEndpoint, List<String> uniqueSessionIds) throws IOException, TimeoutException {
 		SearchRequest search = new SearchRequest(toTraceIndex(aid));
 
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 
 		for (String sid : uniqueSessionIds) {
 			query.should(QueryBuilders.matchQuery("unique-session-ids", sid));
+		}
+
+		if (rootEndpoint != null) {
+			query = QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("endpoint", rootEndpoint)).must(query);
 		}
 
 		search.source(new SearchSourceBuilder().query(query).size(10000)); // This is the maximum
