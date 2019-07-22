@@ -168,7 +168,7 @@ public class MeasurementDataAmqpHandler {
 
 		for (Session session : sessions) {
 			for (SessionRequest request : session.getRequests()) {
-				long traceId = 0; // TODO: store traceId in request
+				long traceId = request.getTraceId();
 				Set<String> sids = sessionMap.get(traceId);
 
 				if (sids == null) {

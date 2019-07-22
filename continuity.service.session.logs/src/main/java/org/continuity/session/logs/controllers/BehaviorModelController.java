@@ -3,26 +3,28 @@ package org.continuity.session.logs.controllers;
 import static org.continuity.api.rest.RestApi.SessionLogs.BehaviorModel.ROOT;
 import static org.continuity.api.rest.RestApi.SessionLogs.BehaviorModel.Paths.CREATE;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.continuity.api.entities.artifact.markovbehavior.NormalDistribution;
 import org.continuity.api.entities.artifact.markovbehavior.RelativeMarkovChain;
-import org.continuity.api.entities.artifact.session.SessionRequest;
 import org.continuity.api.entities.artifact.session.Session;
+import org.continuity.api.entities.artifact.session.SessionRequest;
 import org.continuity.api.entities.config.SessionTailoringDescription;
 import org.continuity.idpa.AppId;
 import org.continuity.idpa.VersionOrTimestamp;
+import org.continuity.session.logs.entities.TraceRecord;
 import org.continuity.session.logs.extractor.RequestTailorer;
 import org.continuity.session.logs.extractor.SessionUpdater;
 import org.continuity.session.logs.extractor.SessionsToMarkovChainAggregator;
 import org.continuity.session.logs.managers.ElasticsearchTraceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spec.research.open.xtrace.api.core.Trace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,18 +51,18 @@ public class BehaviorModelController {
 	private ElasticsearchTraceManager elasticManager;
 
 	@RequestMapping(value = CREATE, method = RequestMethod.POST, produces = "application/json")
-	public ResponseEntity<RelativeMarkovChain> getTailoredMarkovChainAsJson(@RequestBody SessionTailoringDescription description) {
+	public ResponseEntity<RelativeMarkovChain> getTailoredMarkovChainAsJson(@RequestBody SessionTailoringDescription description) throws IOException, TimeoutException {
 		return ResponseEntity.ok(getTailoredMarkovChain(description));
 	}
 
 	@RequestMapping(value = CREATE, method = RequestMethod.POST, produces = "text/plain")
-	public ResponseEntity<String> getTailoredMarkovChainAsMatrix(@RequestBody SessionTailoringDescription description) {
+	public ResponseEntity<String> getTailoredMarkovChainAsMatrix(@RequestBody SessionTailoringDescription description) throws IOException, TimeoutException {
 		RelativeMarkovChain chain = getTailoredMarkovChain(description);
 		String matrix = Arrays.stream(chain.toCsv()).map(Arrays::stream).map(s -> s.collect(Collectors.joining(","))).collect(Collectors.joining("\n"));
 		return ResponseEntity.ok(matrix);
 	}
 
-	private RelativeMarkovChain getTailoredMarkovChain(SessionTailoringDescription description) {
+	private RelativeMarkovChain getTailoredMarkovChain(SessionTailoringDescription description) throws IOException, TimeoutException {
 		AppId aid = description.getAid();
 		VersionOrTimestamp version = description.getVersion();
 		boolean includePrePost = description.isIncludePrePostProcessing();
@@ -68,7 +70,7 @@ public class BehaviorModelController {
 
 		LOGGER.info("Generating tailored Markov chain for app-id {}, version {}, and services {}...", aid, version, services);
 
-		List<Trace> traces = elasticManager.readTraces(description.getSessionIds());
+		List<TraceRecord> traces = elasticManager.readTraceRecords(aid, description.getSessionIds());
 
 		RequestTailorer tailorer = new RequestTailorer(aid, version, restTemplate, includePrePost);
 		SessionUpdater updater = new SessionUpdater(version, description.getTailoring(), Long.MAX_VALUE, true);
