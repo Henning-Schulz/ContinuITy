@@ -62,6 +62,7 @@ public class Session {
 	private List<String> tailoring;
 
 	@JsonView(SessionView.Simple.class)
+	@JsonDeserialize(as = TreeSet.class, contentAs = SessionRequestImpl.class)
 	private NavigableSet<SessionRequest> requests = new TreeSet<>();
 
 	public String getSessionId() {

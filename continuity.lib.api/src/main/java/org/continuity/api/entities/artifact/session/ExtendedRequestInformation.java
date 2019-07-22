@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 /**
  * Adds the information required to generate extensive session logs to a request in a session.
  *
- * @see SessionRequest#getExtendedInformation()
+ * @see SessionRequestImpl#getExtendedInformation()
  *
  * @author Henning Schulz
  *
