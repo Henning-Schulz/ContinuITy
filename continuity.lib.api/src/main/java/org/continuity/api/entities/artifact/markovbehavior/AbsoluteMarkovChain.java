@@ -28,7 +28,7 @@ public class AbsoluteMarkovChain extends AbstractMarkovChain<AbsoluteMarkovTrans
 		Map<String, Map<String, RelativeMarkovTransition>> relativeTransitions = new TreeMap<>();
 
 		for (Map.Entry<String, Map<String, AbsoluteMarkovTransition>> entry : getTransitions().entrySet()) {
-			long sumTransitions = entry.getValue().values().stream().map(AbsoluteMarkovTransition::getNumOccurrences).count();
+			long sumTransitions = entry.getValue().values().stream().mapToLong(AbsoluteMarkovTransition::getNumOccurrences).sum();
 
 			Map<String, RelativeMarkovTransition> outgoing = new TreeMap<>();
 			entry.getValue().entrySet().forEach(e -> outgoing.put(e.getKey(), e.getValue().toRelativeTransition(sumTransitions)));

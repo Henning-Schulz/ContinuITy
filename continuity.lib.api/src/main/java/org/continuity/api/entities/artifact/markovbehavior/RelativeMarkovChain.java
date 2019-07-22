@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
  *
  * A MarkovChain can be read from a CSV file conforming to the WESSBAS behavior model and also
  * written into the same format. <i>Please note that the WESSBAS format deals with think time
- * deviances, while this representation holds the variances. However, the values are automatically
- * transformed by {@link #fromCsv(String[][])} and {@link #toCsv()}.</i>
+ * standard deviations, while this representation holds the variances. However, the values are
+ * automatically transformed by {@link #fromCsv(String[][])} and {@link #toCsv()}.</i>
  *
  * @author Henning Schulz
  *

@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.continuity.api.entities.artifact.session.Session;
+import org.continuity.api.entities.artifact.session.SessionRequest;
 import org.continuity.idpa.AppId;
 import org.continuity.idpa.VersionOrTimestamp;
 import org.continuity.idpa.application.Application;
@@ -128,7 +129,9 @@ public class ModularizedOPENxtraceSessionLogsExtractorTest {
 
 		List<TraceRecord> traces = Arrays.asList(trace1, trace2, trace3, trace4, trace5, trace6, trace7, trace8, trace9);
 
-		return updater.updateSessions(Collections.emptyList(), tailorer.tailorTraces(services, traces)).stream().map(Session::toExtensiveLog).collect(Collectors.joining("\n"));
+		List<SessionRequest> requests = tailorer.tailorTraces(services, traces);
+
+		return updater.updateSessions(Collections.emptyList(), requests).stream().map(Session::toExtensiveLog).collect(Collectors.joining("\n"));
 	}
 
 	/**

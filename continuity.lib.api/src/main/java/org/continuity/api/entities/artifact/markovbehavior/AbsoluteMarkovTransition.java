@@ -1,5 +1,6 @@
 package org.continuity.api.entities.artifact.markovbehavior;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ public class AbsoluteMarkovTransition implements MarkovTransition {
 
 	private long numOccurrences;
 
-	private List<Long> thinkTimes;
+	private List<Long> thinkTimes = new ArrayList<>();
 
 	@Override
 	public boolean hasZeroProbability() {

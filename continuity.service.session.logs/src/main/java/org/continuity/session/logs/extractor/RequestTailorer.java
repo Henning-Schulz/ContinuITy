@@ -315,6 +315,7 @@ public class RequestTailorer {
 
 					if ((endpoint != null) && areEqualOrNull(endpoint.getDomain(), location.getHost()) && areEqualOrNull(endpoint.getPort(), Integer.toString(location.getPort()))) {
 						bundle.setEndpoint(endpoint);
+						return bundle;
 					}
 				}
 			}

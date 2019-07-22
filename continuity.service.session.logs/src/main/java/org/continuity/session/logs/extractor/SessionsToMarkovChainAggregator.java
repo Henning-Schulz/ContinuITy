@@ -4,8 +4,8 @@ import org.continuity.api.entities.artifact.markovbehavior.AbsoluteMarkovChain;
 import org.continuity.api.entities.artifact.markovbehavior.AbsoluteMarkovTransition;
 import org.continuity.api.entities.artifact.markovbehavior.AbstractMarkovChain;
 import org.continuity.api.entities.artifact.markovbehavior.RelativeMarkovChain;
-import org.continuity.api.entities.artifact.session.SessionRequest;
 import org.continuity.api.entities.artifact.session.Session;
+import org.continuity.api.entities.artifact.session.SessionRequest;
 
 /**
  * Can aggregate a list of sessions into a Markov chain.
@@ -43,9 +43,9 @@ public class SessionsToMarkovChainAggregator {
 		return chain.toRelativeMarkovChain();
 	}
 
-	private void updateTransition(AbsoluteMarkovChain chain, String from, String to, long thinkTime) {
+	private void updateTransition(AbsoluteMarkovChain chain, String from, String to, long thinkTimeMicros) {
 		AbsoluteMarkovTransition transition = chain.getTransition(from, to);
-		transition.increment(Math.max(0, thinkTime));
+		transition.increment(Math.max(0, thinkTimeMicros / 1000));
 		chain.setTransition(from, to, transition);
 	}
 
