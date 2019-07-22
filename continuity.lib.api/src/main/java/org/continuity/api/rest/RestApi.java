@@ -793,9 +793,6 @@ public class RestApi {
 			/** {@value #ROOT}/{app-id:.+}/{tailoring}/extended */
 			public static final RestEndpoint GET_EXTENDED = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.GET_SIMPLE, RequestMethod.GET);
 
-			/** {@value #ROOT}/create */
-			public static final RestEndpoint CREATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE, RequestMethod.POST);
-
 			private Sessions() {
 			}
 
@@ -805,17 +802,7 @@ public class RestApi {
 
 				public static final String GET_EXTENDED = "/{app-id:.+}/{tailoring}/extended";
 
-				public static final String CREATE = "/{app-id:.+}/{version:.+}/create";
-
 				private Paths() {
-				}
-			}
-
-			public static class QueryParameters {
-
-				public static final String ADD_PRE_POST_PROCESSING = "add-pre-post-processing";
-
-				private QueryParameters() {
 				}
 			}
 		}
