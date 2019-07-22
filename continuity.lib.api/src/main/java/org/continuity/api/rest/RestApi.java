@@ -872,6 +872,27 @@ public class RestApi {
 
 		}
 
+		public static class BehaviorModel {
+
+			public static final String ROOT = "/behavior-model";
+
+			/** {@value #ROOT}/create */
+			public static final RestEndpoint CREATE = RestEndpoint.of(SERVICE_NAME, ROOT, Paths.CREATE, RequestMethod.POST);
+
+			private BehaviorModel() {
+			}
+
+			public static class Paths {
+
+				public static final String CREATE = "/create";
+
+				private Paths() {
+				}
+
+			}
+
+		}
+
 	}
 
 	/**

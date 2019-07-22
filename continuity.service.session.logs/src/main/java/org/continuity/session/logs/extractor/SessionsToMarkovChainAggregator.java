@@ -4,8 +4,8 @@ import org.continuity.api.entities.artifact.markovbehavior.AbsoluteMarkovChain;
 import org.continuity.api.entities.artifact.markovbehavior.AbsoluteMarkovTransition;
 import org.continuity.api.entities.artifact.markovbehavior.AbstractMarkovChain;
 import org.continuity.api.entities.artifact.markovbehavior.RelativeMarkovChain;
-import org.continuity.api.entities.artifact.session.Session;
 import org.continuity.api.entities.artifact.session.SessionRequest;
+import org.continuity.api.entities.artifact.session.Session;
 
 /**
  * Can aggregate a list of sessions into a Markov chain.

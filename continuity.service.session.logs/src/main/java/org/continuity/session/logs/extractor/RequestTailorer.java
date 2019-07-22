@@ -23,10 +23,10 @@ import org.continuity.idpa.AppId;
 import org.continuity.idpa.VersionOrTimestamp;
 import org.continuity.idpa.application.Application;
 import org.continuity.idpa.application.HttpEndpoint;
+import org.continuity.session.logs.entities.TraceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spec.research.open.xtrace.api.core.Location;
-import org.spec.research.open.xtrace.api.core.Trace;
 import org.spec.research.open.xtrace.api.core.callables.HTTPMethod;
 import org.spec.research.open.xtrace.api.core.callables.HTTPRequestProcessing;
 import org.spec.research.open.xtrace.dflt.impl.core.LocationImpl;
@@ -56,8 +56,6 @@ public class RequestTailorer {
 
 	private final boolean addPrePostProcessing;
 
-	private final RequestUriMapper rootMapper;
-
 	/**
 	 *
 	 * @param aid
@@ -75,17 +73,6 @@ public class RequestTailorer {
 		this.version = version;
 		this.restTemplate = restTemplate;
 		this.addPrePostProcessing = addPrePostProcessing;
-
-		Application rootApp;
-		try {
-			rootApp = restTemplate.getForObject(RestApi.Idpa.Application.GET.requestUrl(aid).withQuery("version", version.toString()).get(), Application.class);
-		} catch (HttpStatusCodeException e) {
-			LOGGER.error("Could not get root application for app-id {} and version {}! {} ({}): {}", aid.dropService(), version, e.getStatusCode(), e.getStatusCode().getReasonPhrase(),
-					e.getResponseBodyAsString());
-			rootApp = null;
-		}
-
-		rootMapper = rootApp == null ? null : new RequestUriMapper(rootApp);
 	}
 
 	/**
@@ -110,7 +97,7 @@ public class RequestTailorer {
 	 *            The traces to be tailored.
 	 * @return A list of {@link SessionRequest}s per tailored requests.
 	 */
-	public List<SessionRequest> tailorTraces(List<String> services, List<Trace> traces) {
+	public List<SessionRequest> tailorTraces(List<String> services, List<TraceRecord> traces) {
 		ResponseEntity<Application[]> response;
 		try {
 			response = restTemplate.getForEntity(
@@ -146,19 +133,19 @@ public class RequestTailorer {
 		return requests;
 	}
 
-	private List<HTTPRequestProcessingImpl> extractChildRequests(Trace trace, List<String> targetHostNames) {
+	private List<HTTPRequestProcessingImpl> extractChildRequests(TraceRecord trace, List<String> targetHostNames) {
 		OpenXtraceTracer tracer;
 
 		if (targetHostNames.isEmpty()) {
-			tracer = OpenXtraceTracer.forRoot(trace.getRoot().getRoot());
+			tracer = OpenXtraceTracer.forRoot(trace.getTrace().getRoot().getRoot());
 		} else {
-			tracer = OpenXtraceTracer.forRootAndHosts(trace.getRoot().getRoot(), targetHostNames);
+			tracer = OpenXtraceTracer.forRootAndHosts(trace.getTrace().getRoot().getRoot(), targetHostNames);
 		}
 
 		List<HTTPRequestProcessingImpl> childCallables = tracer.extractSubtraces();
 
 		if (addPrePostProcessing && !targetHostNames.isEmpty() && (childCallables.size() > 0)) {
-			List<HTTPRequestProcessingImpl> rootCallables = OpenXtraceTracer.forRoot(trace.getRoot().getRoot()).extractSubtraces();
+			List<HTTPRequestProcessingImpl> rootCallables = OpenXtraceTracer.forRoot(trace.getTrace().getRoot().getRoot()).extractSubtraces();
 
 			if (rootCallables.size() > 0) {
 				HTTPRequestProcessingImpl firstRoot = rootCallables.get(0);

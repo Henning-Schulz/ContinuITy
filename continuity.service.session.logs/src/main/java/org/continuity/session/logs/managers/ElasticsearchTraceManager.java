@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.continuity.api.entities.ApiFormats;
@@ -69,9 +70,24 @@ public class ElasticsearchTraceManager extends ElasticsearchScrollingManager {
 	 * @throws IOException
 	 */
 	public void storeTraces(AppId aid, VersionOrTimestamp version, List<Trace> traces) throws IOException {
+		storeTraceRecords(aid, version, traces.stream().map(t -> new TraceRecord(version, t)).collect(Collectors.toList()));
+	}
+
+	/**
+	 * Stores the passed trace records to the elasticsearch database.
+	 *
+	 * @param aid
+	 *            The app-id of the corresponding application.
+	 * @param version
+	 *            The version of the application.
+	 * @param traces
+	 *            The trace records to be stored.
+	 * @throws IOException
+	 */
+	public void storeTraceRecords(AppId aid, VersionOrTimestamp version, List<TraceRecord> traces) throws IOException {
 		BulkRequest request = new BulkRequest();
 
-		traces.stream().map(t -> new TraceRecord(version, t)).map(this::serializeTrace).filter(Objects::nonNull).forEach(json -> {
+		traces.stream().map(this::serializeTrace).filter(Objects::nonNull).forEach(json -> {
 			request.add(new IndexRequest(toTraceIndex(aid)).source(json.getLeft(), XContentType.JSON).id(Long.toString(json.getRight())));
 		});
 
@@ -129,6 +145,17 @@ public class ElasticsearchTraceManager extends ElasticsearchScrollingManager {
 		LOGGER.info("The search request to app-id {}, version {}, and time range {} - {} resulted in {}.", aid, version, formatOrNull(from), formatOrNull(to), hits.getTotalHits());
 
 		return processSearchResponse(response, aid, version, from, to, 0);
+	}
+
+	/**
+	 * Reads all traces having one of the defined unique session IDs.
+	 *
+	 * @param uniqueSessionIds
+	 *            The unique (!) session IDs.
+	 * @return The found traces.
+	 */
+	public List<Trace> readTraces(List<String> uniqueSessionIds) {
+		// TODO
 	}
 
 	private String formatOrNull(Date date) {
