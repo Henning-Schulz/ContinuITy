@@ -185,14 +185,17 @@ public class ElasticsearchTraceManager extends ElasticsearchScrollingManager {
 	public List<TraceRecord> readTraceRecords(AppId aid, String rootEndpoint, List<String> uniqueSessionIds) throws IOException, TimeoutException {
 		SearchRequest search = new SearchRequest(toTraceIndex(aid));
 
-		BoolQueryBuilder query = QueryBuilders.boolQuery();
+		BoolQueryBuilder query;
+		BoolQueryBuilder sessionQuery = QueryBuilders.boolQuery();
 
 		for (String sid : uniqueSessionIds) {
-			query.should(QueryBuilders.matchQuery("unique-session-ids", sid));
+			sessionQuery.should(QueryBuilders.matchQuery("unique-session-ids", sid));
 		}
 
 		if (rootEndpoint != null) {
-			query = QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("endpoint", rootEndpoint)).must(query);
+			query = QueryBuilders.boolQuery().filter(QueryBuilders.matchQuery("endpoint", rootEndpoint)).filter(QueryBuilders.matchQuery("unique-session-ids", uniqueSessionIds.get(0)));
+		} else {
+			query = QueryBuilders.boolQuery().filter(sessionQuery);
 		}
 
 		search.source(new SearchSourceBuilder().query(query).size(10000)); // This is the maximum

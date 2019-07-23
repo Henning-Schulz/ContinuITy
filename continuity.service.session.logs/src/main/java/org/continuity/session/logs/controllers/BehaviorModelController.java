@@ -77,7 +77,8 @@ public class BehaviorModelController {
 		SessionUpdater updater = new SessionUpdater(version, description.getTailoring(), Long.MAX_VALUE, true);
 		SessionsToMarkovChainAggregator aggregator = new SessionsToMarkovChainAggregator();
 
-		Set<Session> sessions = updater.updateSessions(Collections.emptyList(), tailorer.tailorTraces(services, traces));
+		List<SessionRequest> requests = tailorer.tailorTraces(services, traces);
+		Set<Session> sessions = updater.updateSessions(Collections.emptyList(), requests);
 		RelativeMarkovChain chain = aggregator.aggregate(sessions);
 
 		if (includePrePost) {

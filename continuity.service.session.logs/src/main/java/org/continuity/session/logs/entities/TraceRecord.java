@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import open.xtrace.OPENxtraceUtils;
 
+@JsonPropertyOrder({ "endpoint", "version", "unique-session-ids", "cluster-id", "trace" })
 public class TraceRecord {
 
 	private VersionOrTimestamp version;

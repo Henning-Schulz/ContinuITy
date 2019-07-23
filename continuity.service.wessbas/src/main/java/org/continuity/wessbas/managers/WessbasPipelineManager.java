@@ -167,7 +167,7 @@ public class WessbasPipelineManager {
 		return sessionLogsPath;
 	}
 
-	private Properties createWorkloadIntensity(String sessionLogs,IntensityCalculationInterval interval) throws IOException {
+	private Properties createWorkloadIntensity(String sessionLogs, IntensityCalculationInterval interval) throws IOException {
 		Properties properties = new Properties();
 		properties.put("workloadIntensity.type", "constant");
 
