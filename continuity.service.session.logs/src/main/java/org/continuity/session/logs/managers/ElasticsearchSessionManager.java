@@ -114,6 +114,10 @@ public class ElasticsearchSessionManager extends ElasticsearchScrollingManager {
 	 * @throws TimeoutException
 	 */
 	public List<Session> readSessionsInRange(AppId aid, VersionOrTimestamp version, List<String> tailoring, Date from, Date to) throws IOException, TimeoutException {
+		if (!indexExists(toSessionIndex(aid))) {
+			return Collections.emptyList();
+		}
+
 		SearchRequest search = new SearchRequest(toSessionIndex(aid));
 		search.source(createRangeSearch(version, tailoring, from, to).size(10000)); // This is the
 																					// maximum
@@ -153,6 +157,10 @@ public class ElasticsearchSessionManager extends ElasticsearchScrollingManager {
 	 * @throws TimeoutException
 	 */
 	public long countSessionsInRange(AppId aid, VersionOrTimestamp version, List<String> tailoring, Date from, Date to) throws IOException {
+		if (!indexExists(toSessionIndex(aid))) {
+			return 0;
+		}
+
 		CountRequest count = new CountRequest(toSessionIndex(aid));
 		count.source(createRangeSearch(version, tailoring, from, to));
 
@@ -208,6 +216,10 @@ public class ElasticsearchSessionManager extends ElasticsearchScrollingManager {
 	 * @throws IOException
 	 */
 	public List<Session> readOpenSessions(AppId aid, VersionOrTimestamp version, List<String> tailoring) throws IOException, TimeoutException {
+		if (!indexExists(toSessionIndex(aid))) {
+			return Collections.emptyList();
+		}
+
 		SearchRequest search = new SearchRequest(toSessionIndex(aid));
 
 		BoolQueryBuilder query = QueryBuilders.boolQuery();

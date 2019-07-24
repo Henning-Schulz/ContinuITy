@@ -41,16 +41,18 @@
                 "extended-information": {
                     "properties": {
                         "encoding": {
-                            "type": "text"
+                            "type": "text",
+                            "index": false
                         },
                         "host": {
-                            "type": "text"
+                            "type": "keyword"
                         },
                         "method": {
                             "type": "keyword"
                         },
                         "parameters": {
-                            "type": "text"
+                            "type": "text",
+                            "index": false
                         },
                         "port": {
                             "type": "long"

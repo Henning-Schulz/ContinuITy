@@ -145,6 +145,10 @@ public class ElasticsearchTraceManager extends ElasticsearchScrollingManager {
 	 *             If a request to the database times out.
 	 */
 	public List<TraceRecord> readTraceRecords(AppId aid, VersionOrTimestamp version, Date from, Date to) throws IOException, TimeoutException {
+		if (!indexExists(toTraceIndex(aid))) {
+			return Collections.emptyList();
+		}
+
 		SearchRequest search = new SearchRequest(toTraceIndex(aid));
 
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
@@ -186,6 +190,10 @@ public class ElasticsearchTraceManager extends ElasticsearchScrollingManager {
 	 * @throws TimeoutException
 	 */
 	public List<TraceRecord> readTraceRecords(AppId aid, String rootEndpoint, List<String> uniqueSessionIds) throws IOException, TimeoutException {
+		if (!indexExists(toTraceIndex(aid))) {
+			return Collections.emptyList();
+		}
+
 		SearchRequest search = new SearchRequest(toTraceIndex(aid));
 
 		BoolQueryBuilder query;

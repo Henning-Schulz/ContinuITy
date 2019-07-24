@@ -1,4 +1,5 @@
 {
+  "dynamic": false,
   "properties": {
     "endpoint": {
       "type": "keyword"
@@ -17,76 +18,28 @@
         "exclusiveTime": {
           "type": "long"
         },
-        "identifier": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
-        },
         "responseTime": {
           "type": "long"
         },
         "rootOfTrace": {
           "properties": {
             "@class": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
+              "type": "keyword"
             },
             "application": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
+              "type": "keyword"
             },
             "businessTransaction": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
+              "type": "keyword"
             },
             "exclusiveTime": {
               "type": "long"
             },
             "host": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
+              "type": "keyword"
             },
             "identifier": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
-            },
-            "nodeType": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
+              "type": "text"
             },
             "port": {
               "type": "long"
@@ -97,535 +50,13 @@
             "rootOfSubTrace": {
               "properties": {
                 "@class": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "HTTPHeaders": {
                   "properties": {
                     "cookie": {
                       "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    }
-                  }
-                },
-                "HTTPParameters": {
-                  "properties": {
-                    "size": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "tags": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    }
-                  }
-                },
-                "additionalInformation": {
-                  "properties": {
-                    "http": {
-                      "properties": {
-                        "url": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "body": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "children": {
-                  "properties": {
-                    "@class": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "additionalInformation": {
-                      "properties": {
-                        "body": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        },
-                        "http": {
-                          "properties": {
-                            "status_code": {
-                              "type": "text",
-                              "fields": {
-                                "keyword": {
-                                  "type": "keyword",
-                                  "ignore_above": 256
-                                }
-                              }
-                            },
-                            "url": {
-                              "type": "text",
-                              "fields": {
-                                "keyword": {
-                                  "type": "keyword",
-                                  "ignore_above": 256
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "exclusiveTime": {
-                      "type": "long"
-                    },
-                    "exitTime": {
-                      "type": "long"
-                    },
-                    "identifier": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "responseTime": {
-                      "type": "long"
-                    },
-                    "target": {
-                      "type": "text",
-                      "fields": {
-                        "keyword": {
-                          "type": "keyword",
-                          "ignore_above": 256
-                        }
-                      }
-                    },
-                    "targetSubTrace": {
-                      "properties": {
-                        "@class": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        },
-                        "application": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        },
-                        "businessTransaction": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        },
-                        "exclusiveTime": {
-                          "type": "long"
-                        },
-                        "host": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        },
-                        "identifier": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        },
-                        "nodeType": {
-                          "type": "text",
-                          "fields": {
-                            "keyword": {
-                              "type": "keyword",
-                              "ignore_above": 256
-                            }
-                          }
-                        },
-                        "port": {
-                          "type": "long"
-                        },
-                        "responseTime": {
-                          "type": "long"
-                        },
-                        "rootOfSubTrace": {
-                          "properties": {
-                            "@class": {
-                              "type": "text",
-                              "fields": {
-                                "keyword": {
-                                  "type": "keyword",
-                                  "ignore_above": 256
-                                }
-                              }
-                            },
-                            "HTTPHeaders": {
-                              "properties": {
-                                "cookie": {
-                                  "type": "text",
-                                  "fields": {
-                                    "keyword": {
-                                      "type": "keyword",
-                                      "ignore_above": 256
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "HTTPParameters": {
-                              "properties": {
-                                "custId": {
-                                  "type": "text",
-                                  "fields": {
-                                    "keyword": {
-                                      "type": "keyword",
-                                      "ignore_above": 256
-                                    }
-                                  }
-                                },
-                                "sessionId": {
-                                  "type": "text",
-                                  "fields": {
-                                    "keyword": {
-                                      "type": "keyword",
-                                      "ignore_above": 256
-                                    }
-                                  }
-                                },
-                                "size": {
-                                  "type": "text",
-                                  "fields": {
-                                    "keyword": {
-                                      "type": "keyword",
-                                      "ignore_above": 256
-                                    }
-                                  }
-                                },
-                                "sort": {
-                                  "type": "text",
-                                  "fields": {
-                                    "keyword": {
-                                      "type": "keyword",
-                                      "ignore_above": 256
-                                    }
-                                  }
-                                },
-                                "tags": {
-                                  "type": "text",
-                                  "fields": {
-                                    "keyword": {
-                                      "type": "keyword",
-                                      "ignore_above": 256
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "additionalInformation": {
-                              "properties": {
-                                "http": {
-                                  "properties": {
-                                    "host": {
-                                      "type": "text",
-                                      "fields": {
-                                        "keyword": {
-                                          "type": "keyword",
-                                          "ignore_above": 256
-                                        }
-                                      }
-                                    },
-                                    "url": {
-                                      "type": "text",
-                                      "fields": {
-                                        "keyword": {
-                                          "type": "keyword",
-                                          "ignore_above": 256
-                                        }
-                                      }
-                                    }
-                                  }
-                                },
-                                "span": {
-                                  "properties": {
-                                    "kind": {
-                                      "type": "text",
-                                      "fields": {
-                                        "keyword": {
-                                          "type": "keyword",
-                                          "ignore_above": 256
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "children": {
-                              "properties": {
-                                "@class": {
-                                  "type": "text",
-                                  "fields": {
-                                    "keyword": {
-                                      "type": "keyword",
-                                      "ignore_above": 256
-                                    }
-                                  }
-                                },
-                                "additionalInformation": {
-                                  "properties": {
-                                    "lc": {
-                                      "type": "text",
-                                      "fields": {
-                                        "keyword": {
-                                          "type": "keyword",
-                                          "ignore_above": 256
-                                        }
-                                      }
-                                    },
-                                    "mvc": {
-                                      "properties": {
-                                        "controller": {
-                                          "properties": {
-                                            "class": {
-                                              "type": "text",
-                                              "fields": {
-                                                "keyword": {
-                                                  "type": "keyword",
-                                                  "ignore_above": 256
-                                                }
-                                              }
-                                            },
-                                            "method": {
-                                              "type": "text",
-                                              "fields": {
-                                                "keyword": {
-                                                  "type": "keyword",
-                                                  "ignore_above": 256
-                                                }
-                                              }
-                                            }
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "service": {
-                                      "type": "text",
-                                      "fields": {
-                                        "keyword": {
-                                          "type": "keyword",
-                                          "ignore_above": 256
-                                        }
-                                      }
-                                    }
-                                  }
-                                },
-                                "children": {
-                                  "properties": {
-                                    "@class": {
-                                      "type": "text",
-                                      "fields": {
-                                        "keyword": {
-                                          "type": "keyword",
-                                          "ignore_above": 256
-                                        }
-                                      }
-                                    },
-                                    "additionalInformation": {
-                                      "properties": {
-                                        "lc": {
-                                          "type": "text",
-                                          "fields": {
-                                            "keyword": {
-                                              "type": "keyword",
-                                              "ignore_above": 256
-                                            }
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "exclusiveTime": {
-                                      "type": "long"
-                                    },
-                                    "exitTime": {
-                                      "type": "long"
-                                    },
-                                    "identifier": {
-                                      "type": "text",
-                                      "fields": {
-                                        "keyword": {
-                                          "type": "keyword",
-                                          "ignore_above": 256
-                                        }
-                                      }
-                                    },
-                                    "responseTime": {
-                                      "type": "long"
-                                    },
-                                    "threadID": {
-                                      "type": "long"
-                                    },
-                                    "timeStamp": {
-                                      "type": "long"
-                                    },
-                                    "useCaseName": {
-                                      "type": "text",
-                                      "fields": {
-                                        "keyword": {
-                                          "type": "keyword",
-                                          "ignore_above": 256
-                                        }
-                                      }
-                                    }
-                                  }
-                                },
-                                "exclusiveTime": {
-                                  "type": "long"
-                                },
-                                "exitTime": {
-                                  "type": "long"
-                                },
-                                "identifier": {
-                                  "type": "text",
-                                  "fields": {
-                                    "keyword": {
-                                      "type": "keyword",
-                                      "ignore_above": 256
-                                    }
-                                  }
-                                },
-                                "responseTime": {
-                                  "type": "long"
-                                },
-                                "threadID": {
-                                  "type": "long"
-                                },
-                                "timeStamp": {
-                                  "type": "long"
-                                },
-                                "useCaseName": {
-                                  "type": "text",
-                                  "fields": {
-                                    "keyword": {
-                                      "type": "keyword",
-                                      "ignore_above": 256
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "exclusiveTime": {
-                              "type": "long"
-                            },
-                            "exitTime": {
-                              "type": "long"
-                            },
-                            "identifier": {
-                              "type": "text",
-                              "fields": {
-                                "keyword": {
-                                  "type": "keyword",
-                                  "ignore_above": 256
-                                }
-                              }
-                            },
-                            "requestMethod": {
-                              "type": "text",
-                              "fields": {
-                                "keyword": {
-                                  "type": "keyword",
-                                  "ignore_above": 256
-                                }
-                              }
-                            },
-                            "responseCode": {
-                              "type": "long"
-                            },
-                            "responseTime": {
-                              "type": "long"
-                            },
-                            "threadID": {
-                              "type": "long"
-                            },
-                            "timeStamp": {
-                              "type": "long"
-                            },
-                            "uri": {
-                              "type": "text",
-                              "fields": {
-                                "keyword": {
-                                  "type": "keyword",
-                                  "ignore_above": 256
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "subTraceId": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "threadID": {
-                      "type": "long"
-                    },
-                    "timeStamp": {
-                      "type": "long"
+                      "index": false
                     }
                   }
                 },
@@ -636,22 +67,10 @@
                   "type": "long"
                 },
                 "identifier": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "text"
                 },
                 "requestMethod": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "responseCode": {
                   "type": "long"
@@ -659,20 +78,11 @@
                 "responseTime": {
                   "type": "long"
                 },
-                "threadID": {
-                  "type": "long"
-                },
                 "timeStamp": {
                   "type": "long"
                 },
                 "uri": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "text"
                 }
               }
             },
@@ -680,9 +90,6 @@
               "type": "long"
             }
           }
-        },
-        "traceId": {
-          "type": "long"
         }
       }
     }
