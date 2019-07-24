@@ -52,8 +52,8 @@ public class ElasticsearchSessionManager extends ElasticsearchScrollingManager {
 
 	private final ObjectMapper mapper;
 
-	public ElasticsearchSessionManager(String host, ObjectMapper mapper) {
-		super(host);
+	public ElasticsearchSessionManager(String host, ObjectMapper mapper) throws IOException {
+		super(host, "session");
 
 		this.mapper = mapper;
 	}
@@ -73,6 +73,8 @@ public class ElasticsearchSessionManager extends ElasticsearchScrollingManager {
 	 * @throws IOException
 	 */
 	public void storeOrUpdateSessions(AppId aid, Collection<Session> sessions) throws IOException {
+		initIndex(toSessionIndex(aid));
+
 		BulkRequest request = new BulkRequest();
 
 		sessions.stream().map(this::serializeSession).filter(Objects::nonNull).forEach(json -> {

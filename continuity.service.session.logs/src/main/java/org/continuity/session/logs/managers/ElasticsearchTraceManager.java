@@ -26,6 +26,7 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -49,8 +50,8 @@ public class ElasticsearchTraceManager extends ElasticsearchScrollingManager {
 
 	private final ObjectMapper mapper;
 
-	public ElasticsearchTraceManager(String host, ObjectMapper mapper) {
-		super(host);
+	public ElasticsearchTraceManager(String host, ObjectMapper mapper) throws IOException {
+		super(host, "trace");
 		this.mapper = mapper;
 	}
 
@@ -85,6 +86,8 @@ public class ElasticsearchTraceManager extends ElasticsearchScrollingManager {
 	 * @throws IOException
 	 */
 	public void storeTraceRecords(AppId aid, VersionOrTimestamp version, List<TraceRecord> traces) throws IOException {
+		initIndex(toTraceIndex(aid));
+
 		BulkRequest request = new BulkRequest();
 
 		traces.stream().map(this::serializeTrace).filter(Objects::nonNull).forEach(json -> {
@@ -186,16 +189,13 @@ public class ElasticsearchTraceManager extends ElasticsearchScrollingManager {
 		SearchRequest search = new SearchRequest(toTraceIndex(aid));
 
 		BoolQueryBuilder query;
-		BoolQueryBuilder sessionQuery = QueryBuilders.boolQuery();
 
-		for (String sid : uniqueSessionIds) {
-			sessionQuery.should(QueryBuilders.matchQuery("unique-session-ids", sid));
-		}
+		TermsQueryBuilder sessionQuery = QueryBuilders.termsQuery("unique-session-ids", uniqueSessionIds);
 
 		if (rootEndpoint != null) {
-			query = QueryBuilders.boolQuery().filter(QueryBuilders.matchQuery("endpoint", rootEndpoint)).filter(QueryBuilders.matchQuery("unique-session-ids", uniqueSessionIds.get(0)));
+			query = QueryBuilders.boolQuery().must(QueryBuilders.termQuery("endpoint", rootEndpoint)).must(sessionQuery);
 		} else {
-			query = QueryBuilders.boolQuery().filter(sessionQuery);
+			query = QueryBuilders.boolQuery().must(sessionQuery);
 		}
 
 		search.source(new SearchSourceBuilder().query(query).size(10000)); // This is the maximum

@@ -164,7 +164,7 @@ public class WorkloadModularizationManager {
 		RelativeMarkovChain markovChain = RelativeMarkovChain.fromCsv(csvHandler.readValues(behaviorFile));
 		markovChain.setId(FILENAME + sessionBundle.getBehaviorId());
 
-		List<String> services = serviceMap.keySet().stream().map(AppId::getApplication).collect(Collectors.toList());
+		List<String> services = serviceMap.keySet().stream().map(AppId::getService).collect(Collectors.toList());
 
 		for (String state : markovChain.getRequestStates()) {
 			RelativeMarkovChain subChain = retrieveSubChain(aid, state, version, services, sessionBundle);
@@ -218,7 +218,6 @@ public class WorkloadModularizationManager {
 
 		if (subChain.getNumberOfRequestStates() == 0) {
 			LOGGER.info("Removing state {}.", state);
-			// TODO: does this work?
 			NormalDistribution responseTime = subChain.getTransition(RelativeMarkovChain.INITIAL_STATE, RelativeMarkovChain.FINAL_STATE).getThinkTime();
 			markovChain.removeState(state, responseTime);
 		} else {

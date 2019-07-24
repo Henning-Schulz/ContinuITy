@@ -1,0 +1,72 @@
+{
+    "properties": {
+        "unique-id": {
+            "type": "keyword"
+        },
+        "session-id": {
+            "type": "keyword"
+        },
+        "version": {
+            "type": "keyword"
+        },
+        "start-micros": {
+            "type": "long"
+        },
+        "end-micros": {
+            "type": "long"
+        },
+        "finished": {
+            "type": "boolean"
+        },
+        "tailoring": {
+            "type": "keyword"
+        },
+        "requests": {
+            "properties": {
+                "endpoint": {
+                    "type": "keyword"
+                },
+                "id": {
+                    "type": "keyword"
+                },
+                "start-micros": {
+                    "type": "long"
+                },
+                "end-micros": {
+                    "type": "long"
+                },
+                "trace-id": {
+                    "type": "long"
+                },
+                "extended-information": {
+                    "properties": {
+                        "encoding": {
+                            "type": "text"
+                        },
+                        "host": {
+                            "type": "text"
+                        },
+                        "method": {
+                            "type": "keyword"
+                        },
+                        "parameters": {
+                            "type": "text"
+                        },
+                        "port": {
+                            "type": "long"
+                        },
+                        "protocol": {
+                            "type": "text"
+                        },
+                        "responseCode": {
+                            "type": "long"
+                        },
+                        "uri": {
+                            "type": "text"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

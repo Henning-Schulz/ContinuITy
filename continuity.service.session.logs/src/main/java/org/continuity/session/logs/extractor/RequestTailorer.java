@@ -140,7 +140,7 @@ public class RequestTailorer {
 
 		List<RequestBundle> childCallables = tracer.extractSubtraces().stream().map(this::normalBundle).collect(Collectors.toList());
 
-		if (addPrePostProcessing && !targetHostNames.isEmpty() && (childCallables.size() > 0)) {
+		if (addPrePostProcessing) {
 			List<HTTPRequestProcessingImpl> rootCallables = OpenXtraceTracer.forRoot(trace.getTrace().getRoot().getRoot()).extractSubtraces();
 
 			if (rootCallables.size() > 0) {
