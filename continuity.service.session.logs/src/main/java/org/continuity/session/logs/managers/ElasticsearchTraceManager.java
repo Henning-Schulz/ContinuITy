@@ -150,7 +150,7 @@ public class ElasticsearchTraceManager extends ElasticsearchScrollingManager {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 
 		if (version != null) {
-			query = query.must(QueryBuilders.matchQuery("version", version.toString()));
+			query = query.must(QueryBuilders.termQuery("version", version.toNormalizedString()));
 		}
 
 		if ((from != null) && (to != null)) {

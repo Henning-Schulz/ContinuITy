@@ -171,10 +171,10 @@ public class ElasticsearchSessionManager extends ElasticsearchScrollingManager {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 
 		if (version != null) {
-			query = query.must(QueryBuilders.matchQuery("version", version.toString()));
+			query = query.must(QueryBuilders.termQuery("version", version.toNormalizedString()));
 		}
 
-		query.must(QueryBuilders.matchQuery("tailoring", Session.convertTailoringToString(tailoring)));
+		query.must(QueryBuilders.termQuery("tailoring", Session.convertTailoringToString(tailoring)));
 
 		if ((from != null) && (to != null)) {
 			query.must(QueryBuilders.rangeQuery("start-micros").from(from.getTime() * 1000, false).to(to.getTime() * 1000, true));
@@ -213,11 +213,11 @@ public class ElasticsearchSessionManager extends ElasticsearchScrollingManager {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 
 		if (version != null) {
-			query = query.must(QueryBuilders.matchQuery("version", version.toString()));
+			query = query.must(QueryBuilders.termQuery("version", version.toNormalizedString()));
 		}
 
-		query.must(QueryBuilders.matchQuery("tailoring", Session.convertTailoringToString(tailoring)));
-		query.must(QueryBuilders.matchQuery("finished", false));
+		query.must(QueryBuilders.termQuery("tailoring", Session.convertTailoringToString(tailoring)));
+		query.must(QueryBuilders.termQuery("finished", false));
 		search.source(new SearchSourceBuilder().query(query).size(10000)); // This is the maximum
 
 		search.scroll(TimeValue.timeValueMinutes(SCROLL_MINUTES));

@@ -29,6 +29,7 @@ import open.xtrace.OPENxtraceUtils;
 @JsonPropertyOrder({ "endpoint", "version", "unique-session-ids", "cluster-id", "trace" })
 public class TraceRecord {
 
+	@JsonSerialize(using = VersionOrTimestamp.NormalizedSerializer.class)
 	private VersionOrTimestamp version;
 
 	private String endpoint;
