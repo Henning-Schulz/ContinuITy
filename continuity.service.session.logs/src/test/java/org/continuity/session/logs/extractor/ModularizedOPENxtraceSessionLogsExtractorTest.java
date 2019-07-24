@@ -123,11 +123,7 @@ public class ModularizedOPENxtraceSessionLogsExtractorTest {
 		TraceRecord trace5 = generateTrace("orders", 4000, 1000*MILLIS_TO_NANOS, 4200, 700*MILLIS_TO_NANOS); //preTime: 200 postTime: 100
 		TraceRecord trace6 = generateTrace("orders", 5000, 1000*MILLIS_TO_NANOS, 5100, 400*MILLIS_TO_NANOS); //preTime: 100 postTime: 500
 
-		TraceRecord trace7 = generateTrace("user", 0, 1000*MILLIS_TO_NANOS, 100, 700*MILLIS_TO_NANOS); //preTime: 500 postTime: 500
-		TraceRecord trace8 = generateTrace("user", 1000, 1000*MILLIS_TO_NANOS, 1200, 700*MILLIS_TO_NANOS); //preTime: 500 postTime: 500
-		TraceRecord trace9 = generateTrace("user", 2000, 1000*MILLIS_TO_NANOS, 2100, 400*MILLIS_TO_NANOS); //preTime: 500 postTime: 500
-
-		List<TraceRecord> traces = Arrays.asList(trace1, trace2, trace3, trace4, trace5, trace6, trace7, trace8, trace9);
+		List<TraceRecord> traces = Arrays.asList(trace1, trace2, trace3, trace4, trace5, trace6);
 
 		List<SessionRequest> requests = tailorer.tailorTraces(services, traces);
 
